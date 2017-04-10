@@ -16,15 +16,20 @@ class Connector:
         """
         :return: Return a sqlalchemy connection on a postgresql database.
         """
-        engine = cls._get_engine(user, password, host=host, database=database)
-        return engine.connect().execution_option(
+        engine = cls.get_engine(user, password, host=host, database=database)
+        return engine.connect().execution_options(
             schema_translate_map={
                 None: schema,
             }
         )
 
     @classmethod
-    def _get_engine(cls, user, password, host='localhost', database='niamoto'):
+    def dispose_engines(cls):
+        for i in cls.ENGINES.values():
+            i.dispose()
+
+    @classmethod
+    def get_engine(cls, user, password, host='localhost', database='niamoto'):
         """
         :return: Return a sqlalchemy engine, use internal cache to avoid
         engine duplicates.

@@ -67,6 +67,18 @@ class TestDatabaseManager:
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         return connection
 
+    def _get_test_database_connection(self):
+        connection = psycopg2.connect(
+            "dbname='{}' user='{}' host='{}' password='{}'".format(
+                TEST_DATABASE,
+                TEST_USER,
+                self.host,
+                TEST_PASSWORD,
+            )
+        )
+        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        return connection
+
     def create_test_user(self):
         connection = self._get_superuser_connection()
         connection.cursor().execute(
@@ -111,7 +123,8 @@ class TestDatabaseManager:
 
     def drop_test_database(self):
         connection = self._get_superuser_connection()
-        connection.set_isolation_level(0)
+        c = connection.cursor()
+        c.execute("select * from pg_stat_activity;")
         connection.cursor().execute(
             "DROP DATABASE IF EXISTS {database};".format(
                 **{
@@ -121,8 +134,30 @@ class TestDatabaseManager:
         )
         connection.close()
 
+    def create_schema(self, schema_name):
+        connection = self._get_test_database_connection()
+        connection.cursor().execute(
+            "CREATE SCHEMA {schema_name};".format(
+                **{
+                    'schema_name': schema_name,
+                }
+            )
+        )
+        connection.close()
+
+    def drop_schema(self, schema_name):
+        connection = self._get_test_database_connection()
+        connection.cursor().execute(
+            "DROP SCHEMA IF EXISTS {schema_name};".format(
+                **{
+                    'schema_name': schema_name,
+                }
+            )
+        )
+        connection.close()
+
     def clear_test_database(self):
-        pass
+        raise NotImplementedError()
 
     def setup_test_database(self):
         self.teardown_test_database()
