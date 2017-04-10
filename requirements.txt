@@ -1,1 +1,7 @@
+# Documentation libraries
 sphinx
+
+# Database libraries
+sqlalchemy
+psycopg2
+GeoAlchemy2
