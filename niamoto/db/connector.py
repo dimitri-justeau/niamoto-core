@@ -2,17 +2,19 @@
 
 from sqlalchemy import create_engine
 
+from niamoto.settings import NIAMOTO_SCHEMA
+
 
 class Connector:
     """
-    TODO
+    Class managing engines and connections to database(s).
     """
 
     ENGINES = {}
 
     @classmethod
     def get_connection(cls, user, password, host='localhost',
-                       database='niamoto', schema='niamoto'):
+                       database='niamoto', schema=NIAMOTO_SCHEMA):
         """
         :return: Return a sqlalchemy connection on a postgresql database.
         """

@@ -75,6 +75,19 @@ class TestDatabaseManager:
         return connection
 
     @classmethod
+    def _get_test_database_superuser_connection(cls):
+        connection = psycopg2.connect(
+            "dbname='{}' user='{}' host='{}' password='{}'".format(
+                cls.TEST_DATABASE,
+                cls.POSTGRES_SUPERUSER,
+                cls.HOST,
+                cls.POSTGRES_SUPERUSER_PASSWORD,
+            )
+        )
+        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        return connection
+
+    @classmethod
     def create_test_user(cls):
         connection = cls._get_superuser_connection()
         connection.cursor().execute(
@@ -127,8 +140,6 @@ class TestDatabaseManager:
     @classmethod
     def drop_test_database(cls):
         connection = cls._get_superuser_connection()
-        c = connection.cursor()
-        c.execute("select * from pg_stat_activity;")
         connection.cursor().execute(
             "DROP DATABASE IF EXISTS {database};".format(
                 **{
@@ -163,6 +174,14 @@ class TestDatabaseManager:
         connection.close()
 
     @classmethod
+    def create_postgis_extension(cls):
+        connection = cls._get_test_database_superuser_connection()
+        connection.cursor().execute(
+            "CREATE EXTENSION POSTGIS;"
+        )
+        connection.close()
+
+    @classmethod
     def clear_test_database(cls):
         raise NotImplementedError()
 
@@ -172,6 +191,7 @@ class TestDatabaseManager:
         cls.create_test_user()
         cls.create_test_database()
         cls.grant_test_database_to_test_user()
+        cls.create_postgis_extension()
 
     @classmethod
     def teardown_test_database(cls):

@@ -1,8 +1,13 @@
 # coding: utf-8
 
+from niamoto.db.metadata import metadata
+
 
 class Creator:
     """
-    TODO
+    Class managing creation of niamoto databases.
     """
-    pass
+
+    @classmethod
+    def create_niamoto_schema(cls, engine):
+        metadata.create_all(engine)
