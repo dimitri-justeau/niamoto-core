@@ -1,5 +1,12 @@
 # coding: utf-8
 
+from sqlalchemy.sql import select
+import pandas as pd
+
+from niamoto.db.metadata import occurrence
+from niamoto.db.connector import Connector
+from niamoto.settings import DEFAULT_DATABASE, NIAMOTO_SCHEMA
+
 
 class BaseOccurrenceProvider:
     """
@@ -13,9 +20,15 @@ class BaseOccurrenceProvider:
         """
         self.db_id = db_id
 
-    def get_current_occurrence_data(self):
+    def get_current_occurrence_data(self, database=DEFAULT_DATABASE,
+                                    schema=NIAMOTO_SCHEMA):
         """
         :return: A DataFrame containing the current database occurrence data
         for this provider.
         """
-        pass
+        connection = Connector.get_connection(
+            database=database,
+            schema=schema,
+        )
+        sel = select(occurrence).where(occurrence.c.provider_id == self.db_id)
+        return pd.read_sql(sel, connection)
