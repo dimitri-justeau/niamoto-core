@@ -4,26 +4,22 @@ import unittest
 
 from niamoto.db.connector import Connector
 from niamoto.db.creator import Creator
+from niamoto.settings import TEST_DATABASE
+from tests import BaseTest
 from tests.test_utils import TestDatabaseManager
 
 
-class TestCreator(unittest.TestCase):
+class TestCreator(BaseTest):
     """
     Test case for db creator.
     """
 
-    @classmethod
-    def tearDownClass(cls):
-        Connector.dispose_engines()
-
-    def test_create_niamoto_schema(self):
+    def test_create_drop_niamoto_schema(self):
         engine = Connector.get_engine(
-            TestDatabaseManager.TEST_USER,
-            TestDatabaseManager.TEST_PASSWORD,
-            host=TestDatabaseManager.HOST,
-            database=TestDatabaseManager.TEST_DATABASE,
+            database=TEST_DATABASE,
         )
         Creator.create_niamoto_schema(engine)
+        Creator.drop_niamoto_schema(engine)
 
 
 if __name__ == '__main__':

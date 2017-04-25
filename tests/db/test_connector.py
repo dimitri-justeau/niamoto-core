@@ -5,25 +5,19 @@ import unittest
 from sqlalchemy.engine import Connection
 
 from niamoto.db.connector import Connector
-from niamoto.settings import NIAMOTO_SCHEMA
+from niamoto.settings import NIAMOTO_SCHEMA, TEST_DATABASE
+from tests import BaseTest
 from tests.test_utils import TestDatabaseManager
 
 
-class TestConnector(unittest.TestCase):
+class TestConnector(BaseTest):
     """
     Test case for db connector.
     """
 
-    @classmethod
-    def tearDownClass(cls):
-        Connector.dispose_engines()
-
     def test_get_connection(self):
         connection = Connector.get_connection(
-            TestDatabaseManager.TEST_USER,
-            TestDatabaseManager.TEST_PASSWORD,
-            host=TestDatabaseManager.HOST,
-            database=TestDatabaseManager.TEST_DATABASE,
+            database=TEST_DATABASE,
             schema=NIAMOTO_SCHEMA,
         )
         self.assertIsInstance(connection, Connection)

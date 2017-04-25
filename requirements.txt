@@ -5,3 +5,6 @@ sphinx
 sqlalchemy
 psycopg2
 GeoAlchemy2
+
+# Data manipulation / analysis libraries
+pandas

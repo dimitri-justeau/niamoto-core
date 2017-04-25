@@ -31,7 +31,7 @@ occurrence = Table(
     Column('id', Integer, primary_key=True),
     Column(
         'provider_id',
-        ForeignKey('occurrence_provider.id'),
+        ForeignKey('data_provider.id'),
         nullable=False
     ),
     Column('provider_pk', Integer, nullable=False),
@@ -79,7 +79,7 @@ plot = Table(
     'plot',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('provider_id', ForeignKey('plot_provider.id'), nullable=False),
+    Column('provider_id', ForeignKey('data_provider.id'), nullable=False),
     Column('provider_pk', Integer, nullable=False),
     Column('name', String(100), nullable=False, unique=True),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
@@ -100,49 +100,25 @@ plot_occurrence = Table(
     UniqueConstraint('plot_id', 'occurrence_identifier'),
 )
 
-# ---------------------------- #
-#  Occurrence provider tables  #
-# ---------------------------- #
+# ---------------------- #
+#  Data provider tables  #
+# ---------------------- #
 
-occurrence_provider_type = Table(
-    'occurrence_provider_type',
+data_provider_type = Table(
+    'data_provider_type',
     metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(50), nullable=False, unique=True),
 )
 
-occurrence_provider = Table(
-    'occurrence_provider',
+data_provider = Table(
+    'data_provider',
     metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False, unique=True),
     Column(
         'provider_type_id',
-        ForeignKey('occurrence_provider_type.id'),
-        nullable=False
-    ),
-)
-
-
-# ---------------------- #
-#  Plot provider tables  #
-# ---------------------- #
-
-plot_provider_type = Table(
-    'plot_provider_type',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(50), nullable=False, unique=True),
-)
-
-plot_provider = Table(
-    'plot_provider',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(100), nullable=False, unique=True),
-    Column(
-        'provider_type_id',
-        ForeignKey('plot_provider_type.id'),
+        ForeignKey('data_provider_type.id'),
         nullable=False
     ),
 )

@@ -3,6 +3,8 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
+from niamoto import settings
+
 
 class TestDatabaseManager:
     """
@@ -10,13 +12,14 @@ class TestDatabaseManager:
     database.
     """
 
-    POSTGRES_SUPERUSER = 'postgres'
-    POSTGRES_SUPERUSER_PASSWORD = 'postgres'
-    HOST = 'localhost'
+    POSTGRES_SUPERUSER = settings.DEFAULT_POSTGRES_SUPERUSER
+    POSTGRES_SUPERUSER_PASSWORD = settings.DEFAULT_POSTGRES_SUPERUSER_PASSWORD
 
-    TEST_USER = 'niamoto_test'
-    TEST_PASSWORD = 'niamoto_test'
-    TEST_DATABASE = 'niamoto_test'
+    HOST = settings.TEST_DATABASE['HOST']
+    PORT = settings.TEST_DATABASE['PORT']
+    TEST_USER = settings.TEST_DATABASE['USER']
+    TEST_PASSWORD = settings.TEST_DATABASE['PASSWORD']
+    TEST_DATABASE = settings.TEST_DATABASE['NAME']
 
     @classmethod
     def prompt_superuser(cls):

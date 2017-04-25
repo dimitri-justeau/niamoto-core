@@ -11,3 +11,7 @@ class Creator:
     @classmethod
     def create_niamoto_schema(cls, engine):
         metadata.create_all(engine)
+
+    @classmethod
+    def drop_niamoto_schema(cls, engine):
+        metadata.drop_all(engine)
