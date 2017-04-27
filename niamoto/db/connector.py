@@ -1,5 +1,7 @@
 # coding: utf-8
 
+from contextlib import contextmanager
+
 from sqlalchemy import create_engine
 
 from niamoto.settings import NIAMOTO_SCHEMA, DEFAULT_DATABASE
@@ -13,16 +15,21 @@ class Connector:
     ENGINES = {}
 
     @classmethod
+    @contextmanager
     def get_connection(cls, database=DEFAULT_DATABASE, schema=NIAMOTO_SCHEMA):
         """
         :return: Return a sqlalchemy connection on a postgresql database.
         """
-        engine = cls.get_engine(database=database)
-        return engine.connect().execution_options(
-            schema_translate_map={
-                None: schema,
-            }
-        )
+        try:
+            engine = cls.get_engine(database=database)
+            connection = engine.connect().execution_options(
+                schema_translate_map={
+                    None: schema,
+                }
+            )
+            yield connection
+        finally:
+            connection.close()
 
     @classmethod
     def dispose_engines(cls):

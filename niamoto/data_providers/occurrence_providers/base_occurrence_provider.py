@@ -26,9 +26,11 @@ class BaseOccurrenceProvider:
         :return: A DataFrame containing the current database occurrence data
         for this provider.
         """
-        connection = Connector.get_connection(
-            database=database,
-            schema=schema,
-        )
-        sel = select(occurrence).where(occurrence.c.provider_id == self.db_id)
-        return pd.read_sql(sel, connection)
+        with Connector.get_connection(
+                database=database,
+                schema=schema
+        ) as connection:
+            sel = select([occurrence]).where(
+                occurrence.c.provider_id == self.db_id
+            )
+            return pd.read_sql(sel, connection)

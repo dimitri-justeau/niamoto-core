@@ -26,11 +26,11 @@ class BaseTestNiamotoSchemaCreated(BaseTest):
 
     @classmethod
     def tearDownClass(cls):
-        super(BaseTestNiamotoSchemaCreated, cls).tearDownClass()
         engine = Connector.get_engine(
             database=TEST_DATABASE,
         )
         Creator.drop_niamoto_schema(engine)
+        super(BaseTestNiamotoSchemaCreated, cls).tearDownClass()
 
 
 if __name__ == '__main__':

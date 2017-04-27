@@ -16,12 +16,8 @@ class TestConnector(BaseTest):
     """
 
     def test_get_connection(self):
-        connection = Connector.get_connection(
-            database=TEST_DATABASE,
-            schema=NIAMOTO_SCHEMA,
-        )
-        self.assertIsInstance(connection, Connection)
-        connection.close()
+        with Connector.get_connection(database=TEST_DATABASE) as connection:
+            self.assertIsInstance(connection, Connection)
 
 
 if __name__ == '__main__':

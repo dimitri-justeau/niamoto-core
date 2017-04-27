@@ -108,7 +108,7 @@ data_provider_type = Table(
     'data_provider_type',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('name', String(50), nullable=False, unique=True),
+    Column('name', String(100), nullable=False, unique=True),
 )
 
 data_provider = Table(
@@ -121,4 +121,5 @@ data_provider = Table(
         ForeignKey('data_provider_type.id'),
         nullable=False
     ),
+    Column('properties', JSONB),
 )

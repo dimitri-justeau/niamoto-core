@@ -26,9 +26,9 @@ class BasePlotProvider:
         :return: A DataFrame containing the current database plot data for
         this provider.
         """
-        connection = Connector.get_connection(
+        with Connector.get_connection(
             database=database,
             schema=schema,
-        )
-        sel = select(plot).where(plot.c.provider_id == self.db_id)
-        return pd.read_sql(sel, connection)
+        ) as connection:
+            sel = select([plot]).where(plot.c.provider_id == self.db_id)
+            return pd.read_sql(sel, connection)
