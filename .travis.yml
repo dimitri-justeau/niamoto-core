@@ -5,3 +5,10 @@ python:
   - "3.6"
 install: "pip install -r requirements.txt"
 script: python tests/run_tests.py
+services:
+  -postgresql
+before_script:
+  - psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+  - psql -U postgres -c "CREATE EXTENSION postgis;"
+addons:
+  postgresql: "9.6"
