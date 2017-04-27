@@ -1,6 +1,7 @@
 # coding: utf-8
 
-from distutils.core import setup
+from setuptools import find_packages, setup
+
 
 setup(
     name='Niamoto',
@@ -9,5 +10,5 @@ setup(
     author='Dimitri Justeau',
     author_email='dimitri.justeau@gmail.com',
     url='https://github.com/dimitri-justeau/niamoto-core/',
-    packages=['niamoto'],
+    packages=find_packages(),
  )
