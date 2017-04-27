@@ -9,6 +9,6 @@ from niamoto.testing.test_database_manager import TestDatabaseManager
 if __name__ == "__main__":
     TestDatabaseManager.setup_test_database()
     TestDatabaseManager.create_schema(NIAMOTO_SCHEMA)
-    test_suite = unittest.TestLoader().discover('.')
+    test_suite = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=1).run(test_suite)
     TestDatabaseManager.teardown_test_database()
