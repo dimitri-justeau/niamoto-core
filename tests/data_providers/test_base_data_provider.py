@@ -2,25 +2,10 @@
 
 import unittest
 
-from niamoto.data_providers.base_data_provider import BaseDataProvider
 from niamoto.settings import TEST_DATABASE
-from tests.test_utils import TestDatabaseManager
-from tests import BaseTestNiamotoSchemaCreated
-
-
-class TestDataProvider(BaseDataProvider):
-
-    @property
-    def plot_provider(self):
-        raise NotImplementedError()
-
-    @property
-    def occurrence_provider(self):
-        raise NotImplementedError()
-
-    @classmethod
-    def get_type_name(cls):
-        return "TEST_DATA_PROVIDER"
+from niamoto.testing.test_database_manager import TestDatabaseManager
+from niamoto.testing import BaseTestNiamotoSchemaCreated
+from niamoto.testing.test_data_provider import TestDataProvider
 
 
 class TestBaseDataProvider(BaseTestNiamotoSchemaCreated):

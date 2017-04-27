@@ -6,8 +6,8 @@ from sqlalchemy.engine import Connection
 
 from niamoto.db.connector import Connector
 from niamoto.settings import NIAMOTO_SCHEMA, TEST_DATABASE
-from tests import BaseTest
-from tests.test_utils import TestDatabaseManager
+from niamoto.testing import BaseTest
+from niamoto.testing.test_database_manager import TestDatabaseManager
 
 
 class TestConnector(BaseTest):
