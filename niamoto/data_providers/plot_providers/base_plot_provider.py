@@ -32,7 +32,11 @@ class BasePlotProvider:
             sel = select([plot]).where(
                 plot.c.provider_id == self.data_provider.db_id
             )
-            return pd.read_sql(sel, connection)
+            return pd.read_sql(
+                sel,
+                connection,
+                index_col=plot.c.id.name,
+            )
 
     def get_provider_occurrence_dataframe(self):
         """
@@ -41,3 +45,45 @@ class BasePlotProvider:
         to the provider's pk.
         """
         raise NotImplementedError()
+
+    @staticmethod
+    def get_insert_dataframe(niamoto_dataframe, provider_dataframe):
+        """
+        :param niamoto_dataframe: Plot DataFrame from Niamoto database
+        (corresponding to this provider).
+        :param provider_dataframe: Plot DataFrame from provider.
+        :return: The data that is to be inserted to sync Niamoto with the
+        provider (i.e. data which is in the provider, but not in Niamoto).
+        """
+        niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
+        diff = provider_dataframe.index.difference(niamoto_idx)
+        return provider_dataframe.loc[diff]
+
+    @staticmethod
+    def get_update_dataframe(niamoto_dataframe, provider_dataframe):
+        """
+        :param niamoto_dataframe: Plot DataFrame from Niamoto database
+        (corresponding to this provider).
+        :param provider_dataframe: Plot DataFrame from provider.
+        :return: The data that is to be updated to sync Niamoto with the
+        provider (i.e. data which is both in the provider and Niamoto).
+        """
+        niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
+        inter = provider_dataframe.index.intersection(niamoto_idx)
+        return provider_dataframe.loc[inter]
+
+    @staticmethod
+    def get_delete_dataframe(niamoto_dataframe, provider_dataframe):
+        """
+        :param niamoto_dataframe: Plot DataFrame from Niamoto database
+        (corresponding to this provider).
+        :param provider_dataframe: Plot DataFrame from provider.
+        :return: The data that is to be deleted to sync Niamoto with the
+        provider (i.e. data which is in Niamoto, but not in the provider).
+        """
+        niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
+        diff = niamoto_idx.difference(provider_dataframe.index)
+        idx = niamoto_dataframe.reset_index(level=0).set_index(
+            'provider_pk',
+        ).loc[diff]['id']
+        return niamoto_dataframe.loc[pd.Index(idx)]

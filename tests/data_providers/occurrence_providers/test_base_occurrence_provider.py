@@ -2,7 +2,6 @@
 
 import unittest
 
-import pandas as pd
 from shapely.geometry import Point
 from geoalchemy2.shape import from_shape
 
@@ -39,7 +38,6 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             'test_data_provider_3',
             database=settings.TEST_DATABASE,
         )
-        #  3. Insert some data and test
         occ_1 = [
             {
                 'provider_id': data_provider_1.db_id,

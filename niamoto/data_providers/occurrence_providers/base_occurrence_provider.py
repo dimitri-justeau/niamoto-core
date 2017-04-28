@@ -35,7 +35,7 @@ class BaseOccurrenceProvider:
             return pd.read_sql(
                 sel,
                 connection,
-                index_col=occurrence.c.id.name
+                index_col=occurrence.c.id.name,
             )
 
     def get_provider_occurrence_dataframe(self):
