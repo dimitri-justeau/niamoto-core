@@ -58,7 +58,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             },
             {
                 'provider_id': data_provider_1.db_id,
-                'provider_pk': 3,
+                'provider_pk': 5,
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
             },
         ]
@@ -130,8 +130,8 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
             },
         ], index='id')
-        insert = op1.get_insert_dataframe(df1, occ_1)
-        self.assertEqual(len(insert), 0)
+        ins = op1.get_insert_dataframe(df1, occ_1)
+        self.assertEqual(len(ins), 0)
         # 2. Everything to insert
         occ_2 = pd.DataFrame.from_records([
             {
@@ -143,8 +143,8 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
             },
         ], index='id')
-        insert = op1.get_insert_dataframe(df1, occ_2)
-        self.assertEqual(len(insert), 2)
+        ins = op1.get_insert_dataframe(df1, occ_2)
+        self.assertEqual(len(ins), 2)
         # 3. Partial insert
         occ_3 = pd.DataFrame.from_records([
             {
@@ -156,8 +156,8 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
             },
         ], index='id')
-        insert = op1.get_insert_dataframe(df1, occ_3)
-        self.assertEqual(len(insert), 1)
+        ins = op1.get_insert_dataframe(df1, occ_3)
+        self.assertEqual(len(ins), 1)
 
     def test_get_update_dataframe(self):
         data_provider_1 = TestDataProvider(
@@ -169,8 +169,48 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE
         )
         #  1. Nothing to update
+        occ_1 = pd.DataFrame.from_records([
+            {
+                'id': 10,
+                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+            },
+        ], index='id')
+        update_df = op1.get_update_dataframe(df1, occ_1)
+        self.assertEqual(len(update_df), 0)
         #  2. Everything to update
+        occ_2 = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+            },
+            {
+                'id': 1,
+                'location': from_shape(Point(166.551, -22.098), srid=4326),
+            },
+            {
+                'id': 2,
+                'location': from_shape(Point(166.552, -22.097), srid=4326),
+            },
+            {
+                'id': 5,
+                'location': from_shape(Point(166.553, -22.099), srid=4326),
+            },
+        ], index='id')
+        update_df = op1.get_update_dataframe(df1, occ_2)
+        self.assertEqual(len(update_df), 4)
         #  3. Partial update
+        occ_3 = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+            },
+            {
+                'id': 1,
+                'location': from_shape(Point(166.551, -22.098), srid=4326),
+            },
+        ], index='id')
+        update_df = op1.get_update_dataframe(df1, occ_3)
+        self.assertEqual(len(update_df), 2)
 
     def test_get_delete_dataframe(self):
         data_provider_1 = TestDataProvider(
@@ -182,8 +222,48 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE
         )
         #  1. Nothing to delete
+        occ_1 = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+            },
+            {
+                'id': 1,
+                'location': from_shape(Point(166.551, -22.098), srid=4326),
+            },
+            {
+                'id': 2,
+                'location': from_shape(Point(166.552, -22.097), srid=4326),
+            },
+            {
+                'id': 5,
+                'location': from_shape(Point(166.553, -22.099), srid=4326),
+            },
+        ], index='id')
+        delete_df = op1.get_delete_dataframe(df1, occ_1)
+        self.assertEqual(len(delete_df), 0)
+        self.assertEqual(len(delete_df[pd.isnull(delete_df['location'])]), 0)
         #  2. Everything to delete
+        occ_2 = pd.DataFrame.from_records([
+            {
+                'id': 10,
+                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+            },
+        ], index='id')
+        delete_df = op1.get_delete_dataframe(df1, occ_2)
+        self.assertEqual(len(delete_df), 4)
+        self.assertEqual(len(delete_df[pd.isnull(delete_df['location'])]), 0)
         #  3. Partial delete
+        occ_3 = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+            },
+        ], index='id')
+        delete_df = op1.get_delete_dataframe(df1, occ_3)
+        self.assertEqual(len(delete_df), 3)
+        self.assertEqual(len(delete_df[pd.isnull(delete_df['location'])]), 0)
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()

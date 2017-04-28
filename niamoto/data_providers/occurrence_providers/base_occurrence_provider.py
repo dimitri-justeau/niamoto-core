@@ -66,10 +66,11 @@ class BaseOccurrenceProvider:
         (corresponding to this provider).
         :param provider_dataframe: Occurrence DataFrame from provider.
         :return: The data that is to be updated to sync Niamoto with the
-        provider (i.e. data which is both in the provider and Niamoto, but
-        with different values).
+        provider (i.e. data which is both in the provider and Niamoto).
         """
-        pass
+        niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
+        inter = provider_dataframe.index.intersection(niamoto_idx)
+        return provider_dataframe.loc[inter]
 
     @staticmethod
     def get_delete_dataframe(niamoto_dataframe, provider_dataframe):
@@ -80,4 +81,9 @@ class BaseOccurrenceProvider:
         :return: The data that is to be deleted to sync Niamoto with the
         provider (i.e. data which is in Niamoto, but not in the provider).
         """
-        pass
+        niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
+        diff = niamoto_idx.difference(provider_dataframe.index)
+        idx = niamoto_dataframe.reset_index(level=0).set_index(
+            'provider_pk',
+        ).loc[diff]['id']
+        return niamoto_dataframe.loc[pd.Index(idx)]
