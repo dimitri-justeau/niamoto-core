@@ -13,24 +13,71 @@ class BaseOccurrenceProvider:
     Abstract base class for occurrence provider.
     """
 
-    def __init__(self, db_id):
+    def __init__(self, data_provider):
         """
-        :param db_id: The database id of the corresponding data
-        provider record.
+        :param data_provider: The parent data provider.
         """
-        self.db_id = db_id
+        self.data_provider = data_provider
 
-    def get_current_occurrence_data(self, database=DEFAULT_DATABASE,
-                                    schema=NIAMOTO_SCHEMA):
+    def get_niamoto_occurrence_dataframe(self, database=DEFAULT_DATABASE,
+                                         schema=NIAMOTO_SCHEMA):
         """
-        :return: A DataFrame containing the current database occurrence data
-        for this provider.
+        :return: A DataFrame containing the occurrence data for this
+        provider that is currently stored in the Niamoto database.
         """
         with Connector.get_connection(
                 database=database,
                 schema=schema
         ) as connection:
             sel = select([occurrence]).where(
-                occurrence.c.provider_id == self.db_id
+                occurrence.c.provider_id == self.data_provider.db_id
             )
-            return pd.read_sql(sel, connection)
+            return pd.read_sql(
+                sel,
+                connection,
+                index_col=occurrence.c.id.name
+            )
+
+    def get_provider_occurrence_dataframe(self):
+        """
+        :return: A DataFrame containing the occurrence data currently
+        available from the provider. The index of the DataFrame corresponds
+        to the provider's pk.
+        """
+        raise NotImplementedError()
+
+    @staticmethod
+    def get_insert_dataframe(niamoto_dataframe, provider_dataframe):
+        """
+        :param niamoto_dataframe: Occurrence DataFrame from Niamoto database
+        (corresponding to this provider).
+        :param provider_dataframe: Occurrence DataFrame from provider.
+        :return: The data that is to be inserted to sync Niamoto with the
+        provider (i.e. data which is in the provider, but not in Niamoto).
+        """
+        niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
+        diff = provider_dataframe.index.difference(niamoto_idx)
+        return provider_dataframe.loc[diff]
+
+    @staticmethod
+    def get_update_dataframe(niamoto_dataframe, provider_dataframe):
+        """
+        :param niamoto_dataframe: Occurrence DataFrame from Niamoto database
+        (corresponding to this provider).
+        :param provider_dataframe: Occurrence DataFrame from provider.
+        :return: The data that is to be updated to sync Niamoto with the
+        provider (i.e. data which is both in the provider and Niamoto, but
+        with different values).
+        """
+        pass
+
+    @staticmethod
+    def get_delete_dataframe(niamoto_dataframe, provider_dataframe):
+        """
+        :param niamoto_dataframe: Occurrence DataFrame from Niamoto database
+        (corresponding to this provider).
+        :param provider_dataframe: Occurrence DataFrame from provider.
+        :return: The data that is to be deleted to sync Niamoto with the
+        provider (i.e. data which is in Niamoto, but not in the provider).
+        """
+        pass

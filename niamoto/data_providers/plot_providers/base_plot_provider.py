@@ -13,22 +13,31 @@ class BasePlotProvider:
     Abstract base class for plot provider.
     """
 
-    def __init__(self, db_id):
+    def __init__(self, data_provider):
         """
-        :param db_id: The database id of the corresponding data
-        provider record.
+        :param data_provider: The parent data provider.
         """
-        self.db_id = db_id
+        self.data_provider = data_provider
 
-    def get_current_plot_data(self, database=DEFAULT_DATABASE,
-                              schema=NIAMOTO_SCHEMA):
+    def get_niamoto_plot_dataframe(self, database=DEFAULT_DATABASE,
+                                   schema=NIAMOTO_SCHEMA):
         """
-        :return: A DataFrame containing the current database plot data for
-        this provider.
+        :return: A DataFrame containing the plot data for this
+        provider that is currently stored in the Niamoto database.
         """
         with Connector.get_connection(
             database=database,
             schema=schema,
         ) as connection:
-            sel = select([plot]).where(plot.c.provider_id == self.db_id)
+            sel = select([plot]).where(
+                plot.c.provider_id == self.data_provider.db_id
+            )
             return pd.read_sql(sel, connection)
+
+    def get_provider_occurrence_dataframe(self):
+        """
+        :return: A DataFrame containing the plot data currently
+        available from the provider. The index of the DataFrame corresponds
+        to the provider's pk.
+        """
+        raise NotImplementedError()

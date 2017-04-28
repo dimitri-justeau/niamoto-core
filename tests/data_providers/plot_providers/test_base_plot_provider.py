@@ -46,11 +46,11 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             'test_data_provider_2',
             database=settings.TEST_DATABASE,
         )
-        pp1 = BasePlotProvider(data_provider_1.db_id)
-        pp2 = BasePlotProvider(data_provider_2.db_id)
+        pp1 = BasePlotProvider(data_provider_1)
+        pp2 = BasePlotProvider(data_provider_2)
         #  1. retrieve an empty DataFrame
-        df1 = pp1.get_current_plot_data(database=settings.TEST_DATABASE)
-        df2 = pp2.get_current_plot_data(database=settings.TEST_DATABASE)
+        df1 = pp1.get_niamoto_plot_dataframe(database=settings.TEST_DATABASE)
+        df2 = pp2.get_niamoto_plot_dataframe(database=settings.TEST_DATABASE)
         self.assertEqual(len(df1), 0)
         self.assertEqual(len(df2), 0)
         #  2. Check the structure of the DataFrame
@@ -81,8 +81,8 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         ])
         with Connector.get_connection(settings.TEST_DATABASE) as connection:
             connection.execute(ins)
-            df3 = pp1.get_current_plot_data(database=settings.TEST_DATABASE)
-            df4 = pp2.get_current_plot_data(database=settings.TEST_DATABASE)
+            df3 = pp1.get_niamoto_plot_dataframe(database=settings.TEST_DATABASE)
+            df4 = pp2.get_niamoto_plot_dataframe(database=settings.TEST_DATABASE)
             self.assertEqual(len(df3), 2)
             self.assertEqual(len(df4), 1)
 

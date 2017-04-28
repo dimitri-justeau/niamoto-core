@@ -82,3 +82,4 @@ class BaseDataProvider:
         })
         with Connector.get_connection(database=database) as connection:
             connection.execute(ins)
+        return cls(name, database=database)

@@ -8,3 +8,6 @@ GeoAlchemy2
 
 # Data manipulation / analysis libraries
 pandas
+
+# Geo libraries
+shapely
