@@ -19,16 +19,13 @@ class BasePlotProvider:
         """
         self.data_provider = data_provider
 
-    def get_niamoto_plot_dataframe(self, database=DEFAULT_DATABASE,
-                                   schema=NIAMOTO_SCHEMA):
+    def get_niamoto_plot_dataframe(self):
         """
         :return: A DataFrame containing the plot data for this
         provider that is currently stored in the Niamoto database.
         """
-        with Connector.get_connection(
-            database=database,
-            schema=schema,
-        ) as connection:
+        db = self.data_provider.database
+        with Connector.get_connection(database=db) as connection:
             sel = select([plot]).where(
                 plot.c.provider_id == self.data_provider.db_id
             )
@@ -46,8 +43,7 @@ class BasePlotProvider:
         """
         raise NotImplementedError()
 
-    @staticmethod
-    def get_insert_dataframe(niamoto_dataframe, provider_dataframe):
+    def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
         :param niamoto_dataframe: Plot DataFrame from Niamoto database
         (corresponding to this provider).
@@ -57,10 +53,12 @@ class BasePlotProvider:
         """
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         diff = provider_dataframe.index.difference(niamoto_idx)
-        return provider_dataframe.loc[diff]
+        df = provider_dataframe.loc[diff]
+        df['provider_pk'] = df.index
+        df['provider_id'] = self.data_provider.db_id
+        return df
 
-    @staticmethod
-    def get_update_dataframe(niamoto_dataframe, provider_dataframe):
+    def get_update_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
         :param niamoto_dataframe: Plot DataFrame from Niamoto database
         (corresponding to this provider).
@@ -70,10 +68,12 @@ class BasePlotProvider:
         """
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         inter = provider_dataframe.index.intersection(niamoto_idx)
-        return provider_dataframe.loc[inter]
+        df = provider_dataframe.loc[inter]
+        df['provider_pk'] = df.index
+        df['provider_id'] = self.data_provider.db_id
+        return df
 
-    @staticmethod
-    def get_delete_dataframe(niamoto_dataframe, provider_dataframe):
+    def get_delete_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
         :param niamoto_dataframe: Plot DataFrame from Niamoto database
         (corresponding to this provider).

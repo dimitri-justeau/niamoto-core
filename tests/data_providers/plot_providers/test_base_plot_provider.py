@@ -98,9 +98,9 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         pp2 = BasePlotProvider(data_provider_2)
         pp3 = BasePlotProvider(data_provider_3)
         #  1. retrieve an empty DataFrame
-        df1 = pp1.get_niamoto_plot_dataframe(database=settings.TEST_DATABASE)
-        df2 = pp2.get_niamoto_plot_dataframe(database=settings.TEST_DATABASE)
-        df3 = pp3.get_niamoto_plot_dataframe(database=settings.TEST_DATABASE)
+        df1 = pp1.get_niamoto_plot_dataframe()
+        df2 = pp2.get_niamoto_plot_dataframe()
+        df3 = pp3.get_niamoto_plot_dataframe()
         self.assertEqual(len(df1), 4)
         self.assertEqual(len(df2), 1)
         self.assertEqual(len(df3), 0)
@@ -116,9 +116,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
         pp1 = BasePlotProvider(data_provider_1)
-        df1 = pp1.get_niamoto_plot_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        df1 = pp1.get_niamoto_plot_dataframe()
         #  1. Nothing to insert
         plot_1 = pd.DataFrame.from_records([
             {
@@ -143,6 +141,10 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         ins = pp1.get_insert_dataframe(df1, plot_2)
+        self.assertIn('provider_pk', ins.columns)
+        self.assertIn('provider_id', ins.columns)
+        self.assertEqual(len(ins[pd.isnull(ins['provider_pk'])]), 0)
+        self.assertEqual(len(ins[pd.isnull(ins['provider_id'])]), 0)
         self.assertEqual(len(ins), 2)
         # 3. Partial insert
         plot_3 = pd.DataFrame.from_records([
@@ -166,9 +168,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
         pp1 = BasePlotProvider(data_provider_1)
-        df1 = pp1.get_niamoto_plot_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        df1 = pp1.get_niamoto_plot_dataframe()
         #  1. Nothing to update
         plot_1 = pd.DataFrame.from_records([
             {
@@ -178,6 +178,16 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         update_df = pp1.get_update_dataframe(df1, plot_1)
+        self.assertIn('provider_pk', update_df.columns)
+        self.assertIn('provider_id', update_df.columns)
+        self.assertEqual(
+            len(update_df[pd.isnull(update_df['provider_pk'])]),
+            0
+        )
+        self.assertEqual(
+            len(update_df[pd.isnull(update_df['provider_id'])]),
+            0
+        )
         self.assertEqual(len(update_df), 0)
         #  2. Everything to update
         plot_2 = pd.DataFrame.from_records([
@@ -226,9 +236,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
         pp1 = BasePlotProvider(data_provider_1)
-        df1 = pp1.get_niamoto_plot_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        df1 = pp1.get_niamoto_plot_dataframe()
         #  1. Nothing to delete
         plot_1 = pd.DataFrame.from_records([
             {
@@ -251,6 +259,16 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         delete_df = pp1.get_delete_dataframe(df1, plot_1)
+        self.assertIn('provider_pk', delete_df.columns)
+        self.assertIn('provider_id', delete_df.columns)
+        self.assertEqual(
+            len(delete_df[pd.isnull(delete_df['provider_pk'])]),
+            0
+        )
+        self.assertEqual(
+            len(delete_df[pd.isnull(delete_df['provider_id'])]),
+            0
+        )
         self.assertEqual(len(delete_df), 0)
         self.assertEqual(len(delete_df[pd.isnull(delete_df['location'])]), 0)
         #  2. Everything to delete

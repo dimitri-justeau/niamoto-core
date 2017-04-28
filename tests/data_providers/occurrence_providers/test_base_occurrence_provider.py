@@ -94,15 +94,9 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         op2 = BaseOccurrenceProvider(data_provider_2)
         op3 = BaseOccurrenceProvider(data_provider_3)
         #  1. retrieve DataFrames
-        df1 = op1.get_niamoto_occurrence_dataframe(
-            database=settings.TEST_DATABASE
-        )
-        df2 = op2.get_niamoto_occurrence_dataframe(
-            database=settings.TEST_DATABASE
-        )
-        df3 = op3.get_niamoto_occurrence_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        df1 = op1.get_niamoto_occurrence_dataframe()
+        df2 = op2.get_niamoto_occurrence_dataframe()
+        df3 = op3.get_niamoto_occurrence_dataframe()
         self.assertEqual(len(df1), 4)
         self.assertEqual(len(df2), 1)
         self.assertEqual(len(df3), 0)
@@ -118,9 +112,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
         op1 = BaseOccurrenceProvider(data_provider_1)
-        df1 = op1.get_niamoto_occurrence_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        df1 = op1.get_niamoto_occurrence_dataframe()
         #  1. Nothing to insert
         occ_1 = pd.DataFrame.from_records([
             {
@@ -142,6 +134,10 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         ins = op1.get_insert_dataframe(df1, occ_2)
+        self.assertIn('provider_pk', ins.columns)
+        self.assertIn('provider_id', ins.columns)
+        self.assertEqual(len(ins[pd.isnull(ins['provider_pk'])]), 0)
+        self.assertEqual(len(ins[pd.isnull(ins['provider_id'])]), 0)
         self.assertEqual(len(ins), 2)
         # 3. Partial insert
         occ_3 = pd.DataFrame.from_records([
@@ -163,9 +159,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
         op1 = BaseOccurrenceProvider(data_provider_1)
-        df1 = op1.get_niamoto_occurrence_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        df1 = op1.get_niamoto_occurrence_dataframe()
         #  1. Nothing to update
         occ_1 = pd.DataFrame.from_records([
             {
@@ -195,6 +189,16 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         update_df = op1.get_update_dataframe(df1, occ_2)
+        self.assertIn('provider_pk', update_df.columns)
+        self.assertIn('provider_id', update_df.columns)
+        self.assertEqual(
+            len(update_df[pd.isnull(update_df['provider_pk'])]),
+            0
+        )
+        self.assertEqual(
+            len(update_df[pd.isnull(update_df['provider_id'])]),
+            0
+        )
         self.assertEqual(len(update_df), 4)
         #  3. Partial update
         occ_3 = pd.DataFrame.from_records([
@@ -216,9 +220,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
         op1 = BaseOccurrenceProvider(data_provider_1)
-        df1 = op1.get_niamoto_occurrence_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        df1 = op1.get_niamoto_occurrence_dataframe()
         #  1. Nothing to delete
         occ_1 = pd.DataFrame.from_records([
             {
@@ -239,6 +241,16 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         delete_df = op1.get_delete_dataframe(df1, occ_1)
+        self.assertIn('provider_pk', delete_df.columns)
+        self.assertIn('provider_id', delete_df.columns)
+        self.assertEqual(
+            len(delete_df[pd.isnull(delete_df['provider_pk'])]),
+            0
+        )
+        self.assertEqual(
+            len(delete_df[pd.isnull(delete_df['provider_id'])]),
+            0
+        )
         self.assertEqual(len(delete_df), 0)
         self.assertEqual(len(delete_df[pd.isnull(delete_df['location'])]), 0)
         #  2. Everything to delete
@@ -249,6 +261,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         delete_df = op1.get_delete_dataframe(df1, occ_2)
+
         self.assertEqual(len(delete_df), 4)
         self.assertEqual(len(delete_df[pd.isnull(delete_df['location'])]), 0)
         #  3. Partial delete
