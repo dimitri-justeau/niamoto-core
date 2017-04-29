@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from sqlalchemy.sql import select, bindparam, and_
+from geoalchemy2 import WKBElement
 import pandas as pd
 
 from niamoto.db.metadata import occurrence
@@ -42,37 +43,51 @@ class BaseOccurrenceProvider:
         """
         raise NotImplementedError()
 
+    def _sync(self, df):
+        niamoto_df = self.get_niamoto_occurrence_dataframe()
+        provider_df = df
+        insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
+        update_df = self.get_update_dataframe(niamoto_df, provider_df)
+        delete_df = self.get_delete_dataframe(niamoto_df, provider_df)
+        db = self.data_provider.database
+        with Connector.get_connection(database=db) as connection:
+            with connection.begin():
+                if len(insert_df) > 0:
+                    ins_stmt = occurrence.insert().values(
+                        insert_df.to_dict(orient='records')
+                    )
+                    connection.execute(ins_stmt)
+                if len(update_df) > 0:
+                    upd_stmt = occurrence.update().where(
+                        and_(
+                            occurrence.c.provider_id == bindparam('prov_id'),
+                            occurrence.c.provider_pk == bindparam('prov_pk')
+                        )
+                    ).values({
+                        'location': bindparam('location'),
+                        'taxon_id': bindparam('taxon_id'),
+                        'properties': bindparam('properties'),
+                    })
+                    connection.execute(
+                        upd_stmt,
+                        update_df.rename(columns={
+                            'provider_id': 'prov_id',
+                            'provider_pk': 'prov_pk',
+                        }).to_dict(orient='records')
+                    )
+                if len(delete_df) > 0:
+                    del_stmt = occurrence.delete().where(
+                        occurrence.c.id.in_(delete_df.index)
+                    )
+                    connection.execute(del_stmt)
+        return insert_df, update_df, delete_df
+
     def sync(self):
         """
         Sync Niamoto database with provider.
         :return: The insert, update, delete DataFrames.
         """
-        niamoto_df = self.get_niamoto_occurrence_dataframe()
-        provider_df = self.get_provider_occurrence_dataframe()
-        insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
-        update_df = self.get_update_dataframe(niamoto_df, provider_df)
-        delete_df = self.get_delete_dataframe(niamoto_df, provider_df)
-        db = self.data_provider.database
-        ins_stmt = occurrence.insert().values(insert_df)
-        upd_stmt = occurrence.update().where(
-            and_(
-                occurrence.c.provider_id == bindparam('provider_id'),
-                occurrence.c.provider_pk == bindparam('provider_pk')
-            )
-        ).values({
-            'location': bindparam('location'),
-            'taxon_id': bindparam('taxon_id'),
-            'properties': bindparam('properties'),
-        })
-        del_stmt = occurrence.delete().where(
-            occurrence.c.id.in_(delete_df.index)
-        )
-        with Connector.get_connection(database=db) as connection:
-            with connection.begin():
-                connection.execute(ins_stmt)
-                connection.execute(upd_stmt, update_df)
-                connection.execute(del_stmt)
-        return insert_df, update_df, delete_df
+        return self._sync(self.get_provider_occurrence_dataframe())
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """

@@ -3,7 +3,7 @@
 import unittest
 
 from shapely.geometry import Point
-from geoalchemy2.shape import from_shape
+from geoalchemy2.shape import from_shape, WKTElement
 
 from niamoto.data_providers.occurrence_providers\
     .base_occurrence_provider import *
@@ -274,6 +274,98 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         delete_df = op1.get_delete_dataframe(df1, occ_3)
         self.assertEqual(len(delete_df), 3)
         self.assertEqual(len(delete_df[pd.isnull(delete_df['location'])]), 0)
+
+    def test_sync_insert(self):
+        self.tearDownClass()
+        self.setUpClass()
+        data_provider_3 = TestDataProvider(
+            'test_data_provider_3',
+            database=settings.TEST_DATABASE,
+        )
+        op3 = BaseOccurrenceProvider(data_provider_3)
+        self.assertEqual(len(op3.get_niamoto_occurrence_dataframe()), 0)
+        occ = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+            },
+            {
+                'id': 1,
+                'location': from_shape(Point(166.551, -22.098), srid=4326),
+            },
+        ], index='id')
+        i, u, d = op3._sync(occ)
+        self.assertEqual(len(i), 2)
+        self.assertEqual(len(u), 0)
+        self.assertEqual(len(d), 0)
+        self.assertEqual(len(op3.get_niamoto_occurrence_dataframe()), 2)
+
+    def test_sync_update(self):
+        self.tearDownClass()
+        self.setUpClass()
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+        op1 = BaseOccurrenceProvider(data_provider_1)
+        self.assertEqual(len(op1.get_niamoto_occurrence_dataframe()), 4)
+        occ = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'taxon_id': None,
+                'properties': None,
+                'location': WKTElement(
+                    Point(166.5521, -22.0939).wkt,
+                    srid=4326
+                ),
+            },
+            {
+                'id': 1,
+                'taxon_id': None,
+                'properties': None,
+                'location': from_shape(Point(166.551, -22.098), srid=4326),
+            },
+            {
+                'id': 2,
+                'taxon_id': None,
+                'properties': {'yo': 'yo'},
+                'location': from_shape(Point(166.552, -22.097), srid=4326)
+            },
+            {
+                'id': 5,
+                'taxon_id': None,
+                'properties': {},
+                'location': WKTElement(
+                    Point(166.553, -22.099),
+                    srid=4326
+                ),
+            },
+        ], index='id')
+        i, u, d = op1._sync(occ)
+        self.assertEqual(len(i), 0)
+        self.assertEqual(len(u), 4)
+        self.assertEqual(len(d), 0)
+        self.assertEqual(len(op1.get_niamoto_occurrence_dataframe()), 4)
+
+    def test_sync_delete(self):
+        self.tearDownClass()
+        self.setUpClass()
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+        op1 = BaseOccurrenceProvider(data_provider_1)
+        self.assertEqual(len(op1.get_niamoto_occurrence_dataframe()), 4)
+        occ = pd.DataFrame.from_records(
+            [],
+            index='id',
+            columns=('id', 'location')
+        )
+        i, u, d = op1._sync(occ)
+        self.assertEqual(len(i), 0)
+        self.assertEqual(len(u), 0)
+        self.assertEqual(len(d), 4)
+        self.assertEqual(len(op1.get_niamoto_occurrence_dataframe()), 0)
 
 
 if __name__ == '__main__':
