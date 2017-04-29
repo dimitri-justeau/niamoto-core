@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from sqlalchemy.sql import select, bindparam, and_
-from geoalchemy2 import WKBElement
 import pandas as pd
 
 from niamoto.db.metadata import occurrence
