@@ -47,10 +47,14 @@ occurrence = Table(
 
 
 class TaxonRankEnum(enum.Enum):
-    FAMILY = "FAMILY"
+    REGNUM = "REGNUM"
+    PHYLUM = "PHYLUM"
+    CLASSIS = "CLASSIS"
+    ORDO = "ORDO"
+    FAMILIA = "FAMILIA"
     GENUS = "GENUS"
-    SPECIE = "SPECIE"
-    INFRA = "INFRA"
+    SPECIES = "SPECIES"
+    INFRASPECIES = "INFRASPECIES"
 
 
 taxon = Table(
@@ -61,14 +65,16 @@ taxon = Table(
     Column('rank_name', Text, nullable=False),
     Column('rank', Enum(TaxonRankEnum), nullable=False),
     Column('parent_id', ForeignKey('taxon.id'), nullable=True),
-    Column('lft', Integer, nullable=False),
-    Column('rght', Integer, nullable=False),
-    Column('tree_id', Integer, nullable=False),
-    Column('level', Integer, nullable=False),
-    CheckConstraint('level >= 0', name='level_gt_0'),
-    CheckConstraint('lft >= 0', name='lft_gt_0'),
-    CheckConstraint('rght >= 0', name='rght_gt_0'),
-    CheckConstraint('tree_id >= 0', name='tree_id_gt_0'),
+    Column('synonyms', JSONB),
+    #  MPTT (Modified Pre-order Tree Traversal) columns
+    Column('mptt_left', Integer, nullable=False),
+    Column('mptt_right', Integer, nullable=False),
+    Column('mptt_tree_id', Integer, nullable=False),
+    Column('mptt_depth', Integer, nullable=False),
+    CheckConstraint('mptt_depth >= 0', name='mptt_depth_gt_0'),
+    CheckConstraint('mptt_left >= 0', name='mptt_left_gt_0'),
+    CheckConstraint('mptt_right >= 0', name='mptt_right_gt_0'),
+    CheckConstraint('mptt_tree_id >= 0', name='mptt_tree_id_gt_0'),
 )
 
 # ---------- #
