@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from sqlalchemy import select
+from sqlalchemy import select, Index
 
 from niamoto import settings
 from niamoto.db import metadata as niamoto_db_meta
@@ -71,6 +71,20 @@ class BaseDataProvider:
         })
         with Connector.get_connection(database=database) as connection:
             connection.execute(ins)
+            cls._register_unique_synonym_constraint(database=database)
+
+    @classmethod
+    def _register_unique_synonym_constraint(
+            cls,
+            database=settings.DEFAULT_DATABASE):
+        index = Index(
+            "{}_unique_synonym".format(cls.get_type_name()),
+            niamoto_db_meta.taxon.c.synonyms[cls.get_type_name()],
+            unique=True,
+        )
+        engine = Connector.get_engine(database=database)
+        index.create(engine)
+        niamoto_db_meta.taxon.indexes.remove(index)
 
     @classmethod
     def register_data_provider(cls, name, database=settings.DEFAULT_DATABASE):
