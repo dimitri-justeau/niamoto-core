@@ -23,7 +23,7 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
         Taxon.delete_all_taxa(database=settings.TEST_DATABASE)
 
     def test_get_empty_raw_taxon_dataset(self):
-        df1 = Taxon.get_raw_taxon_dataset(
+        df1 = Taxon.get_raw_taxon_dataframe(
             database=settings.TEST_DATABASE
         )
         self.assertEqual(len(df1), 0)
@@ -70,7 +70,7 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection(settings.TEST_DATABASE) as connection:
             connection.execute(ins)
-        df1 = Taxon.get_raw_taxon_dataset(
+        df1 = Taxon.get_raw_taxon_dataframe(
             database=settings.TEST_DATABASE
         )
         self.assertEqual(len(df1), 3)

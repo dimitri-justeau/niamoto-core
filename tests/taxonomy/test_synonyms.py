@@ -13,14 +13,14 @@ from niamoto.testing import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
 
 
-class TestGetTaxon(BaseTestNiamotoSchemaCreated):
+class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
     """
-    Test for get taxon methods.
+    Test for synonyms taxon methods.
     """
 
     @classmethod
     def setUpClass(cls):
-        super(TestGetTaxon, cls).setUpClass()
+        super(TestSynonymsTaxon, cls).setUpClass()
         TestDataProvider.register_data_provider_type(
             database=settings.TEST_DATABASE
         )
@@ -68,7 +68,7 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
             1,
             database=settings.TEST_DATABASE,
         )
-        df1 = Taxon.get_raw_taxon_dataset(
+        df1 = Taxon.get_raw_taxon_dataframe(
             database=settings.TEST_DATABASE
         )
         self.assertEqual(
@@ -81,7 +81,7 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
             2,
             database=settings.TEST_DATABASE
         )
-        df2 = Taxon.get_raw_taxon_dataset(
+        df2 = Taxon.get_raw_taxon_dataframe(
             database=settings.TEST_DATABASE
         )
         self.assertEqual(
