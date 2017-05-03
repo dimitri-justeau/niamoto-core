@@ -43,21 +43,25 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
                 'provider_id': data_provider_1.db_id,
                 'provider_pk': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'provider_id': data_provider_1.db_id,
                 'provider_pk': 1,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'provider_id': data_provider_1.db_id,
                 'provider_pk': 2,
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
+                'properties': {},
             },
             {
                 'provider_id': data_provider_1.db_id,
                 'provider_pk': 5,
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
+                'properties': {},
             },
         ]
         occ_2 = [
@@ -65,6 +69,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
                 'provider_id': data_provider_2.db_id,
                 'provider_pk': 0,
                 'location': from_shape(Point(166.5511, -22.09739), srid=4326),
+                'properties': {},
             },
         ]
         ins = niamoto_db_meta.occurrence.insert().values(occ_1 + occ_2)
@@ -118,6 +123,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         ins = op1.get_insert_dataframe(df1, occ_1)
@@ -127,10 +133,12 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 10,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 11,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
         ], index='id')
         ins = op1.get_insert_dataframe(df1, occ_2)
@@ -144,10 +152,12 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 11,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
         ], index='id')
         ins = op1.get_insert_dataframe(df1, occ_3)
@@ -165,6 +175,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 10,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         update_df = op1.get_update_dataframe(df1, occ_1)
@@ -174,18 +185,22 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'id': 2,
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
+                'properties': {},
             },
             {
                 'id': 5,
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
+                'properties': {},
             },
         ], index='id')
         update_df = op1.get_update_dataframe(df1, occ_2)
@@ -205,10 +220,12 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
         ], index='id')
         update_df = op1.get_update_dataframe(df1, occ_3)
@@ -226,18 +243,22 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'id': 2,
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
+                'properties': {},
             },
             {
                 'id': 5,
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
+                'properties': {},
             },
         ], index='id')
         delete_df = op1.get_delete_dataframe(df1, occ_1)
@@ -258,6 +279,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 10,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         delete_df = op1.get_delete_dataframe(df1, occ_2)
@@ -269,6 +291,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         delete_df = op1.get_delete_dataframe(df1, occ_3)
@@ -288,10 +311,12 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
         ], index='id')
         i, u, d = op3._sync(occ)
@@ -313,17 +338,17 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 0,
                 'taxon_id': None,
-                'properties': None,
                 'location': WKTElement(
                     Point(166.5521, -22.0939).wkt,
                     srid=4326
                 ),
+                'properties': {},
             },
             {
                 'id': 1,
                 'taxon_id': None,
-                'properties': None,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'id': 2,

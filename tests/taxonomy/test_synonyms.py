@@ -8,6 +8,7 @@ from niamoto.db import metadata as niamoto_db_meta
 from niamoto import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing import BaseTestNiamotoSchemaCreated
+from niamoto.testing.test_data_provider import TestDataProvider
 
 
 class TestGetTaxon(BaseTestNiamotoSchemaCreated):
@@ -18,17 +19,22 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestGetTaxon, cls).setUpClass()
+        TestDataProvider.register_data_provider_type(
+            database=settings.TEST_DATABASE
+        )
+        TestDataProvider.register_data_provider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
 
     def tearDown(self):
         Taxon.delete_all_taxa(database=settings.TEST_DATABASE)
 
-    def test_get_empty_raw_taxon_dataset(self):
-        df1 = Taxon.get_raw_taxon_dataset(
-            database=settings.TEST_DATABASE
-        )
-        self.assertEqual(len(df1), 0)
-
     def test_get_not_empty_raw_taxon_dataset(self):
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
         data = [
             {
                 'id': 0,
@@ -42,38 +48,20 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
                 'mptt_tree_id': 0,
                 'mptt_depth': 0,
             },
-            {
-                'id': 1,
-                'full_name': 'Genus Two',
-                'rank_name': 'Two',
-                'rank': niamoto_db_meta.TaxonRankEnum.GENUS,
-                'parent_id': 0,
-                'synonyms': {},
-                'mptt_left': 0,
-                'mptt_right': 0,
-                'mptt_tree_id': 0,
-                'mptt_depth': 0,
-            },
-            {
-                'id': 2,
-                'full_name': 'Species Three',
-                'rank_name': 'Three',
-                'rank': niamoto_db_meta.TaxonRankEnum.SPECIES,
-                'parent_id': None,
-                'synonyms': {},
-                'mptt_left': 1,
-                'mptt_right': 0,
-                'mptt_tree_id': 0,
-                'mptt_depth': 0,
-            },
         ]
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection(settings.TEST_DATABASE) as connection:
             connection.execute(ins)
+        Taxon.add_synonym_for_single_taxon(
+            0,
+            data_provider_1,
+            1,
+            database=settings.TEST_DATABASE,
+        )
         df1 = Taxon.get_raw_taxon_dataset(
             database=settings.TEST_DATABASE
         )
-        self.assertEqual(len(df1), 3)
+        print(df1)
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()

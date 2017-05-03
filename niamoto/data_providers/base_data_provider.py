@@ -87,12 +87,14 @@ class BaseDataProvider:
         niamoto_db_meta.taxon.indexes.remove(index)
 
     @classmethod
-    def register_data_provider(cls, name, database=settings.DEFAULT_DATABASE):
+    def register_data_provider(cls, name, database=settings.DEFAULT_DATABASE,
+                               properties={}):
         ins = niamoto_db_meta.data_provider.insert({
             'name': name,
             'provider_type_id': cls.get_data_provider_type_db_id(
                 database=database
             ),
+            'properties': properties,
         })
         with Connector.get_connection(database=database) as connection:
             connection.execute(ins)

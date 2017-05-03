@@ -37,7 +37,7 @@ occurrence = Table(
     Column('provider_pk', Integer, nullable=False),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column('taxon_id', ForeignKey('taxon.id'), nullable=True),
-    Column('properties', JSONB),
+    Column('properties', JSONB, nullable=False),
     UniqueConstraint('provider_id', 'provider_pk'),
 )
 
@@ -65,7 +65,7 @@ taxon = Table(
     Column('rank_name', Text, nullable=False),
     Column('rank', Enum(TaxonRankEnum), nullable=False),
     Column('parent_id', ForeignKey('taxon.id'), nullable=True),
-    Column('synonyms', JSONB),
+    Column('synonyms', JSONB, nullable=False),
     #  MPTT (Modified Pre-order Tree Traversal) columns
     Column('mptt_left', Integer, nullable=False),
     Column('mptt_right', Integer, nullable=False),
@@ -89,7 +89,7 @@ plot = Table(
     Column('provider_pk', Integer, nullable=False),
     Column('name', String(100), nullable=False, unique=True),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
-    Column('properties', JSONB),
+    Column('properties', JSONB, nullable=False),
     UniqueConstraint('provider_id', 'provider_pk'),
 )
 
@@ -127,5 +127,5 @@ data_provider = Table(
         ForeignKey('data_provider_type.id'),
         nullable=False
     ),
-    Column('properties', JSONB),
+    Column('properties', JSONB, nullable=False),
 )

@@ -43,24 +43,28 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'provider_pk': 0,
                 'name': 'plot_1_1',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'provider_id': data_provider_1.db_id,
                 'provider_pk': 1,
                 'name': 'plot_1_2',
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'provider_id': data_provider_1.db_id,
                 'provider_pk': 2,
                 'name': 'plot_1_3',
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
+                'properties': {},
             },
             {
                 'provider_id': data_provider_1.db_id,
                 'provider_pk': 5,
                 'name': 'plot_1_4',
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
+                'properties': {},
             },
         ]
         plot_2 = [
@@ -69,6 +73,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'provider_pk': 0,
                 'name': 'plot_2_1',
                 'location': from_shape(Point(166.5511, -22.09739), srid=4326),
+                'properties': {},
             },
         ]
         ins = niamoto_db_meta.plot.insert().values(plot_1 + plot_2)
@@ -123,6 +128,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 0,
                 'name': 'plot_1_1',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         ins = pp1.get_insert_dataframe(df1, plot_1)
@@ -133,11 +139,13 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 10,
                 'name': 'plot_1_11',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 11,
                 'name': 'plot_1_12',
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
         ], index='id')
         ins = pp1.get_insert_dataframe(df1, plot_2)
@@ -152,11 +160,13 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 0,
                 'name': 'plot_1_1',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 11,
                 'name': 'plot_1_12',
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
         ], index='id')
         ins = pp1.get_insert_dataframe(df1, plot_3)
@@ -175,6 +185,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 10,
                 'name': 'plot_1_11',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         update_df = pp1.get_update_dataframe(df1, plot_1)
@@ -195,21 +206,25 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 0,
                 'name': 'plot_1_a',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'name': 'plot_1_b',
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'id': 2,
                 'name': 'plot_1_c',
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
+                'properties': {},
             },
             {
                 'id': 5,
                 'name': 'plot_1_d',
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
+                'properties': {},
             },
         ], index='id')
         update_df = pp1.get_update_dataframe(df1, plot_2)
@@ -220,11 +235,13 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 0,
                 'name': 'plot_1_z',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'name': 'plot_1_zzz',
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
         ], index='id')
         update_df = pp1.get_update_dataframe(df1, plot_3)
@@ -243,19 +260,23 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 0,
                 'name': 'plot_1_1',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'name': 'plot_1_2',
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'id': 2,
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
+                'properties': {},
             },
             {
                 'id': 5,
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
+                'properties': {},
             },
         ], index='id')
         delete_df = pp1.get_delete_dataframe(df1, plot_1)
@@ -277,6 +298,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 10,
                 'name': 'plot_1_11',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         delete_df = pp1.get_delete_dataframe(df1, plot_2)
@@ -288,6 +310,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 0,
                 'name': 'plot_1_1',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
         ], index='id')
         delete_df = pp1.get_delete_dataframe(df1, plot_3)
@@ -308,11 +331,14 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'id': 0,
                 'name': 'plot_3_1',
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
+                'properties': {},
             },
             {
                 'id': 1,
                 'name': 'plot_3_2',
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
+
             },
         ], index='id')
         i, u, d = pp3._sync(pl)
@@ -339,18 +365,21 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                     Point(166.5521, -22.0939).wkt,
                     srid=4326
                 ),
+                'properties': {},
             },
             {
                 'id': 1,
                 'name': 'plot_b',
                 'properties': None,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
+                'properties': {},
             },
             {
                 'id': 2,
                 'name': 'plot_c',
                 'properties': {'yo': 'yo'},
-                'location': from_shape(Point(166.552, -22.097), srid=4326)
+                'location': from_shape(Point(166.552, -22.097), srid=4326),
+                'properties': {},
             },
             {
                 'id': 5,
@@ -360,6 +389,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                     Point(166.553, -22.099),
                     srid=4326
                 ),
+                'properties': {},
             },
         ], index='id')
         i, u, d = pp1._sync(pl)
