@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, bindparam
 import pandas as pd
 
 from niamoto import settings
@@ -53,8 +53,31 @@ class Taxon:
             connection.execute(upd)
 
     @classmethod
-    def make_mptt(cls):
-        pass
+    def make_mptt(cls, database=settings.DEFAULT_DATABASE):
+        df = cls.get_raw_taxon_dataframe(
+            database=database
+        )
+        mptt = cls.construct_mptt(df)
+        mptt['taxon_id'] = mptt.index
+        upd = niamoto_db_meta.taxon.update().where(
+            niamoto_db_meta.taxon.c.id == bindparam('taxon_id')
+        ).values({
+            'mptt_tree_id': bindparam('mptt_tree_id'),
+            'mptt_depth': bindparam('mptt_depth'),
+            'mptt_left': bindparam('mptt_left'),
+            'mptt_right': bindparam('mptt_right'),
+        })
+        with Connector.get_connection(database=database) as connection:
+            connection.execute(
+                upd,
+                mptt[[
+                    'taxon_id',
+                    'mptt_tree_id',
+                    'mptt_depth',
+                    'mptt_left',
+                    'mptt_right',
+                ]].to_dict(orient='records')
+            )
 
     @staticmethod
     def construct_mptt(dataframe):
