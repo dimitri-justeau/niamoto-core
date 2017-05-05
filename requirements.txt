@@ -11,3 +11,9 @@ pandas
 
 # Geo libraries
 shapely
+
+# Tasks and workflows
+# airflow[postgres]
+
+# CLI
+click
