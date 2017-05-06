@@ -5,11 +5,11 @@ import unittest
 import pandas as pd
 
 from niamoto.taxonomy.taxon import Taxon
-from niamoto import settings
+from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.testing.test_database_manager import TestDatabaseManager
-from niamoto.testing import BaseTestNiamotoSchemaCreated
+from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.mptt import make_taxon_tree
 
 

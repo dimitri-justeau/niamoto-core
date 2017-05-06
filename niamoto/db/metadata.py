@@ -10,7 +10,7 @@ from sqlalchemy import *
 from sqlalchemy.dialects.postgresql import JSONB
 from geoalchemy2 import *
 
-from niamoto import settings
+from niamoto.conf import settings
 
 
 metadata = MetaData(

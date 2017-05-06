@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 
-from niamoto.settings import NIAMOTO_SCHEMA, DEFAULT_DATABASE
+from niamoto.conf import settings
 
 
 class Connector:
@@ -16,7 +16,8 @@ class Connector:
 
     @classmethod
     @contextmanager
-    def get_connection(cls, database=DEFAULT_DATABASE, schema=NIAMOTO_SCHEMA):
+    def get_connection(cls, database=settings.DEFAULT_DATABASE,
+                       schema=settings.NIAMOTO_SCHEMA):
         """
         :return: Return a sqlalchemy connection on a postgresql database.
         """
@@ -37,7 +38,7 @@ class Connector:
             i.dispose()
 
     @classmethod
-    def get_engine(cls, database=DEFAULT_DATABASE):
+    def get_engine(cls, database=settings.DEFAULT_DATABASE):
         """
         :return: Return a sqlalchemy engine, use internal cache to avoid
         engine duplicates.

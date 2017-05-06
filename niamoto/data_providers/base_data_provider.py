@@ -2,7 +2,7 @@
 
 from sqlalchemy import select, Index
 
-from niamoto import settings
+from niamoto.conf import settings
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 

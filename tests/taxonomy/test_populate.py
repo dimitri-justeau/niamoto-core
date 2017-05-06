@@ -3,9 +3,9 @@
 import unittest
 
 from niamoto.taxonomy.populate import *
-from niamoto import settings
+from niamoto.conf import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager
-from niamoto.testing import BaseTestNiamotoSchemaCreated
+from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
 
 class TestPopulateTaxon(BaseTestNiamotoSchemaCreated):
@@ -22,7 +22,7 @@ class TestPopulateTaxon(BaseTestNiamotoSchemaCreated):
 
     def test_load_ncpippn_taxon_dataframe_from_json(self):
         df = load_ncpippn_taxon_dataframe_from_json()
-        self.assertEqual(len(df) > 0)
+        self.assertTrue(len(df) > 0)
 
     def test_populate_ncpippn_taxon_database(self):
         df = load_ncpippn_taxon_dataframe_from_json()

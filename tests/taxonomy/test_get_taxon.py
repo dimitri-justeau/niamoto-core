@@ -5,9 +5,9 @@ import unittest
 from niamoto.taxonomy.taxon import Taxon
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
-from niamoto import settings
+from niamoto.conf import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager
-from niamoto.testing import BaseTestNiamotoSchemaCreated
+from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
 
 class TestGetTaxon(BaseTestNiamotoSchemaCreated):

@@ -3,7 +3,7 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-from niamoto import settings
+from niamoto.conf import settings
 
 
 class TestDatabaseManager:

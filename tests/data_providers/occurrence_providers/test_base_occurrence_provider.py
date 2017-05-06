@@ -9,9 +9,9 @@ from niamoto.data_providers.occurrence_providers\
     .base_occurrence_provider import *
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
-from niamoto import settings
+from niamoto.conf import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager
-from niamoto.testing import BaseTestNiamotoSchemaCreated
+from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
 
 

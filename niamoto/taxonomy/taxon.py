@@ -3,7 +3,7 @@
 from sqlalchemy import select, func, bindparam
 import pandas as pd
 
-from niamoto import settings
+from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 
