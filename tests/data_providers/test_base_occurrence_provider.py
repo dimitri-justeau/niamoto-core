@@ -2,17 +2,16 @@
 
 import unittest
 
-from shapely.geometry import Point
 from geoalchemy2.shape import from_shape, WKTElement
+from shapely.geometry import Point
 
-from niamoto.data_providers.occurrence_providers\
-    .base_occurrence_provider import *
+from niamoto.conf import settings
+from niamoto.data_providers.base_occurrence_provider import *
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
-from niamoto.conf import settings
-from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
+from niamoto.testing.test_database_manager import TestDatabaseManager
 
 
 class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):

@@ -37,6 +37,7 @@ occurrence = Table(
     Column('provider_pk', Integer, nullable=False),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column('taxon_id', ForeignKey('taxon.id'), nullable=True),
+    Column('provider_taxon_id', Integer, nullable=True),
     Column('properties', JSONB, nullable=False),
     UniqueConstraint('provider_id', 'provider_pk'),
 )
