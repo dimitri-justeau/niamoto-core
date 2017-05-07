@@ -2,7 +2,7 @@
 
 import unittest
 
-from niamoto.conf import DynamicSettings
+from niamoto.settings.dynamic_settings import DynamicSettings
 
 
 class DynamicSettingTest(unittest.TestCase):

@@ -4,6 +4,9 @@ import unittest
 
 from sqlalchemy.engine import Connection
 
+from niamoto.testing import set_test_path
+set_test_path()
+
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
 from niamoto.testing.base_tests import BaseTest

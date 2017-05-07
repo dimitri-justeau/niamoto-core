@@ -1,8 +1,10 @@
 # coding: utf-8
 
-import importlib
 import os
 import sys
+
+from niamoto.exceptions import ImproperlyConfiguredError
+from niamoto.settings.dynamic_settings import DynamicSettings
 
 
 #  Environment variable indicating the Niamoto home folder.
@@ -10,32 +12,6 @@ HOME_ENVIRONMENT_VARIABLE = "NIAMOTO_HOME"
 
 DEFAULT_NIAMOTO_HOME = "~/niamoto"
 NIAMOTO_SETTINGS = "settings"
-
-
-class DynamicSettings:
-    """
-    Niamoto dynamic settings endpoint.
-    Inspired by Django's method to handle dynamic settings modules.
-    Loads a set of settings value from a python settings file.
-    """
-
-    def __init__(self, settings_module_path):
-        self.setting_module_path = settings_module_path
-        try:
-            setting_module = importlib.import_module(settings_module_path)
-        except ModuleNotFoundError:
-            raise ImproperlyConfiguredError(
-                    "The settings module '{}' does not exist.".format(
-                        settings_module_path
-                    )
-            )
-        for setting in dir(setting_module):
-            setting_value = getattr(setting_module, setting)
-            setattr(self, setting, setting_value)
-
-
-class ImproperlyConfiguredError(Exception):
-    pass
 
 
 #  Set home var if not set

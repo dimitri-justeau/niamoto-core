@@ -39,7 +39,8 @@ class BaseOccurrenceProvider:
         Map provider's taxon ids with Niamoto taxon ids.
         :param provider_taxon_ids: A series containing the provider's taxon
         ids. The index must correspond to the provider's pk.
-        :return:
+        :return: A series with the same index, the niamoto corresponding
+        taxon id as values.
         """
         pass  # TODO
 

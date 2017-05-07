@@ -4,6 +4,9 @@ import unittest
 
 from sqlalchemy.exc import IntegrityError
 
+from niamoto.testing import set_test_path
+set_test_path()
+
 from niamoto.taxonomy.taxon import Taxon
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta

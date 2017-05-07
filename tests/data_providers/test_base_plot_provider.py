@@ -5,6 +5,9 @@ import unittest
 from geoalchemy2.shape import from_shape, WKTElement
 from shapely.geometry import Point
 
+from niamoto.testing import set_test_path
+set_test_path()
+
 from niamoto.conf import settings
 from niamoto.data_providers.base_plot_provider import *
 from niamoto.db import metadata as niamoto_db_meta

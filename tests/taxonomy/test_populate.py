@@ -2,6 +2,9 @@
 
 import unittest
 
+from niamoto.testing import set_test_path
+set_test_path()
+
 from niamoto.taxonomy.populate import *
 from niamoto.conf import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager

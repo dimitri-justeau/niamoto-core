@@ -4,6 +4,9 @@ import unittest
 
 import pandas as pd
 
+from niamoto.testing import set_test_path
+set_test_path()
+
 from niamoto.taxonomy.taxon import Taxon
 from niamoto.conf import settings
 from niamoto.db.connector import Connector
