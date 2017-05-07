@@ -3,11 +3,11 @@
 import os
 import unittest
 
+PATH = os.path.abspath(os.path.dirname(__file__))
 
 if __name__ == "__main__":
-    os.environ.setdefault(
-        "NIAMOTO_SETTINGS_MODULE",
-        "niamoto.testing.test_settings"
+    os.environ['NIAMOTO_HOME'] = os.path.join(
+        PATH, "niamoto", "testing", "test_niamoto_home"
     )
     from niamoto.conf import settings
     from niamoto.testing.test_database_manager import TestDatabaseManager
