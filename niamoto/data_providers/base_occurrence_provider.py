@@ -34,6 +34,15 @@ class BaseOccurrenceProvider:
                 index_col=occurrence.c.id.name,
             )
 
+    def map_provider_taxon_ids(self, provider_taxon_ids):
+        """
+        Map provider's taxon ids with Niamoto taxon ids.
+        :param provider_taxon_ids: A series containing the provider's taxon
+        ids. The index must correspond to the provider's pk.
+        :return:
+        """
+        pass  # TODO
+
     def get_provider_occurrence_dataframe(self):
         """
         :return: A DataFrame containing the occurrence data currently

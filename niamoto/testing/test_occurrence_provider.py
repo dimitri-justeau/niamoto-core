@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from niamoto.data_providers.occurrence_providers.base_occurrence_provider \
+from niamoto.data_providers.base_occurrence_provider \
     import BaseOccurrenceProvider
 
 
