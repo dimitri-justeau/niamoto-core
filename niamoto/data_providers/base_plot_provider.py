@@ -128,7 +128,7 @@ class BasePlotProvider:
         """
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         diff = niamoto_idx.difference(provider_dataframe.index)
-        idx = niamoto_dataframe.reset_index(level=0).set_index(
+        idx = niamoto_dataframe.reset_index().set_index(
             'provider_pk',
         ).loc[diff]['id']
         return niamoto_dataframe.loc[pd.Index(idx)]
