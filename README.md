@@ -29,7 +29,7 @@ Among more, Niamoto provides:
 
 ## Setting up a development environment ##
 
-**Prerequesite**: You need to have `PostgreSQL` and `PostGIS` install in your system, or have access to a distant instance of it. Check the test settings in the `tests/test_data/test_niamoto_home/settings.py` file.
+**Prerequesite**: You need to have `PostgreSQL` and `PostGIS` installed and running in your system, or have access to a distant instance of it. Check the test settings in the `tests/test_data/test_niamoto_home/settings.py` file.
 
 It is recommended to use `virtualenv` to setup a development environment with python 3.4, 3.5 or 3.6. Please refer to https://virtualenv.pypa.io/en/stable/
 
