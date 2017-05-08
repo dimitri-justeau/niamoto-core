@@ -27,7 +27,7 @@ Among more, Niamoto provides:
 - Schedulable scientific data workflows.
 - Publication of value-added aggregated data.
 
-## Seting up a development environment ##
+## Setting up a development environment ##
 
 **Prerequesite**: You need to have `PostgreSQL` and `PostGIS` install in your system, or have access to a distant instance of it. Check the test settings in the `tests/test_data/test_niamoto_home/settings.py` file.
 
