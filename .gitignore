@@ -93,3 +93,8 @@ ENV/
 .idea
 
 *.ipynb
+
+*.sqlite
+*.ptx
+
+tests/test_data/test_niamoto_home/data

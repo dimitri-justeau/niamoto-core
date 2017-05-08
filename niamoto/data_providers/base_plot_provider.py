@@ -34,7 +34,7 @@ class BasePlotProvider:
                 index_col=plot.c.id.name,
             )
 
-    def get_provider_occurrence_dataframe(self):
+    def get_provider_plot_dataframe(self):
         """
         :return: A DataFrame containing the plot data currently
         available from the provider. The index of the DataFrame corresponds

@@ -26,3 +26,33 @@ Among more, Niamoto provides:
 - Generic methods for storing geographic layers (raster and vector).
 - Schedulable scientific data workflows.
 - Publication of value-added aggregated data.
+
+## Seting up a development environment ##
+
+**Prerequesite**: You need to have `PostgreSQL` and `PostGIS` install in your system, or have access to a distant instance of it. Check the test settings in the `tests/test_data/test_niamoto_home/settings.py` file.
+
+It is recommended to use `virtualenv` to setup a development environment with python 3.4, 3.5 or 3.6. Please refer to https://virtualenv.pypa.io/en/stable/
+
+First, clone the repository in your system using `git`:
+
+```
+git clone https://github.com/dimitri-justeau/niamoto-core.git
+```
+
+Move in the cloned repository and install the dependencies using `pip`:
+
+```
+pip install -r requirements.txt
+```
+
+Finally download the test data:
+
+```
+sh tests/download_test_data.sh
+```
+
+You can check the tests using:
+
+```
+python run_tests.py
+```
