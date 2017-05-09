@@ -39,11 +39,11 @@ class PlantnoteOccurrenceProvider(BaseOccurrenceProvider):
             id_inv = inv_table.c["ID Inventaires"]
             id_inv_loc = inv_table.c["ID Parcelle"]
             id_loc = loc_table.c["ID Localités"]
-            loc_col = type_coerce("POINT(", String) + \
+            loc_col = "SRID=4326;POINT(" + \
                 type_coerce(loc_table.c["LongDD"], String) + \
-                type_coerce(' ', String) + \
+                ' ' + \
                 type_coerce(loc_table.c["LatDD"], String) + \
-                type_coerce(')', String)
+                ')'
             sel = select([
                 occ_table.c["ID Individus"].label('id'),
                 func.coalesce(
@@ -81,17 +81,23 @@ class PlantnoteOccurrenceProvider(BaseOccurrenceProvider):
                 occ_table.c["ID Individus"],
             )
             df = pd.read_sql(sel, connection, index_col="id")
-            properties = df.apply(lambda x: {
-                'strata': x['strata'],
-                'wood_density': x['wood_density'],
-                'leaves_sla': x['leaves_sla'],
-                'bark_thickness': x['bark_thickness'],
-                'dbh': x['dbh'],
-                'height': x['height'],
-                'stem_nb': x['stem_nb'],
-                'status': x['status'],
-
-            }, axis=1)  # TODO: MORE EFFICIENT
+            property_cols = [
+                "strata",
+                "wood_density",
+                "leaves_sla",
+                "bark_thickness",
+                "dbh",
+                "height",
+                "stem_nb",
+                "status",
+                "date_observation",
+            ]
+            properties = df[property_cols].apply(
+                lambda x: x.to_json(),
+                axis=1
+            )
+            df.drop(property_cols, axis=1, inplace=True)
+            df['properties'] = properties
             return df
         except:
             raise

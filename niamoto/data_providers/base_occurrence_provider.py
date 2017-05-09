@@ -67,7 +67,7 @@ class BaseOccurrenceProvider:
 
     def _sync(self, df):
         niamoto_df = self.get_niamoto_occurrence_dataframe()
-        provider_df = df
+        provider_df = df.where((pd.notnull(df)), None)
         insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
         update_df = self.get_update_dataframe(niamoto_df, provider_df)
         delete_df = self.get_delete_dataframe(niamoto_df, provider_df)
