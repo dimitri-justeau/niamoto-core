@@ -49,7 +49,7 @@ class TestPlantnoteOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         )
         occ_provider = pt_provider.occurrence_provider
         df1 = occ_provider.get_provider_occurrence_dataframe()
-        # print(df1[:10])
+        print(df1[:10])
 
 
 if __name__ == '__main__':

@@ -19,11 +19,11 @@ class PlantnoteOccurrenceProvider(BaseOccurrenceProvider):
 
     def get_provider_occurrence_dataframe(self):
         db_str = 'sqlite:///{}'.format(self.plantnote_db_path)
-        engine = create_engine(db_str)
-        connection = engine.connect()
+        eng = create_engine(db_str)
+        connection = eng.connect()
         try:
             metadata = MetaData()
-            metadata.reflect(engine)
+            metadata.reflect(eng)
             #  Needed tables
             occ_table = metadata.tables['Individus']
             obs_table = metadata.tables['Observations']
@@ -80,12 +80,23 @@ class PlantnoteOccurrenceProvider(BaseOccurrenceProvider):
             ).group_by(
                 occ_table.c["ID Individus"],
             )
+            df = pd.read_sql(sel, connection, index_col="id")
+            properties = df.apply(lambda x: {
+                'strata': x['strata'],
+                'wood_density': x['wood_density'],
+                'leaves_sla': x['leaves_sla'],
+                'bark_thickness': x['bark_thickness'],
+                'dbh': x['dbh'],
+                'height': x['height'],
+                'stem_nb': x['stem_nb'],
+                'status': x['status'],
 
-            return pd.read_sql(sel, connection, index_col="id")
+            }, axis=1)  # TODO: MORE EFFICIENT
+            return df
         except:
             raise
         finally:
             if connection:
                 connection.close()
-                engine.dispose()
+                eng.dispose()
 

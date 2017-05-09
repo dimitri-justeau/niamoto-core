@@ -49,6 +49,19 @@ class BaseOccurrenceProvider:
         :return: A DataFrame containing the occurrence data currently
         available from the provider. The index of the DataFrame corresponds
         to the provider's pk.
+        The dataframe must be structured with the following columns:
+            _________________________________________________________________
+           | id -> Index of the DataFrame corresponding to the provider's pk |
+           |_________________________________________________________________|
+           |-----------------------------------------------------------------|
+           | taxon_id -> The id of the occurrence's taxon, according to the  |
+           |    provider's taxonomic referential (the mapping is done in     |
+           |    sync method, if necessary)                                   |
+           | ----------------------------------------------------------------|
+           | location -> The location of the occurrence (WKT, srid=4326)     |
+           |-----------------------------------------------------------------|
+           | properties -> The properties of the occurrence, in JSON format  |
+            -----------------------------------------------------------------
         """
         raise NotImplementedError()
 
@@ -96,6 +109,7 @@ class BaseOccurrenceProvider:
         Sync Niamoto database with provider.
         :return: The insert, update, delete DataFrames.
         """
+        # TODO Map taxon ids
         return self._sync(self.get_provider_occurrence_dataframe())
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):

@@ -355,7 +355,7 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             {
                 'id': 2,
                 'taxon_id': None,
-                'properties': {'yo': 'yo'},
+                'properties': '{"yo": "yo"}',
                 'location': from_shape(Point(166.552, -22.097), srid=4326)
             },
             {
