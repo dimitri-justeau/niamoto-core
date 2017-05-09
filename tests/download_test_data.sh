@@ -8,4 +8,4 @@ then
     rm -r $DIR/test_data/test_niamoto_home/data
     mkdir $DIR/test_data/test_niamoto_home/data
 fi
-git clone https://github.com/niamoto/niamoto-core.git $DIR/test_data/test_niamoto_home/data
+git clone https://github.com/niamoto/niamoto-core-test-data.git $DIR/test_data/test_niamoto_home/data
