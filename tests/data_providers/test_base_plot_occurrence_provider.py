@@ -75,10 +75,39 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         df1 = prov1.get_niamoto_plot_occurrence_dataframe()
         df2 = prov2.get_niamoto_plot_occurrence_dataframe()
         df3 = prov3.get_niamoto_plot_occurrence_dataframe()
-        self.assertEqual(len(df1), 4)
+        self.assertEqual(len(df1), 5)
         self.assertEqual(len(df2), 1)
         self.assertEqual(len(df3), 0)
 
+    def test_get_insert_dataframe(self):
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+
+    def test_get_update_dataframe(self):
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+
+    def test_get_delete_dataframe(self):
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+
+    def test_sync_insert(self):
+        self.tearDownClass()
+        self.setUpClass()
+
+    def test_sync_update(self):
+        self.tearDownClass()
+        self.setUpClass()
+
+    def test_sync_delete(self):
+        self.tearDownClass()
+        self.setUpClass()
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
