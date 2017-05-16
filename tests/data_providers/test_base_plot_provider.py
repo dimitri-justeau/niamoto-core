@@ -12,9 +12,11 @@ from niamoto.conf import settings
 from niamoto.data_providers.base_plot_provider import *
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
+from niamoto.db.utils import fix_db_sequences
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
 from niamoto.testing.test_database_manager import TestDatabaseManager
+from niamoto.testing import test_data
 
 
 class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
@@ -40,48 +42,12 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             'test_data_provider_3',
             database=settings.TEST_DATABASE,
         )
-        plot_1 = [
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 0,
-                'name': 'plot_1_1',
-                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
-                'properties': {},
-            },
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 1,
-                'name': 'plot_1_2',
-                'location': from_shape(Point(166.551, -22.098), srid=4326),
-                'properties': {},
-            },
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 2,
-                'name': 'plot_1_3',
-                'location': from_shape(Point(166.552, -22.097), srid=4326),
-                'properties': {},
-            },
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 5,
-                'name': 'plot_1_4',
-                'location': from_shape(Point(166.553, -22.099), srid=4326),
-                'properties': {},
-            },
-        ]
-        plot_2 = [
-            {
-                'provider_id': data_provider_2.db_id,
-                'provider_pk': 0,
-                'name': 'plot_2_1',
-                'location': from_shape(Point(166.5511, -22.09739), srid=4326),
-                'properties': {},
-            },
-        ]
+        plot_1 = test_data.get_plot_data_1(data_provider_1)
+        plot_2 = test_data.get_plot_data_2(data_provider_2)
         ins = niamoto_db_meta.plot.insert().values(plot_1 + plot_2)
         with Connector.get_connection(settings.TEST_DATABASE) as connection:
             connection.execute(ins)
+        fix_db_sequences(database=settings.TEST_DATABASE)
 
     def test_get_current_plot_data(self):
         """
@@ -105,7 +71,6 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         pp1 = BasePlotProvider(data_provider_1)
         pp2 = BasePlotProvider(data_provider_2)
         pp3 = BasePlotProvider(data_provider_3)
-        #  1. retrieve an empty DataFrame
         df1 = pp1.get_niamoto_plot_dataframe()
         df2 = pp2.get_niamoto_plot_dataframe()
         df3 = pp3.get_niamoto_plot_dataframe()

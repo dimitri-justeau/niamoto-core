@@ -3,7 +3,7 @@
 from sqlalchemy.sql import *
 import pandas as pd
 
-from niamoto.db.metadata import plot_occurrence
+from niamoto.db.metadata import plot_occurrence, plot
 from niamoto.db.connector import Connector
 
 
@@ -26,7 +26,18 @@ class BasePlotOccurrenceProvider:
         """
         db = self.data_provider.database
         with Connector.get_connection(database=db) as connection:
-            pass  # TODO
+            sel = select([
+                plot_occurrence.c.plot_id,
+                plot_occurrence.c.occurrence_id,
+                plot_occurrence.c.provider_id,
+                plot_occurrence.c.occurrence_identifier,
+            ]).where(
+                plot_occurrence.c.provider_id == self.data_provider.db_id
+            )
+            return pd.read_sql(
+                sel,
+                connection
+            )
 
     def get_provider_plot_occurrence_dataframe(self):
         """
@@ -37,7 +48,7 @@ class BasePlotOccurrenceProvider:
         raise NotImplementedError()
 
     def _sync(self, df):
-        niamoto_df = self.get_niamoto_plot_dataframe()
+        niamoto_df = self.get_niamoto_plot_occurrence_dataframe()
         provider_df = df
         insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
         update_df = self.get_update_dataframe(niamoto_df, provider_df)

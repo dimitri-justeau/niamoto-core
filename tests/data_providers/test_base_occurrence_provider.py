@@ -12,9 +12,11 @@ from niamoto.conf import settings
 from niamoto.data_providers.base_occurrence_provider import *
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
+from niamoto.db.utils import fix_db_sequences
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
 from niamoto.testing.test_database_manager import TestDatabaseManager
+from niamoto.testing import test_data
 
 
 class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
@@ -40,47 +42,16 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             'test_data_provider_3',
             database=settings.TEST_DATABASE,
         )
-        occ_1 = [
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 0,
-                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
-                'properties': {},
-            },
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 1,
-                'location': from_shape(Point(166.551, -22.098), srid=4326),
-                'properties': {},
-            },
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 2,
-                'location': from_shape(Point(166.552, -22.097), srid=4326),
-                'properties': {},
-            },
-            {
-                'provider_id': data_provider_1.db_id,
-                'provider_pk': 5,
-                'location': from_shape(Point(166.553, -22.099), srid=4326),
-                'properties': {},
-            },
-        ]
-        occ_2 = [
-            {
-                'provider_id': data_provider_2.db_id,
-                'provider_pk': 0,
-                'location': from_shape(Point(166.5511, -22.09739), srid=4326),
-                'properties': {},
-            },
-        ]
+        occ_1 = test_data.get_occurrence_data_1(data_provider_1)
+        occ_2 = test_data.get_occurrence_data_2(data_provider_2)
         ins = niamoto_db_meta.occurrence.insert().values(occ_1 + occ_2)
         with Connector.get_connection(settings.TEST_DATABASE) as connection:
             connection.execute(ins)
+        fix_db_sequences(database=settings.TEST_DATABASE)
 
     def test_get_current_plot_data(self):
         """
-        :return: Test for get_current_plot_data_method.
+        :return: Test for get_current_occurrence_data_method.
             Test the structure of the returned DataFrame.
             Test retrieving an empty DataFrame.
             Test retrieving a not-empty DataFrame.
