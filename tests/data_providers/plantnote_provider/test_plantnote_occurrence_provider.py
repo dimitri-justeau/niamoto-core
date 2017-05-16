@@ -55,6 +55,8 @@ class TestPlantnoteOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         for i in ['taxon_id', 'location', 'properties']:
             self.assertIn(i, cols)
         occ_provider.sync()
+        df2 = occ_provider.get_niamoto_occurrence_dataframe()
+        self.assertEqual(len(df1), len(df2))
 
 
 if __name__ == '__main__':

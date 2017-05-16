@@ -86,7 +86,7 @@ class BasePlotProvider:
         Sync Niamoto database with provider.
         :return: The insert, update, delete DataFrames.
         """
-        return self._sync(self.get_niamoto_plot_dataframe())
+        return self._sync(self.get_provider_plot_dataframe())
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """

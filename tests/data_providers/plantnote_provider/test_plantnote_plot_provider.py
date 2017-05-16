@@ -55,6 +55,8 @@ class TestPlantnotePlotProvider(BaseTestNiamotoSchemaCreated):
         for i in ['name', 'location', 'properties']:
             self.assertIn(i, cols)
         plot_provider.sync()
+        df2 = plot_provider.get_niamoto_plot_dataframe()
+        self.assertEqual(len(df1), len(df2))
 
 
 if __name__ == '__main__':
