@@ -5,6 +5,7 @@ import pandas as pd
 
 from niamoto.db.metadata import occurrence
 from niamoto.db.connector import Connector
+from niamoto.taxonomy.taxon import Taxon
 
 
 class BaseOccurrenceProvider:
@@ -34,15 +35,20 @@ class BaseOccurrenceProvider:
                 index_col=occurrence.c.id.name,
             )
 
-    def map_provider_taxon_ids(self, provider_taxon_ids):
+    def map_provider_taxon_ids(self, dataframe):
         """
         Map provider's taxon ids with Niamoto taxon ids.
-        :param provider_taxon_ids: A series containing the provider's taxon
+        :param dataframe: The dataframe where the mapping has to be done.
         ids. The index must correspond to the provider's pk.
         :return: A series with the same index, the niamoto corresponding
         taxon id as values.
         """
-        pass  # TODO
+        db = self.data_provider.database
+        synonyms = Taxon.get_synonyms_for_provider(
+            self.data_provider,
+            database=db
+        )
+        dataframe["taxon_id"] = dataframe["taxon_id"].map(synonyms)
 
     def get_provider_occurrence_dataframe(self):
         """
@@ -109,8 +115,9 @@ class BaseOccurrenceProvider:
         Sync Niamoto database with provider.
         :return: The insert, update, delete DataFrames.
         """
-        # TODO Map taxon ids
-        return self._sync(self.get_provider_occurrence_dataframe())
+        dataframe = self.get_provider_occurrence_dataframe()
+        self.map_provider_taxon_ids(dataframe)
+        return self._sync(dataframe)
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """

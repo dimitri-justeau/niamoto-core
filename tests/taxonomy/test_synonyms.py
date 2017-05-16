@@ -187,6 +187,7 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         self.assertEqual(synonyms.loc[10], 0)
         self.assertEqual(synonyms.loc[20], 1)
 
+
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
     TestDatabaseManager.create_schema('niamoto')
