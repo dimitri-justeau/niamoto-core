@@ -22,7 +22,7 @@ class TestPlantnoteOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         NIAMOTO_HOME,
         'data',
         'plantnote',
-        'ncpippn.sqlite',
+        'ncpippn_test.sqlite',
     )
 
     @classmethod

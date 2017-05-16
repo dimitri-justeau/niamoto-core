@@ -21,7 +21,7 @@ class TestPlantnoteDataProvider(BaseTestNiamotoSchemaCreated):
         NIAMOTO_HOME,
         'data',
         'plantnote',
-        'ncpippn.sqlite',
+        'ncpippn_test.sqlite',
     )
 
     def test_plantnote_data_provider(self):
