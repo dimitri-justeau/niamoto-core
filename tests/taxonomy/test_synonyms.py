@@ -142,6 +142,51 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
 
+    def test_get_synonyms_map(self):
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+        data = [
+            {
+                'id': 0,
+                'full_name': 'Family One',
+                'rank_name': 'One',
+                'rank': niamoto_db_meta.TaxonRankEnum.FAMILIA,
+                'parent_id': None,
+                'synonyms': {
+                    data_provider_1.get_type_name(): 10,
+                },
+                'mptt_left': 0,
+                'mptt_right': 0,
+                'mptt_tree_id': 0,
+                'mptt_depth': 0,
+            },
+            {
+                'id': 1,
+                'full_name': 'Family Two',
+                'rank_name': 'Two',
+                'rank': niamoto_db_meta.TaxonRankEnum.FAMILIA,
+                'parent_id': None,
+                'synonyms': {
+                    data_provider_1.get_type_name(): 20,
+                },
+                'mptt_left': 0,
+                'mptt_right': 0,
+                'mptt_tree_id': 0,
+                'mptt_depth': 0,
+            },
+        ]
+        ins = niamoto_db_meta.taxon.insert().values(data)
+        with Connector.get_connection(settings.TEST_DATABASE) as connection:
+            connection.execute(ins)
+        synonyms = Taxon.get_synonyms_for_provider(
+            data_provider_1,
+            database=settings.TEST_DATABASE,
+        )
+        self.assertEqual(synonyms.loc[10], 0)
+        self.assertEqual(synonyms.loc[20], 1)
+
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
     TestDatabaseManager.create_schema('niamoto')
