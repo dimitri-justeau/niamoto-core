@@ -37,8 +37,10 @@ if __name__ == "__main__":
         "_static",
         "db_schema.svg",
     )
+
     if len(sys.argv) > 2:
         svg_destination_path = sys.argv[2]
+
     with open(svg_destination_path, 'w') as f:
         subprocess.Popen(
             ["dot", "-Tsvg", dot_destination_path],

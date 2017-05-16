@@ -50,11 +50,11 @@ class TestPlantnotePlotProvider(BaseTestNiamotoSchemaCreated):
             database=settings.TEST_DATABASE,
         )
         plot_provider = pt_provider.plot_provider
-        # df1 = plot_provider.get_provider_plot_dataframe()
-        # cols = df1.columns
-        # for i in ['taxon_id', 'location', 'properties']:
-        #     self.assertIn(i, cols)
-        # plot_provider.sync()
+        df1 = plot_provider.get_provider_plot_dataframe()
+        cols = df1.columns
+        for i in ['name', 'location', 'properties']:
+            self.assertIn(i, cols)
+        plot_provider.sync()
 
 
 if __name__ == '__main__':
