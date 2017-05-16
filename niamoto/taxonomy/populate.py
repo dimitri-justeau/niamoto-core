@@ -9,6 +9,7 @@ from niamoto.conf import settings
 from niamoto.taxonomy.taxon import Taxon
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
+from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 
 
 PATH = os.path.abspath(os.path.dirname(__file__))
@@ -34,7 +35,10 @@ def populate_ncpippn_taxon_database(dataframe,
         rank_name=bindparam('rank_name'),
         rank=bindparam('rank'),
         parent_id=bindparam('parent'),
-        synonyms=func.jsonb_build_object('taxref', bindparam('id_taxref')),
+        synonyms=func.jsonb_build_object(
+            'taxref', bindparam('id_taxref'),
+            PlantnoteDataProvider.get_type_name(), bindparam('tax_id'),
+        ),
         mptt_left=0,
         mptt_right=0,
         mptt_tree_id=0,

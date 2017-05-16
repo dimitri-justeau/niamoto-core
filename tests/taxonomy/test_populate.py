@@ -9,6 +9,7 @@ from niamoto.taxonomy.populate import *
 from niamoto.conf import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
+from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 
 
 class TestPopulateTaxon(BaseTestNiamotoSchemaCreated):
@@ -35,6 +36,14 @@ class TestPopulateTaxon(BaseTestNiamotoSchemaCreated):
         )
         taxa = Taxon.get_raw_taxon_dataframe(database=settings.TEST_DATABASE)
         self.assertTrue(len(taxa) > 0)
+        test_taxa = taxa.iloc[20]
+        synonyms = test_taxa["synonyms"]
+        self.assertIn("taxref", synonyms.keys())
+        self.assertIn(PlantnoteDataProvider.get_type_name(), synonyms.keys())
+        self.assertEqual(
+            synonyms[PlantnoteDataProvider.get_type_name()],
+            test_taxa.name
+        )
 
 
 if __name__ == '__main__':
