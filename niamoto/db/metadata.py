@@ -40,6 +40,7 @@ occurrence = Table(
     Column('provider_taxon_id', Integer, nullable=True),
     Column('properties', JSONB, nullable=False),
     UniqueConstraint('provider_id', 'provider_pk'),
+    UniqueConstraint('id', 'provider_id'),
 )
 
 # ------------- #
@@ -92,6 +93,7 @@ plot = Table(
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column('properties', JSONB, nullable=False),
     UniqueConstraint('provider_id', 'provider_pk'),
+    UniqueConstraint('id', 'provider_id'),
 )
 
 # --------------------------- #
@@ -101,10 +103,19 @@ plot = Table(
 plot_occurrence = Table(
     'plot_occurrence',
     metadata,
-    Column('plot_id', ForeignKey('plot.id'), primary_key=True),
-    Column('occurrence_id', ForeignKey('occurrence.id'), primary_key=True),
+    Column('plot_id', primary_key=True),
+    Column('occurrence_id', primary_key=True),
+    Column('provider_id'),
     Column('occurrence_identifier', String(50)),
     UniqueConstraint('plot_id', 'occurrence_identifier'),
+    ForeignKeyConstraint(
+        ['plot_id', 'provider_id'],
+        ['plot.id', 'plot.provider_id'],
+    ),
+    ForeignKeyConstraint(
+        ['occurrence_id', 'provider_id'],
+        ['occurrence.id', 'occurrence.provider_id'],
+    ),
 )
 
 # ---------------------- #
