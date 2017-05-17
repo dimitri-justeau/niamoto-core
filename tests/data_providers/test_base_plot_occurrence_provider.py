@@ -240,6 +240,62 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             'test_data_provider_1',
             database=settings.TEST_DATABASE,
         )
+        prov1 = BasePlotOccurrenceProvider(data_provider_1)
+        df1 = prov1.get_niamoto_plot_occurrence_dataframe()
+        #  1. Nothing to delete
+        data_1 = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'PLOT1_000',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'PLOT2_000',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 1,
+                'occurrence_identifier': 'PLOT2_001',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 2,
+                'occurrence_identifier': 'PLOT2_002',
+            },
+            {
+                'provider_plot_pk': 2,
+                'provider_occurrence_pk': 5,
+                'occurrence_identifier': 'PLOT2_002',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        reindexed_data_1 = prov1.get_reindexed_provider_dataframe(data_1)
+        delete = prov1.get_delete_dataframe(df1, reindexed_data_1)
+        self.assertEqual(len(delete), 0)
+        # 2. Everything to delete
+        data_2 = pd.DataFrame.from_records([
+        ])
+        reindexed_data_2 = prov1.get_reindexed_provider_dataframe(data_2)
+        delete = prov1.get_delete_dataframe(df1, reindexed_data_2)
+        self.assertEqual(len(delete), 5)
+        # 3. Partial delete
+        data_3 = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'PLOT1_000',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'PLOT2_000',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        reindexed_data_3 = prov1.get_reindexed_provider_dataframe(data_3)
+        delete = prov1.get_delete_dataframe(df1, reindexed_data_3)
+        self.assertEqual(len(delete), 3)
+        self.assertEqual(list(delete['provider_occurrence_pk']), [1, 2, 5])
 
     def test_sync_insert(self):
         self.tearDownClass()

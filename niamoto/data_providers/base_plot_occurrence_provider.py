@@ -92,6 +92,8 @@ class BasePlotOccurrenceProvider:
             provider_plot_pk -> plot_id
             provider_occurrence_pk -> occurrence_id
         """
+        if len(dataframe) == 0:
+            return dataframe
         db = self.data_provider.database
         with Connector.get_connection(database=db) as connection:
             sel_plot = select([
@@ -139,6 +141,8 @@ class BasePlotOccurrenceProvider:
         :return: The data that is to be inserted to sync Niamoto with the
         provider (i.e. data which is in the provider, but not in Niamoto).
         """
+        if len(provider_dataframe) == 0:
+            return provider_dataframe
         diff = provider_dataframe.index.difference(niamoto_dataframe.index)
         return provider_dataframe.loc[diff]
 
@@ -150,6 +154,8 @@ class BasePlotOccurrenceProvider:
         :return: The data that is to be updated to sync Niamoto with the
         provider (i.e. data which is both in the provider and Niamoto).
         """
+        if len(provider_dataframe) == 0:
+            return provider_dataframe
         inter = provider_dataframe.index.intersection(niamoto_dataframe.index)
         return provider_dataframe.loc[inter]
 
@@ -161,4 +167,7 @@ class BasePlotOccurrenceProvider:
         :return: The data that is to be deleted to sync Niamoto with the
         provider (i.e. data which is in Niamoto, but not in the provider).
         """
-        pass  # TODO
+        if len(provider_dataframe) == 0:
+            return niamoto_dataframe
+        diff = niamoto_dataframe.index.difference(provider_dataframe.index)
+        return niamoto_dataframe.loc[diff]
