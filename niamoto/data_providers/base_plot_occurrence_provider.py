@@ -34,6 +34,8 @@ class BasePlotOccurrenceProvider:
                 plot_occurrence.c.plot_id,
                 plot_occurrence.c.occurrence_id,
                 plot_occurrence.c.provider_id,
+                plot_occurrence.c.provider_plot_pk,
+                plot_occurrence.c.provider_occurrence_pk,
                 plot_occurrence.c.occurrence_identifier,
             ]).where(
                 plot_occurrence.c.provider_id == self.data_provider.db_id
@@ -81,39 +83,50 @@ class BasePlotOccurrenceProvider:
         """
         return self._sync(self.get_provider_plot_occurrence_dataframe())
 
-    def get_niamoto_index(self, dataframe):
+    def get_reindexed_provider_dataframe(self, dataframe):
         """
         :param dataframe: The provider's DataFrame, or a subset, with index
         being a multi-index composed with
         [provider_plot_pk, occurrence_plot_pk].
-        :return: The Niamoto's corresponding index:
+        :return: The dataframe reindexed:
             provider_plot_pk -> plot_id
             provider_occurrence_pk -> occurrence_id
         """
-        plot_pk = dataframe.index.get_level_values('provider_plot_pk')
-        occ_pk = dataframe.index.get_level_values('provider_occurrence_pk')
-        #  Retrieve plot and occurrence ids
         db = self.data_provider.database
         with Connector.get_connection(database=db) as connection:
-            sel_plot = select([plot.c.id, plot.c.provider_pk])
-            sel_occ = select([occurrence.c.id, occurrence.c.provider_pk])
+            sel_plot = select([
+                plot.c.id.label('plot_id'),
+                plot.c.provider_pk.label('provider_plot_pk')
+            ]).where(plot.c.provider_id == self.data_provider.db_id)
+            sel_occ = select([
+                occurrence.c.id.label('occurrence_id'),
+                occurrence.c.provider_pk.label('provider_occurrence_pk')
+            ]).where(occurrence.c.provider_id == self.data_provider.db_id)
             plot_ids = pd.read_sql(
                 sel_plot,
                 connection,
-                index_col=plot.c.provider_pk.name
+                index_col='provider_plot_pk'
             )
             occ_ids = pd.read_sql(
                 sel_occ,
                 connection,
-                index_col=occurrence.c.provider_pk.name
+                index_col='provider_occurrence_pk'
             )
-        plot_id_series = plot_ids.loc[plot_pk]['id']
-        occ_id_series = occ_ids.loc[occ_pk]['id']
-        tuples = list(zip(*[plot_id_series, occ_id_series]))
-        return pd.MultiIndex.from_tuples(
-            tuples,
-            names=['plot_id', 'occurrence_id']
+        plot_id = plot_ids
+        occ_id = occ_ids
+        dataframe.reset_index(inplace=True)
+        dataframe = dataframe.merge(
+            plot_id,
+            left_on='provider_plot_pk',
+            right_index=True,
         )
+        dataframe = dataframe.merge(
+            occ_id,
+            left_on='provider_occurrence_pk',
+            right_index=True,
+        )
+        dataframe.set_index(['plot_id', 'occurrence_id'], inplace=True)
+        return dataframe
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
@@ -121,16 +134,13 @@ class BasePlotOccurrenceProvider:
         database (corresponding to this provider). The index is a multi-index
         [plot_id, occurrence_id], where ids correspond to Niamoto ids.
         :param provider_dataframe: Plot-occurrence DataFrame from provider.
+        Must have been reindexed with the get_reindexed_provider_dataframe
+        method.
         :return: The data that is to be inserted to sync Niamoto with the
         provider (i.e. data which is in the provider, but not in Niamoto).
         """
-        niamoto_idx = pd.Index(
-            niamoto_dataframe[['provider_plot_pk', 'provider_occurrence_pk']]
-        )
-        diff = provider_dataframe.index.difference(niamoto_idx)
-        df = provider_dataframe.loc[diff]
-
-        pass  # TODO
+        diff = provider_dataframe.index.difference(niamoto_dataframe.index)
+        return provider_dataframe.loc[diff]
 
     def get_update_dataframe(self, niamoto_dataframe, provider_dataframe):
         """

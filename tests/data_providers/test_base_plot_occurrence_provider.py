@@ -105,9 +105,9 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 'occurrence_identifier': 'PLOT2_002',
             },
         ], index=['provider_plot_pk', 'provider_occurrence_pk'])
-        niamoto_index = prov1.get_niamoto_index(data)
+        reindexed = prov1.get_reindexed_provider_dataframe(data)
         self.assertEqual(
-            list(niamoto_index.get_values()),
+            list(reindexed.index.get_values()),
             [(1, 1), (1, 2), (2, 3), ],
         )
 
@@ -116,6 +116,62 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             'test_data_provider_1',
             database=settings.TEST_DATABASE,
         )
+        prov1 = BasePlotOccurrenceProvider(data_provider_1)
+        df1 = prov1.get_niamoto_plot_occurrence_dataframe()
+        #  1. Nothing to insert
+        data_1 = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 1,
+                'occurrence_identifier': 'PLOT2_001',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        reindexed_data_1 = prov1.get_reindexed_provider_dataframe(data_1)
+        ins = prov1.get_insert_dataframe(df1, reindexed_data_1)
+        self.assertEqual(len(ins), 0)
+        # 2. Everything to insert
+        data_2 = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 1,
+                'occurrence_identifier': 'PLOT1_002',
+            },
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 2,
+                'occurrence_identifier': 'PLOT1_003',
+            },
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 5,
+                'occurrence_identifier': 'PLOT1_003',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        reindexed_data_2 = prov1.get_reindexed_provider_dataframe(data_2)
+        ins = prov1.get_insert_dataframe(df1, reindexed_data_2)
+        self.assertEqual(len(ins), 3)
+        # 3. Partial insert
+        data_3 = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'PLOT1_001',
+            },
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 2,
+                'occurrence_identifier': 'PLOT1_003',
+            },
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 5,
+                'occurrence_identifier': 'PLOT1_003',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        reindexed_data_3 = prov1.get_reindexed_provider_dataframe(data_3)
+        ins = prov1.get_insert_dataframe(df1, reindexed_data_3)
+        self.assertEqual(len(ins), 2)
+        self.assertEqual(list(ins['provider_occurrence_pk']), [2, 5])
 
     def test_get_update_dataframe(self):
         data_provider_1 = TestDataProvider(
