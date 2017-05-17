@@ -1,0 +1,3 @@
+ignore:
+  - "niamoto/db/utils.py"  # ignore niamoto/db/utils.py since it
+                      # results in a coverage bug
