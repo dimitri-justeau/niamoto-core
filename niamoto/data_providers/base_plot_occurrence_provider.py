@@ -150,7 +150,8 @@ class BasePlotOccurrenceProvider:
         :return: The data that is to be updated to sync Niamoto with the
         provider (i.e. data which is both in the provider and Niamoto).
         """
-        pass  # TODO
+        inter = provider_dataframe.index.intersection(niamoto_dataframe.index)
+        return provider_dataframe.loc[inter]
 
     def get_delete_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
