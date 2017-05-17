@@ -24,7 +24,7 @@ class PlantnotePlotOccurrenceProvider(BasePlotOccurrenceProvider):
             metadata.reflect(eng)
             #  Needed tables
             plot_occ_table = metadata.tables['Inventaires']
-
+            df = None  # TODO
             return df
         except:
             raise
