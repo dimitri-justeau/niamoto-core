@@ -3,7 +3,7 @@
 from sqlalchemy.sql import *
 import pandas as pd
 
-from niamoto.db.metadata import plot_occurrence
+from niamoto.db.metadata import plot_occurrence, plot, occurrence
 from niamoto.db.connector import Connector
 
 
@@ -11,6 +11,9 @@ class BasePlotOccurrenceProvider:
     """
     Abstract base class for plot-occurrence provider. plot-occurrence data
     corresponds to the association between plots and occurrences.
+    /!\/!\ The plot-occurrence provider sync method must be used after having
+    synced plots and occurrences with the plot provider and the occurrence
+    provider.
     """
 
     def __init__(self, data_provider):
@@ -44,9 +47,18 @@ class BasePlotOccurrenceProvider:
     def get_provider_plot_occurrence_dataframe(self):
         """
         :return: A DataFrame containing the plot-occurrence data currently
-        available from the provider. The 'plot_id'  and 'occurrence_id'
-        attributes correspond to the provider's pks, and must be constitute
-        a multi-index [plot_id, occurrence_id].
+        available from the provider. The 'provider_plot_id' and
+        'provider_occurrence_id' attributes correspond to the provider's pks,
+        and must be constitute a multi-index [provider_plot_id,
+        provider_occurrence_id]. The structure must be the following:
+            _________________________________________________________________
+           | provider_plot_id       -> First member of the multi index       |
+           | provider_occurrence_id -> Second member of the multi index      |
+           |_________________________________________________________________|
+           |-----------------------------------------------------------------|
+           | occurrence_identifier -> The identifier of the occurrence in    |
+           |    the plot                                                     |
+            -----------------------------------------------------------------
         """
         raise NotImplementedError()
 
@@ -78,7 +90,30 @@ class BasePlotOccurrenceProvider:
             provider_plot_pk -> plot_id
             provider_occurrence_pk -> occurrence_id
         """
-        pass  # TODO
+        plot_pk = dataframe.index.get_level_values('provider_plot_pk')
+        occ_pk = dataframe.index.get_level_values('provider_occurrence_pk')
+        #  Retrieve plot and occurrence ids
+        db = self.data_provider.database
+        with Connector.get_connection(database=db) as connection:
+            sel_plot = select([plot.c.id, plot.c.provider_pk])
+            sel_occ = select([occurrence.c.id, occurrence.c.provider_pk])
+            plot_ids = pd.read_sql(
+                sel_plot,
+                connection,
+                index_col=plot.c.provider_pk.name
+            )
+            occ_ids = pd.read_sql(
+                sel_occ,
+                connection,
+                index_col=occurrence.c.provider_pk.name
+            )
+        plot_id_series = plot_ids.loc[plot_pk]['id']
+        occ_id_series = occ_ids.loc[occ_pk]['id']
+        tuples = list(zip(*[plot_id_series, occ_id_series]))
+        return pd.MultiIndex.from_tuples(
+            tuples,
+            names=['plot_id', 'occurrence_id']
+        )
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """

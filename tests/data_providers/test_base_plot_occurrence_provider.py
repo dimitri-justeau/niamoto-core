@@ -2,11 +2,14 @@
 
 import unittest
 
+import pandas as pd
+
 from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings
-from niamoto.data_providers.base_plot_occurrence_provider import *
+from niamoto.data_providers.base_plot_occurrence_provider \
+    import BasePlotOccurrenceProvider
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.db.utils import fix_db_sequences
@@ -78,6 +81,35 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(df1), 5)
         self.assertEqual(len(df2), 1)
         self.assertEqual(len(df3), 0)
+
+    def test_get_niamoto_index(self):
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+        prov1 = BasePlotOccurrenceProvider(data_provider_1)
+        data = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 1,
+                'occurrence_identifier': 'PLOT1_001',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 2,
+                'occurrence_identifier': 'PLOT1_002',
+            },
+            {
+                'provider_plot_pk': 2,
+                'provider_occurrence_pk': 5,
+                'occurrence_identifier': 'PLOT2_002',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        niamoto_index = prov1.get_niamoto_index(data)
+        self.assertEqual(
+            list(niamoto_index.get_values()),
+            [(1, 1), (1, 2), (2, 3), ],
+        )
 
     def test_get_insert_dataframe(self):
         data_provider_1 = TestDataProvider(
