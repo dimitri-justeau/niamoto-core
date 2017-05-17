@@ -99,6 +99,14 @@ def get_plot_data_2(data_provider):
             'location': from_shape(Point(166.5511, -22.09739), srid=4326),
             'properties': {},
         },
+        {
+            'id': 5,
+            'provider_id': data_provider.db_id,
+            'provider_pk': 1,
+            'name': 'plot_2_2',
+            'location': from_shape(Point(166.5511, -22.09749), srid=4326),
+            'properties': {},
+        },
     ]
     return plot_2
 

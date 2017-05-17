@@ -49,13 +49,13 @@ class BasePlotOccurrenceProvider:
     def get_provider_plot_occurrence_dataframe(self):
         """
         :return: A DataFrame containing the plot-occurrence data currently
-        available from the provider. The 'provider_plot_id' and
-        'provider_occurrence_id' attributes correspond to the provider's pks,
-        and must be constitute a multi-index [provider_plot_id,
-        provider_occurrence_id]. The structure must be the following:
+        available from the provider. The 'provider_plot_pk' and
+        'provider_occurrence_pk' attributes correspond to the provider's pks,
+        and must be constitute a multi-index [provider_plot_pk,
+        provider_occurrence_pk]. The structure must be the following:
             _________________________________________________________________
-           | provider_plot_id       -> First member of the multi index       |
-           | provider_occurrence_id -> Second member of the multi index      |
+           | provider_plot_pk       -> First member of the multi index       |
+           | provider_occurrence_pk -> Second member of the multi index      |
            |_________________________________________________________________|
            |-----------------------------------------------------------------|
            | occurrence_identifier -> The identifier of the occurrence in    |
@@ -73,7 +73,45 @@ class BasePlotOccurrenceProvider:
         db = self.data_provider.database
         with Connector.get_connection(database=db) as connection:
             with connection.begin():
-                pass  # TODO
+                plot_id_col = plot_occurrence.c.plot_id
+                occurrence_id_col = plot_occurrence.c.occurrence_id
+                if len(insert_df) > 0:
+                    ins_stmt = plot_occurrence.insert().values(
+                        insert_df.to_dict(orient='records')
+                    )
+                    connection.execute(ins_stmt)
+                if len(update_df) > 0:
+                    upd_stmt = plot_occurrence.update().where(
+                        and_(
+                            plot_id_col == bindparam('_plot_id'),
+                            occurrence_id_col == bindparam('_occurrence_id')
+                        )
+                    ).values({
+                        'occurrence_identifier': bindparam(
+                            'occurrence_identifier'
+                        )
+                    })
+                    connection.execute(
+                        upd_stmt,
+                        update_df.rename(columns={
+                            'plot_id': '_plot_id',
+                            'occurrence_id': '_occurrence_id',
+                        }).to_dict(orient='records')
+                    )
+                if len(delete_df) > 0:
+                    del_stmt = plot_occurrence.delete().where(
+                        and_(
+                            plot_id_col == bindparam('plot_id'),
+                            occurrence_id_col == bindparam('occurrence_id')
+                        )
+                    )
+                    connection.execute(
+                        del_stmt,
+                        delete_df[[
+                            'plot_id',
+                            'occurrence_id',
+                        ]].to_dict(orient='records')
+                    )
         return insert_df, update_df, delete_df
 
     def sync(self):
@@ -81,7 +119,8 @@ class BasePlotOccurrenceProvider:
         Sync Niamoto database with provider.
         :return: The insert, update, delete DataFrames.
         """
-        return self._sync(self.get_provider_plot_occurrence_dataframe())
+        df = self.get_provider_plot_occurrence_dataframe()
+        return self._sync(self.get_reindexed_provider_dataframe(df))
 
     def get_reindexed_provider_dataframe(self, dataframe):
         """
@@ -114,20 +153,23 @@ class BasePlotOccurrenceProvider:
                 connection,
                 index_col='provider_occurrence_pk'
             )
-        plot_id = plot_ids
-        occ_id = occ_ids
         dataframe.reset_index(inplace=True)
         dataframe = dataframe.merge(
-            plot_id,
+            plot_ids,
             left_on='provider_plot_pk',
             right_index=True,
         )
         dataframe = dataframe.merge(
-            occ_id,
+            occ_ids,
             left_on='provider_occurrence_pk',
             right_index=True,
         )
         dataframe.set_index(['plot_id', 'occurrence_id'], inplace=True)
+        dataframe['provider_id'] = self.data_provider.db_id
+        dataframe['plot_id'] = dataframe.index.get_level_values('plot_id')
+        dataframe['occurrence_id'] = dataframe.index.get_level_values(
+            'occurrence_id'
+        )
         return dataframe
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
@@ -168,6 +210,9 @@ class BasePlotOccurrenceProvider:
         provider (i.e. data which is in Niamoto, but not in the provider).
         """
         if len(provider_dataframe) == 0:
-            return niamoto_dataframe
+            df = niamoto_dataframe
+            df['plot_id'] = df.index.get_level_values('plot_id')
+            df['occurrence_id'] = df.index.get_level_values('occurrence_id')
+            return df
         diff = niamoto_dataframe.index.difference(provider_dataframe.index)
         return niamoto_dataframe.loc[diff]

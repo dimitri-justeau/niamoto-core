@@ -75,7 +75,7 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         df2 = pp2.get_niamoto_plot_dataframe()
         df3 = pp3.get_niamoto_plot_dataframe()
         self.assertEqual(len(df1), 4)
-        self.assertEqual(len(df2), 1)
+        self.assertEqual(len(df2), 2)
         self.assertEqual(len(df3), 0)
         #  2. Check the structure of the DataFrame
         df_cols = list(df1.columns) + [df1.index.name, ]

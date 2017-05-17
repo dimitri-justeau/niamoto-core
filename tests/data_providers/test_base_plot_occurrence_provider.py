@@ -299,15 +299,105 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
 
     def test_sync_insert(self):
         self.tearDownClass()
-        self.setUpClass()
+        super(TestBasePlotProvider, self).setUpClass()
+        # Reset the data
+        TestDataProvider.register_data_provider_type(
+            database=settings.TEST_DATABASE
+        )
+        data_provider_1 = TestDataProvider.register_data_provider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+        plot_1 = test_data.get_plot_data_1(data_provider_1)
+        occ_1 = test_data.get_occurrence_data_1(data_provider_1)
+        ins_1 = niamoto_db_meta.plot.insert().values(plot_1)
+        ins_2 = niamoto_db_meta.occurrence.insert().values(occ_1)
+        with Connector.get_connection(settings.TEST_DATABASE) as connection:
+            connection.execute(ins_1)
+            connection.execute(ins_2)
+        fix_db_sequences(database=settings.TEST_DATABASE)
+        # Test
+        prov = BasePlotOccurrenceProvider(data_provider_1)
+        self.assertEqual(len(prov.get_niamoto_plot_occurrence_dataframe()), 0)
+        data = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'TEST',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 1,
+                'occurrence_identifier': 'TEST_ENCORE',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        data = prov.get_reindexed_provider_dataframe(data)
+        i, u, d = prov._sync(data)
+        self.assertEqual(len(i), 2)
+        self.assertEqual(len(u), 0)
+        self.assertEqual(len(d), 0)
+        self.assertEqual(len(prov.get_niamoto_plot_occurrence_dataframe()), 2)
 
     def test_sync_update(self):
         self.tearDownClass()
         self.setUpClass()
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+        prov = BasePlotOccurrenceProvider(data_provider_1)
+        self.assertEqual(len(prov.get_niamoto_plot_occurrence_dataframe()), 5)
+        data = pd.DataFrame.from_records([
+            {
+                'provider_plot_pk': 0,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'PLOT1_000',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 0,
+                'occurrence_identifier': 'PLOT2_000',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 1,
+                'occurrence_identifier': 'PLOT2_001',
+            },
+            {
+                'provider_plot_pk': 1,
+                'provider_occurrence_pk': 2,
+                'occurrence_identifier': 'PLOT2_002',
+            },
+            {
+                'provider_plot_pk': 2,
+                'provider_occurrence_pk': 5,
+                'occurrence_identifier': 'PLOT2_002',
+            },
+        ], index=['provider_plot_pk', 'provider_occurrence_pk'])
+        data = prov.get_reindexed_provider_dataframe(data)
+        i, u, d = prov._sync(data)
+        self.assertEqual(len(i), 0)
+        self.assertEqual(len(u), 5)
+        self.assertEqual(len(d), 0)
+        self.assertEqual(len(prov.get_niamoto_plot_occurrence_dataframe()), 5)
 
     def test_sync_delete(self):
         self.tearDownClass()
         self.setUpClass()
+        data_provider_1 = TestDataProvider(
+            'test_data_provider_1',
+            database=settings.TEST_DATABASE,
+        )
+        prov = BasePlotOccurrenceProvider(data_provider_1)
+        self.assertEqual(len(prov.get_niamoto_plot_occurrence_dataframe()), 5)
+        data = pd.DataFrame.from_records([])
+        data = prov.get_reindexed_provider_dataframe(data)
+        i, u, d = prov._sync(data)
+        self.assertEqual(len(i), 0)
+        self.assertEqual(len(u), 0)
+        self.assertEqual(len(d), 5)
+        self.assertEqual(len(prov.get_niamoto_plot_occurrence_dataframe()), 0)
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
