@@ -6,6 +6,8 @@ from niamoto.data_providers.plantnote_provider.plantnote_occurrence_provider \
     import PlantnoteOccurrenceProvider
 from niamoto.data_providers.plantnote_provider.plantnote_plot_provider \
     import PlantnotePlotProvider
+from niamoto.data_providers.plantnote_provider \
+    .plantnote_plot_occurrence_provider import PlantnotePlotOccurrenceProvider
 
 
 class PlantnoteDataProvider(BaseDataProvider):
@@ -30,6 +32,10 @@ class PlantnoteDataProvider(BaseDataProvider):
             self,
             self.plantnote_db_path
         )
+        self._plot_occurrence_provider = PlantnotePlotOccurrenceProvider(
+            self,
+            self.plantnote_db_path
+        )
 
     @property
     def occurrence_provider(self):
@@ -38,6 +44,10 @@ class PlantnoteDataProvider(BaseDataProvider):
     @property
     def plot_provider(self):
         return self._plot_provider
+
+    @property
+    def plot_occurrence_provider(self):
+        return self._plot_occurrence_provider
 
     @classmethod
     def get_type_name(cls):

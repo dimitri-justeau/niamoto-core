@@ -47,6 +47,10 @@ class BaseDataProvider:
     def occurrence_provider(self):
         raise NotImplementedError()
 
+    @property
+    def plot_occurrence_provider(self):
+        raise NotImplementedError()
+
     @classmethod
     def get_type_name(cls):
         raise NotImplementedError()

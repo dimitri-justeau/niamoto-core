@@ -6,3 +6,5 @@ from niamoto.data_providers.plantnote_provider.plantnote_data_provider \
     import PlantnoteDataProvider
 from niamoto.data_providers.plantnote_provider.plantnote_plot_provider \
     import PlantnotePlotProvider
+from niamoto.data_providers.plantnote_provider \
+    .plantnote_plot_occurrence_provider import PlantnotePlotOccurrenceProvider

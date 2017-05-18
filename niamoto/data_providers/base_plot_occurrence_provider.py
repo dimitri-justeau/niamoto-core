@@ -5,6 +5,7 @@ import pandas as pd
 
 from niamoto.db.metadata import plot_occurrence, plot, occurrence
 from niamoto.db.connector import Connector
+from niamoto.exceptions import IncoherentDatabaseStateError
 
 
 class BasePlotOccurrenceProvider:
@@ -154,6 +155,21 @@ class BasePlotOccurrenceProvider:
                 index_col='provider_occurrence_pk'
             )
         dataframe.reset_index(inplace=True)
+        # Assert plots and occurrences exist in db
+        plot_pks = pd.Index(pd.unique(dataframe['provider_plot_pk']))
+        plot_not_in_db = plot_pks.difference(plot_ids.index)
+        occ_pks = pd.Index(pd.unique(dataframe['provider_occurrence_pk']))
+        occ_not_in_db = occ_pks.difference(occ_ids.index)
+        if len(plot_not_in_db) != 0:
+            raise IncoherentDatabaseStateError(
+                "Tried to insert plot_occurrence records with plot records "
+                "that do not exist in database."
+            )
+        if len(occ_not_in_db) != 0:
+            raise IncoherentDatabaseStateError(
+                "Tried to insert plot_occurrence records with occurrence "
+                "records that dot not exist in database."
+            )
         dataframe = dataframe.merge(
             plot_ids,
             left_on='provider_plot_pk',

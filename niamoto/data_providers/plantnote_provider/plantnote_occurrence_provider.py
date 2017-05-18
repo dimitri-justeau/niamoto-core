@@ -61,13 +61,13 @@ class PlantnoteOccurrenceProvider(BaseOccurrenceProvider):
                 func.coalesce(obs_table.c["statut"], None).label("status"),
                 obs_table.c["date_observation"],
             ]).select_from(
-                occ_table.join(
+                occ_table.outerjoin(
                     obs_table,
                     id_occ_obs == id_obs
-                ).join(
+                ).outerjoin(
                     det_table,
                     id_occ_det == id_det
-                ).join(
+                ).outerjoin(
                     inv_table,
                     id_occ_inv == id_inv
                 ).join(

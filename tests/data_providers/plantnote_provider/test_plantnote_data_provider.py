@@ -46,10 +46,15 @@ class TestPlantnoteDataProvider(BaseTestNiamotoSchemaCreated):
         self.assertIsNotNone(test_data_provider.db_id)
         plot_provider = test_data_provider.plot_provider
         occurrence_provider = test_data_provider.occurrence_provider
+        plot_occurrence_provider = test_data_provider.plot_occurrence_provider
         self.assertIsInstance(plot_provider, PlantnotePlotProvider)
         self.assertIsInstance(
             occurrence_provider,
             PlantnoteOccurrenceProvider
+        )
+        self.assertIsInstance(
+            plot_occurrence_provider,
+            PlantnotePlotOccurrenceProvider
         )
 
 
