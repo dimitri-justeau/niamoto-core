@@ -136,6 +136,7 @@ class BaseDataProvider:
         )
         with Connector.get_connection(database=database) as connection:
             index.drop(connection)
+        niamoto_db_meta.taxon.indexes.remove(index)
 
     @classmethod
     def register_data_provider(cls, name, *args,
