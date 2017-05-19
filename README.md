@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/dimitri-justeau/niamoto-core.svg?branch=master)](https://travis-ci.org/dimitri-justeau/niamoto-core)
 [![codecov](https://codecov.io/gh/dimitri-justeau/niamoto-core/branch/master/graph/badge.svg)](https://codecov.io/gh/dimitri-justeau/niamoto-core)
+[![Documentation Status](https://readthedocs.org/projects/niamoto/badge/?version=latest)](http://niamoto.readthedocs.io/en/latest/?badge=latest)
 
 **Ecological information system for decision support in ecosystems and biodiversity conservation.**
 

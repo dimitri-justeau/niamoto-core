@@ -1,6 +1,3 @@
-# Documentation libraries
-sphinx
-
 # Database libraries
 sqlalchemy
 psycopg2
