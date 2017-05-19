@@ -7,6 +7,7 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
+from niamoto.db.connector import Connector
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_database_manager import TestDatabaseManager
@@ -44,19 +45,21 @@ class TestPlantnotePlotProvider(BaseTestNiamotoSchemaCreated):
         )
 
     def test_get_dataframe_and_sync(self):
+        db = settings.TEST_DATABASE
         pt_provider = PlantnoteDataProvider(
             'pl@ntnote_provider',
             self.TEST_DB_PATH,
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        plot_provider = pt_provider.plot_provider
-        df1 = plot_provider.get_provider_plot_dataframe()
-        cols = df1.columns
-        for i in ['name', 'location', 'properties']:
-            self.assertIn(i, cols)
-        plot_provider.sync()
-        df2 = plot_provider.get_niamoto_plot_dataframe()
-        self.assertEqual(len(df1), len(df2))
+        with Connector.get_connection(database=db) as connection:
+            plot_provider = pt_provider.plot_provider
+            df1 = plot_provider.get_provider_plot_dataframe()
+            cols = df1.columns
+            for i in ['name', 'location', 'properties']:
+                self.assertIn(i, cols)
+            plot_provider.sync(connection)
+            df2 = plot_provider.get_niamoto_plot_dataframe(connection)
+            self.assertEqual(len(df1), len(df2))
 
 
 if __name__ == '__main__':

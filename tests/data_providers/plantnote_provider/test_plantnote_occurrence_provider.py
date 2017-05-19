@@ -7,6 +7,7 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
+from niamoto.db.connector import Connector
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_database_manager import TestDatabaseManager
@@ -44,19 +45,21 @@ class TestPlantnoteOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         )
 
     def test_get_dataframe_and_sync(self):
+        db = settings.TEST_DATABASE
         pt_provider = PlantnoteDataProvider(
             'pl@ntnote_provider',
             self.TEST_DB_PATH,
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        occ_provider = pt_provider.occurrence_provider
-        df1 = occ_provider.get_provider_occurrence_dataframe()
-        cols = df1.columns
-        for i in ['taxon_id', 'location', 'properties']:
-            self.assertIn(i, cols)
-        occ_provider.sync()
-        df2 = occ_provider.get_niamoto_occurrence_dataframe()
-        self.assertEqual(len(df1), len(df2))
+        with Connector.get_connection(database=db) as connection:
+            occ_provider = pt_provider.occurrence_provider
+            df1 = occ_provider.get_provider_occurrence_dataframe()
+            cols = df1.columns
+            for i in ['taxon_id', 'location', 'properties']:
+                self.assertIn(i, cols)
+            occ_provider.sync(connection)
+            df2 = occ_provider.get_niamoto_occurrence_dataframe(connection)
+            self.assertEqual(len(df1), len(df2))
 
 
 if __name__ == '__main__':

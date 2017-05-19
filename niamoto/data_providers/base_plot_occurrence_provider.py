@@ -23,29 +23,28 @@ class BasePlotOccurrenceProvider:
         """
         self.data_provider = data_provider
 
-    def get_niamoto_plot_occurrence_dataframe(self):
+    def get_niamoto_plot_occurrence_dataframe(self, connection):
         """
+        :param connection: A connection to the database to work with.
         :return: A DataFrame containing the plot-occurrence data for this
         provider that is currently stored in the Niamoto database.
         The index is the multi-index [plot_id, occurrence_id].
         """
-        db = self.data_provider.database
-        with Connector.get_connection(database=db) as connection:
-            sel = select([
-                plot_occurrence.c.plot_id,
-                plot_occurrence.c.occurrence_id,
-                plot_occurrence.c.provider_id,
-                plot_occurrence.c.provider_plot_pk,
-                plot_occurrence.c.provider_occurrence_pk,
-                plot_occurrence.c.occurrence_identifier,
-            ]).where(
-                plot_occurrence.c.provider_id == self.data_provider.db_id
-            )
-            return pd.read_sql(
-                sel,
-                connection,
-                index_col=["plot_id", "occurrence_id"]
-            )
+        sel = select([
+            plot_occurrence.c.plot_id,
+            plot_occurrence.c.occurrence_id,
+            plot_occurrence.c.provider_id,
+            plot_occurrence.c.provider_plot_pk,
+            plot_occurrence.c.provider_occurrence_pk,
+            plot_occurrence.c.occurrence_identifier,
+        ]).where(
+            plot_occurrence.c.provider_id == self.data_provider.db_id
+        )
+        return pd.read_sql(
+            sel,
+            connection,
+            index_col=["plot_id", "occurrence_id"]
+        )
 
     def get_provider_plot_occurrence_dataframe(self):
         """
@@ -65,63 +64,63 @@ class BasePlotOccurrenceProvider:
         """
         raise NotImplementedError()
 
-    def _sync(self, df):
-        niamoto_df = self.get_niamoto_plot_occurrence_dataframe()
+    def _sync(self, df, connection):
+        niamoto_df = self.get_niamoto_plot_occurrence_dataframe(connection)
         provider_df = df
         insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
         update_df = self.get_update_dataframe(niamoto_df, provider_df)
         delete_df = self.get_delete_dataframe(niamoto_df, provider_df)
-        db = self.data_provider.database
-        with Connector.get_connection(database=db) as connection:
-            with connection.begin():
-                plot_id_col = plot_occurrence.c.plot_id
-                occurrence_id_col = plot_occurrence.c.occurrence_id
-                if len(insert_df) > 0:
-                    ins_stmt = plot_occurrence.insert().values(
-                        insert_df.to_dict(orient='records')
+        with connection.begin():
+            plot_id_col = plot_occurrence.c.plot_id
+            occurrence_id_col = plot_occurrence.c.occurrence_id
+            if len(insert_df) > 0:
+                ins_stmt = plot_occurrence.insert().values(
+                    insert_df.to_dict(orient='records')
+                )
+                connection.execute(ins_stmt)
+            if len(update_df) > 0:
+                upd_stmt = plot_occurrence.update().where(
+                    and_(
+                        plot_id_col == bindparam('_plot_id'),
+                        occurrence_id_col == bindparam('_occurrence_id')
                     )
-                    connection.execute(ins_stmt)
-                if len(update_df) > 0:
-                    upd_stmt = plot_occurrence.update().where(
-                        and_(
-                            plot_id_col == bindparam('_plot_id'),
-                            occurrence_id_col == bindparam('_occurrence_id')
-                        )
-                    ).values({
-                        'occurrence_identifier': bindparam(
-                            'occurrence_identifier'
-                        )
-                    })
-                    connection.execute(
-                        upd_stmt,
-                        update_df.rename(columns={
-                            'plot_id': '_plot_id',
-                            'occurrence_id': '_occurrence_id',
-                        }).to_dict(orient='records')
+                ).values({
+                    'occurrence_identifier': bindparam(
+                        'occurrence_identifier'
                     )
-                if len(delete_df) > 0:
-                    del_stmt = plot_occurrence.delete().where(
-                        and_(
-                            plot_id_col == bindparam('plot_id'),
-                            occurrence_id_col == bindparam('occurrence_id')
-                        )
+                })
+                connection.execute(
+                    upd_stmt,
+                    update_df.rename(columns={
+                        'plot_id': '_plot_id',
+                        'occurrence_id': '_occurrence_id',
+                    }).to_dict(orient='records')
+                )
+            if len(delete_df) > 0:
+                del_stmt = plot_occurrence.delete().where(
+                    and_(
+                        plot_id_col == bindparam('plot_id'),
+                        occurrence_id_col == bindparam('occurrence_id')
                     )
-                    connection.execute(
-                        del_stmt,
-                        delete_df[[
-                            'plot_id',
-                            'occurrence_id',
-                        ]].to_dict(orient='records')
-                    )
+                )
+                connection.execute(
+                    del_stmt,
+                    delete_df[[
+                        'plot_id',
+                        'occurrence_id',
+                    ]].to_dict(orient='records')
+                )
         return insert_df, update_df, delete_df
 
-    def sync(self):
+    def sync(self, connection):
         """
         Sync Niamoto database with provider.
+        :param connection: A connection to the database to work with.
         :return: The insert, update, delete DataFrames.
         """
         df = self.get_provider_plot_occurrence_dataframe()
-        return self._sync(self.get_reindexed_provider_dataframe(df))
+        reindexed_df = self.get_reindexed_provider_dataframe(df)
+        return self._sync(reindexed_df, connection)
 
     def get_reindexed_provider_dataframe(self, dataframe):
         """

@@ -56,40 +56,44 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             Test retrieving an empty DataFrame.
             Test retrieving a not-empty DataFrame.
         """
+        db = settings.TEST_DATABASE
         data_provider_1 = TestDataProvider(
             'test_data_provider_1',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
         data_provider_2 = TestDataProvider(
             'test_data_provider_2',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
         data_provider_3 = TestDataProvider(
             'test_data_provider_3',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        pp1 = BasePlotProvider(data_provider_1)
-        pp2 = BasePlotProvider(data_provider_2)
-        pp3 = BasePlotProvider(data_provider_3)
-        df1 = pp1.get_niamoto_plot_dataframe()
-        df2 = pp2.get_niamoto_plot_dataframe()
-        df3 = pp3.get_niamoto_plot_dataframe()
-        self.assertEqual(len(df1), 4)
-        self.assertEqual(len(df2), 2)
-        self.assertEqual(len(df3), 0)
-        #  2. Check the structure of the DataFrame
-        df_cols = list(df1.columns) + [df1.index.name, ]
-        db_cols = niamoto_db_meta.plot.columns
-        for db_col in db_cols:
-            self.assertIn(db_col.name, df_cols)
+        with Connector.get_connection(database=db) as connection:
+            pp1 = BasePlotProvider(data_provider_1)
+            pp2 = BasePlotProvider(data_provider_2)
+            pp3 = BasePlotProvider(data_provider_3)
+            df1 = pp1.get_niamoto_plot_dataframe(connection)
+            df2 = pp2.get_niamoto_plot_dataframe(connection)
+            df3 = pp3.get_niamoto_plot_dataframe(connection)
+            self.assertEqual(len(df1), 4)
+            self.assertEqual(len(df2), 2)
+            self.assertEqual(len(df3), 0)
+            #  2. Check the structure of the DataFrame
+            df_cols = list(df1.columns) + [df1.index.name, ]
+            db_cols = niamoto_db_meta.plot.columns
+            for db_col in db_cols:
+                self.assertIn(db_col.name, df_cols)
 
     def test_get_insert_dataframe(self):
+        db = settings.TEST_DATABASE
         data_provider_1 = TestDataProvider(
             'test_data_provider_1',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        pp1 = BasePlotProvider(data_provider_1)
-        df1 = pp1.get_niamoto_plot_dataframe()
+        with Connector.get_connection(database=db) as connection:
+            pp1 = BasePlotProvider(data_provider_1)
+            df1 = pp1.get_niamoto_plot_dataframe(connection)
         #  1. Nothing to insert
         plot_1 = pd.DataFrame.from_records([
             {
@@ -141,12 +145,14 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(ins), 1)
 
     def test_get_update_dataframe(self):
+        db = settings.TEST_DATABASE
         data_provider_1 = TestDataProvider(
             'test_data_provider_1',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        pp1 = BasePlotProvider(data_provider_1)
-        df1 = pp1.get_niamoto_plot_dataframe()
+        with Connector.get_connection(database=db) as connection:
+            pp1 = BasePlotProvider(data_provider_1)
+            df1 = pp1.get_niamoto_plot_dataframe(connection)
         #  1. Nothing to update
         plot_1 = pd.DataFrame.from_records([
             {
@@ -216,12 +222,14 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(update_df), 2)
 
     def test_get_delete_dataframe(self):
+        db = settings.TEST_DATABASE
         data_provider_1 = TestDataProvider(
             'test_data_provider_1',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        pp1 = BasePlotProvider(data_provider_1)
-        df1 = pp1.get_niamoto_plot_dataframe()
+        with Connector.get_connection(database=db) as connection:
+            pp1 = BasePlotProvider(data_provider_1)
+            df1 = pp1.get_niamoto_plot_dataframe(connection)
         #  1. Nothing to delete
         plot_1 = pd.DataFrame.from_records([
             {
@@ -288,103 +296,133 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
     def test_sync_insert(self):
         self.tearDownClass()
         self.setUpClass()
+        db = settings.TEST_DATABASE
         data_provider_3 = TestDataProvider(
             'test_data_provider_3',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        pp3 = BasePlotProvider(data_provider_3)
-        self.assertEqual(len(pp3.get_niamoto_plot_dataframe()), 0)
-        pl = pd.DataFrame.from_records([
-            {
-                'id': 0,
-                'name': 'plot_3_1',
-                'location': from_shape(Point(166.5521, -22.0939), srid=4326),
-                'properties': {},
-            },
-            {
-                'id': 1,
-                'name': 'plot_3_2',
-                'location': from_shape(Point(166.551, -22.098), srid=4326),
-                'properties': {},
+        with Connector.get_connection(database=db) as connection:
+            pp3 = BasePlotProvider(data_provider_3)
+            self.assertEqual(
+                len(pp3.get_niamoto_plot_dataframe(connection)),
+                0
+            )
+            pl = pd.DataFrame.from_records([
+                {
+                    'id': 0,
+                    'name': 'plot_3_1',
+                    'location': from_shape(
+                        Point(166.5521, -22.0939),
+                        srid=4326
+                    ),
+                    'properties': {},
+                },
+                {
+                    'id': 1,
+                    'name': 'plot_3_2',
+                    'location': from_shape(
+                        Point(166.551, -22.098),
+                        srid=4326
+                    ),
+                    'properties': {},
 
-            },
-        ], index='id')
-        i, u, d = pp3._sync(pl)
-        self.assertEqual(len(i), 2)
-        self.assertEqual(len(u), 0)
-        self.assertEqual(len(d), 0)
-        self.assertEqual(len(pp3.get_niamoto_plot_dataframe()), 2)
+                },
+            ], index='id')
+            i, u, d = pp3._sync(pl, connection)
+            self.assertEqual(len(i), 2)
+            self.assertEqual(len(u), 0)
+            self.assertEqual(len(d), 0)
+            self.assertEqual(
+                len(pp3.get_niamoto_plot_dataframe(connection)),
+                2
+            )
 
     def test_sync_update(self):
         self.tearDownClass()
         self.setUpClass()
+        db = settings.TEST_DATABASE
         data_provider_1 = TestDataProvider(
             'test_data_provider_1',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        pp1 = BasePlotProvider(data_provider_1)
-        self.assertEqual(len(pp1.get_niamoto_plot_dataframe()), 4)
-        pl = pd.DataFrame.from_records([
-            {
-                'id': 0,
-                'name': "plot_1",
-                'properties': None,
-                'location': WKTElement(
-                    Point(166.5521, -22.0939).wkt,
-                    srid=4326
-                ),
-                'properties': {},
-            },
-            {
-                'id': 1,
-                'name': 'plot_b',
-                'properties': None,
-                'location': from_shape(Point(166.551, -22.098), srid=4326),
-                'properties': {},
-            },
-            {
-                'id': 2,
-                'name': 'plot_c',
-                'properties': {'yo': 'yo'},
-                'location': from_shape(Point(166.552, -22.097), srid=4326),
-                'properties': {},
-            },
-            {
-                'id': 5,
-                'name': 'plot_d',
-                'properties': {},
-                'location': WKTElement(
-                    Point(166.553, -22.099),
-                    srid=4326
-                ),
-                'properties': {},
-            },
-        ], index='id')
-        i, u, d = pp1._sync(pl)
-        self.assertEqual(len(i), 0)
-        self.assertEqual(len(u), 4)
-        self.assertEqual(len(d), 0)
-        self.assertEqual(len(pp1.get_niamoto_plot_dataframe()), 4)
+        with Connector.get_connection(database=db) as connection:
+            pp1 = BasePlotProvider(data_provider_1)
+            self.assertEqual(
+                len(pp1.get_niamoto_plot_dataframe(connection)),
+                4
+            )
+            pl = pd.DataFrame.from_records([
+                {
+                    'id': 0,
+                    'name': "plot_1",
+                    'properties': None,
+                    'location': WKTElement(
+                        Point(166.5521, -22.0939).wkt,
+                        srid=4326
+                    ),
+                    'properties': {},
+                },
+                {
+                    'id': 1,
+                    'name': 'plot_b',
+                    'properties': None,
+                    'location': from_shape(Point(166.551, -22.098), srid=4326),
+                    'properties': {},
+                },
+                {
+                    'id': 2,
+                    'name': 'plot_c',
+                    'properties': {'yo': 'yo'},
+                    'location': from_shape(Point(166.552, -22.097), srid=4326),
+                    'properties': {},
+                },
+                {
+                    'id': 5,
+                    'name': 'plot_d',
+                    'properties': {},
+                    'location': WKTElement(
+                        Point(166.553, -22.099),
+                        srid=4326
+                    ),
+                    'properties': {},
+                },
+            ], index='id')
+            i, u, d = pp1._sync(pl, connection)
+            self.assertEqual(len(i), 0)
+            self.assertEqual(len(u), 4)
+            self.assertEqual(len(d), 0)
+            self.assertEqual(
+                len(pp1.get_niamoto_plot_dataframe(connection)),
+                4
+            )
 
     def test_sync_delete(self):
         self.tearDownClass()
         self.setUpClass()
+        db = settings.TEST_DATABASE
         data_provider_1 = TestDataProvider(
             'test_data_provider_1',
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        pp1 = BasePlotProvider(data_provider_1)
-        self.assertEqual(len(pp1.get_niamoto_plot_dataframe()), 4)
-        occ = pd.DataFrame.from_records(
-            [],
-            index='id',
-            columns=('id', 'location')
-        )
-        i, u, d = pp1._sync(occ)
-        self.assertEqual(len(i), 0)
-        self.assertEqual(len(u), 0)
-        self.assertEqual(len(d), 4)
-        self.assertEqual(len(pp1.get_niamoto_plot_dataframe()), 0)
+        with Connector.get_connection(database=db) as connection:
+            pp1 = BasePlotProvider(data_provider_1)
+            self.assertEqual(
+                len(pp1.get_niamoto_plot_dataframe(connection)),
+                4
+            )
+            occ = pd.DataFrame.from_records(
+                [],
+                index='id',
+                columns=('id', 'location')
+            )
+            i, u, d = pp1._sync(occ, connection)
+            self.assertEqual(len(i), 0)
+            self.assertEqual(len(u), 0)
+            self.assertEqual(len(d), 4)
+            self.assertEqual(
+                len(pp1.get_niamoto_plot_dataframe(connection)),
+                0
+            )
 
 
 if __name__ == '__main__':

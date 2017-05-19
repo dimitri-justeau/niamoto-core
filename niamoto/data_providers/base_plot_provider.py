@@ -18,21 +18,20 @@ class BasePlotProvider:
         """
         self.data_provider = data_provider
 
-    def get_niamoto_plot_dataframe(self):
+    def get_niamoto_plot_dataframe(self, connection):
         """
+        :param connection: A connection to the database to work with.
         :return: A DataFrame containing the plot data for this
         provider that is currently stored in the Niamoto database.
         """
-        db = self.data_provider.database
-        with Connector.get_connection(database=db) as connection:
-            sel = select([plot]).where(
-                plot.c.provider_id == self.data_provider.db_id
-            )
-            return pd.read_sql(
-                sel,
-                connection,
-                index_col=plot.c.id.name,
-            )
+        sel = select([plot]).where(
+            plot.c.provider_id == self.data_provider.db_id
+        )
+        return pd.read_sql(
+            sel,
+            connection,
+            index_col=plot.c.id.name,
+        )
 
     def get_provider_plot_dataframe(self):
         """
@@ -42,51 +41,50 @@ class BasePlotProvider:
         """
         raise NotImplementedError()
 
-    def _sync(self, df):
-        niamoto_df = self.get_niamoto_plot_dataframe()
+    def _sync(self, df, connection):
+        niamoto_df = self.get_niamoto_plot_dataframe(connection)
         provider_df = df
         insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
         update_df = self.get_update_dataframe(niamoto_df, provider_df)
         delete_df = self.get_delete_dataframe(niamoto_df, provider_df)
-        db = self.data_provider.database
-        with Connector.get_connection(database=db) as connection:
-            with connection.begin():
-                if len(insert_df) > 0:
-                    ins_stmt = plot.insert().values(
-                        insert_df.to_dict(orient='records')
+        with connection.begin():
+            if len(insert_df) > 0:
+                ins_stmt = plot.insert().values(
+                    insert_df.to_dict(orient='records')
+                )
+                connection.execute(ins_stmt)
+            if len(update_df) > 0:
+                upd_stmt = plot.update().where(
+                    and_(
+                        plot.c.provider_id == bindparam('prov_id'),
+                        plot.c.provider_pk == bindparam('prov_pk')
                     )
-                    connection.execute(ins_stmt)
-                if len(update_df) > 0:
-                    upd_stmt = plot.update().where(
-                        and_(
-                            plot.c.provider_id == bindparam('prov_id'),
-                            plot.c.provider_pk == bindparam('prov_pk')
-                        )
-                    ).values({
-                        'location': bindparam('location'),
-                        'name': bindparam('name'),
-                        'properties': bindparam('properties'),
-                    })
-                    connection.execute(
-                        upd_stmt,
-                        update_df.rename(columns={
-                            'provider_id': 'prov_id',
-                            'provider_pk': 'prov_pk',
-                        }).to_dict(orient='records')
-                    )
-                if len(delete_df) > 0:
-                    del_stmt = plot.delete().where(
-                        plot.c.id.in_(delete_df.index)
-                    )
-                    connection.execute(del_stmt)
+                ).values({
+                    'location': bindparam('location'),
+                    'name': bindparam('name'),
+                    'properties': bindparam('properties'),
+                })
+                connection.execute(
+                    upd_stmt,
+                    update_df.rename(columns={
+                        'provider_id': 'prov_id',
+                        'provider_pk': 'prov_pk',
+                    }).to_dict(orient='records')
+                )
+            if len(delete_df) > 0:
+                del_stmt = plot.delete().where(
+                    plot.c.id.in_(delete_df.index)
+                )
+                connection.execute(del_stmt)
         return insert_df, update_df, delete_df
 
-    def sync(self):
+    def sync(self, connection):
         """
         Sync Niamoto database with provider.
+        :param connection: A connection to the database to work with.
         :return: The insert, update, delete DataFrames.
         """
-        return self._sync(self.get_provider_plot_dataframe())
+        return self._sync(self.get_provider_plot_dataframe(), connection)
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """

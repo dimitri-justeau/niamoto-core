@@ -7,6 +7,7 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
+from niamoto.db.connector import Connector
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_database_manager import TestDatabaseManager
@@ -44,27 +45,29 @@ class TestPlantnotePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         )
 
     def test_get_dataframe_and_sync(self):
+        db = settings.TEST_DATABASE
         pt_provider = PlantnoteDataProvider(
             'pl@ntnote_provider',
             self.TEST_DB_PATH,
-            database=settings.TEST_DATABASE,
+            database=db,
         )
-        plot_occurrence_prov = pt_provider.plot_occurrence_provider
-        df1 = plot_occurrence_prov.get_niamoto_plot_occurrence_dataframe()
-        self.assertEqual(len(df1), 0)
-        # Sync plots and occurrences
-        plot_prov = pt_provider.plot_provider
-        occ_prov = pt_provider.occurrence_provider
-        plot_prov.sync()
-        occ_prov.sync()
-        # Sync plot-occurrences
-        df2 = plot_occurrence_prov.get_provider_plot_occurrence_dataframe()
-        cols = df2.columns
-        for i in ['occurrence_identifier', ]:
-            self.assertIn(i, cols)
-        plot_occurrence_prov.sync()
-        df3 = plot_occurrence_prov.get_niamoto_plot_occurrence_dataframe()
-        self.assertEqual(len(df2), len(df3))
+        with Connector.get_connection(database=db) as connection:
+            prov = pt_provider.plot_occurrence_provider
+            df1 = prov.get_niamoto_plot_occurrence_dataframe(connection)
+            self.assertEqual(len(df1), 0)
+            # Sync plots and occurrences
+            plot_prov = pt_provider.plot_provider
+            occ_prov = pt_provider.occurrence_provider
+            plot_prov.sync(connection)
+            occ_prov.sync(connection)
+            # Sync plot-occurrences
+            df2 = prov.get_provider_plot_occurrence_dataframe()
+            cols = df2.columns
+            for i in ['occurrence_identifier', ]:
+                self.assertIn(i, cols)
+            prov.sync(connection)
+            df3 = prov.get_niamoto_plot_occurrence_dataframe(connection)
+            self.assertEqual(len(df2), len(df3))
 
 
 if __name__ == '__main__':
