@@ -56,6 +56,8 @@ class TestPlantnoteDataProvider(BaseTestNiamotoSchemaCreated):
             plot_occurrence_provider,
             PlantnotePlotOccurrenceProvider
         )
+        # Test sync
+        sync_report = test_data_provider.sync()
 
 
 if __name__ == '__main__':

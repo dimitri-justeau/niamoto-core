@@ -51,6 +51,45 @@ class BaseDataProvider:
     def plot_occurrence_provider(self):
         raise NotImplementedError()
 
+    def sync(self):
+        """
+        Sync Niamoto database with providers data.
+        :return A dict containing the insert / update / delete dataframes for
+        each specialized provider:
+            {
+                'occurrence': {
+                    'insert': insert_df,
+                    'update': update_df,
+                    "delete': delete_df,
+                },
+                'plot': { ... },
+                'plot_occurrence': { ... },
+            }
+        """
+        with Connector.get_connection(database=self.database) as connection:
+            with connection.begin():
+                i1, u1, d1 = self.occurrence_provider.sync(connection)
+                i2, u2, d2 = self.plot_provider.sync(connection)
+            with connection.begin():
+                i3, u3, d3 = self.plot_occurrence_provider.sync(connection)
+            return {
+                'occurrence': {
+                    'insert': i1,
+                    'update': u1,
+                    'delete': d1,
+                },
+                'plot': {
+                    'insert': i2,
+                    'update': u2,
+                    'delete': d2,
+                },
+                'plot_occurrence': {
+                    'insert': i3,
+                    'update': u3,
+                    'delete': d3,
+                },
+            }
+
     @classmethod
     def get_type_name(cls):
         raise NotImplementedError()
