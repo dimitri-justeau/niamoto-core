@@ -126,6 +126,18 @@ class BaseDataProvider:
         niamoto_db_meta.taxon.indexes.remove(index)
 
     @classmethod
+    def _unregister_unique_synonym_constraint(
+            cls,
+            database=settings.DEFAULT_DATABASE):
+        index = Index(
+            "{}_unique_synonym".format(cls.get_type_name()),
+            niamoto_db_meta.taxon.c.synonyms[cls.get_type_name()],
+            unique=True,
+        )
+        with Connector.get_connection(database=database) as connection:
+            index.drop(connection)
+
+    @classmethod
     def register_data_provider(cls, name, *args,
                                database=settings.DEFAULT_DATABASE,
                                properties={}, return_object=True, **kwargs):
