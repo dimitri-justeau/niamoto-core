@@ -14,7 +14,6 @@ from niamoto.conf import settings
 
 
 metadata = MetaData(
-    schema=settings.NIAMOTO_SCHEMA,
     naming_convention={
         "ck": "ck_%(table_name)s_%(constraint_name)s"
     },
@@ -31,15 +30,20 @@ occurrence = Table(
     Column('id', Integer, primary_key=True),
     Column(
         'provider_id',
-        ForeignKey('data_provider.id'),
+        ForeignKey('{}.data_provider.id'.format(settings.NIAMOTO_SCHEMA)),
         nullable=False
     ),
     Column('provider_pk', Integer, nullable=False),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
-    Column('taxon_id', ForeignKey('taxon.id'), nullable=True),
+    Column(
+        'taxon_id',
+        ForeignKey('{}.taxon.id'.format(settings.NIAMOTO_SCHEMA)),
+        nullable=True
+    ),
     Column('provider_taxon_id', Integer, nullable=True),
     Column('properties', JSONB, nullable=False),
     UniqueConstraint('id', 'provider_id', 'provider_pk'),
+    schema=settings.NIAMOTO_SCHEMA
 )
 
 # ------------- #
@@ -65,7 +69,11 @@ taxon = Table(
     Column('full_name', Text, nullable=False, unique=True),
     Column('rank_name', Text, nullable=False),
     Column('rank', Enum(TaxonRankEnum), nullable=False),
-    Column('parent_id', ForeignKey('taxon.id'), nullable=True),
+    Column(
+        'parent_id',
+        ForeignKey('{}.taxon.id'.format(settings.NIAMOTO_SCHEMA)),
+        nullable=True
+    ),
     Column('synonyms', JSONB, nullable=False),
     #  MPTT (Modified Pre-order Tree Traversal) columns
     Column('mptt_left', Integer, nullable=False),
@@ -76,6 +84,7 @@ taxon = Table(
     CheckConstraint('mptt_left >= 0', name='mptt_left_gt_0'),
     CheckConstraint('mptt_right >= 0', name='mptt_right_gt_0'),
     CheckConstraint('mptt_tree_id >= 0', name='mptt_tree_id_gt_0'),
+    schema=settings.NIAMOTO_SCHEMA,
 )
 
 # ---------- #
@@ -86,12 +95,17 @@ plot = Table(
     'plot',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('provider_id', ForeignKey('data_provider.id'), nullable=False),
+    Column(
+        'provider_id',
+        ForeignKey('{}.data_provider.id'.format(settings.NIAMOTO_SCHEMA)),
+        nullable=False
+    ),
     Column('provider_pk', Integer, nullable=False),
     Column('name', String(100), nullable=False, unique=True),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column('properties', JSONB, nullable=False),
     UniqueConstraint('id', 'provider_id', 'provider_pk'),
+    schema=settings.NIAMOTO_SCHEMA,
 )
 
 # --------------------------- #
@@ -109,13 +123,30 @@ plot_occurrence = Table(
     Column('occurrence_identifier', String(50)),
     UniqueConstraint('plot_id', 'occurrence_identifier'),
     ForeignKeyConstraint(
-        ['plot_id', 'provider_id', 'provider_plot_pk'],
-        ['plot.id', 'plot.provider_id', 'plot.provider_pk'],
+        [
+            'plot_id',
+            'provider_id',
+            'provider_plot_pk'
+        ],
+        [
+            '{}.plot.id'.format(settings.NIAMOTO_SCHEMA),
+            '{}.plot.provider_id'.format(settings.NIAMOTO_SCHEMA),
+            '{}.plot.provider_pk'.format(settings.NIAMOTO_SCHEMA)
+        ],
     ),
     ForeignKeyConstraint(
-        ['occurrence_id', 'provider_id', 'provider_occurrence_pk'],
-        ['occurrence.id', 'occurrence.provider_id', 'occurrence.provider_pk'],
+        [
+            'occurrence_id',
+            'provider_id',
+            'provider_occurrence_pk'
+        ],
+        [
+            '{}.occurrence.id'.format(settings.NIAMOTO_SCHEMA),
+            '{}.occurrence.provider_id'.format(settings.NIAMOTO_SCHEMA),
+            '{}.occurrence.provider_pk'.format(settings.NIAMOTO_SCHEMA)
+        ],
     ),
+    schema=settings.NIAMOTO_SCHEMA,
 )
 
 # ---------------------- #
@@ -127,6 +158,7 @@ data_provider_type = Table(
     metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False, unique=True),
+    schema=settings.NIAMOTO_SCHEMA,
 )
 
 data_provider = Table(
@@ -136,8 +168,27 @@ data_provider = Table(
     Column('name', String(100), nullable=False, unique=True),
     Column(
         'provider_type_id',
-        ForeignKey('data_provider_type.id'),
+        ForeignKey('{}.data_provider_type.id'.format(settings.NIAMOTO_SCHEMA)),
         nullable=False
     ),
     Column('properties', JSONB, nullable=False),
+    schema=settings.NIAMOTO_SCHEMA,
 )
+
+
+# ---------------------- #
+#  Raster manager table  #
+# ---------------------- #
+
+raster_manager = Table(
+    'raster_manager',
+    metadata,
+    Column('name', String(100), primary_key=True),
+    Column('tile_width', Integer, nullable=False),
+    Column('tile_height', Integer, nullable=False),
+    Column('srid', Integer, nullable=False),
+    Column('date_create', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=False),
+    schema=settings.NIAMOTO_RASTER_SCHEMA,
+)
+

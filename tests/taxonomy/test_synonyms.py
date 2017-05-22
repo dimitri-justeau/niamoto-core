@@ -190,7 +190,9 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
-    TestDatabaseManager.create_schema('niamoto')
+    TestDatabaseManager.create_schema(settings.NIAMOTO_SCHEMA)
+    TestDatabaseManager.create_schema(settings.NIAMOTO_RASTER_SCHEMA)
+    TestDatabaseManager.create_schema(settings.NIAMOTO_VECTOR_SCHEMA)
     unittest.main(exit=False)
     TestDatabaseManager.teardown_test_database()
 

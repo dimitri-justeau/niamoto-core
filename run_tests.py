@@ -12,6 +12,8 @@ if __name__ == "__main__":
     from niamoto.testing.test_database_manager import TestDatabaseManager
     TestDatabaseManager.setup_test_database()
     TestDatabaseManager.create_schema(settings.NIAMOTO_SCHEMA)
+    TestDatabaseManager.create_schema(settings.NIAMOTO_RASTER_SCHEMA)
+    TestDatabaseManager.create_schema(settings.NIAMOTO_VECTOR_SCHEMA)
     test_suite = unittest.TestLoader().discover('tests')
     test_results = unittest.TextTestRunner(verbosity=1).run(test_suite)
     TestDatabaseManager.teardown_test_database()

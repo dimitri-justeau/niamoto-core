@@ -1,6 +1,8 @@
 # coding: utf-8
 
 NIAMOTO_SCHEMA = 'niamoto'
+NIAMOTO_RASTER_SCHEMA = 'niamoto_raster'
+NIAMOTO_VECTOR_SCHEMA = 'niamoto_vector'
 
 DATABASES = {
     "default": {
