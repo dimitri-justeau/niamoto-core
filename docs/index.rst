@@ -39,4 +39,5 @@ IRD are also implied in the project.
 
     overview
     quickstart
+    configuration
     contributing
