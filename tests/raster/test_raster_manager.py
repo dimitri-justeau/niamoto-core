@@ -4,10 +4,10 @@ import unittest
 import os
 from datetime import datetime
 
-from sqlalchemy import insert
 from sqlalchemy.engine.reflection import Inspector
 
 from niamoto.testing import set_test_path
+
 set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
@@ -16,7 +16,6 @@ from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.raster.raster_manager import RasterManager
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
-
 
 DB = settings.TEST_DATABASE
 
@@ -29,6 +28,15 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
     def tearDown(self):
         delete_stmt = niamoto_db_meta.raster_registry.delete()
         with Connector.get_connection(database=DB) as connection:
+            inspector = Inspector.from_engine(connection)
+            tables = inspector.get_table_names(
+                schema=settings.NIAMOTO_RASTER_SCHEMA
+            )
+            for tb in tables:
+                if tb != niamoto_db_meta.raster_registry.name:
+                    connection.execute("DROP TABLE IF EXISTS {};".format(
+                        "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, tb)
+                    ))
             connection.execute(delete_stmt)
 
     def test_get_raster_list(self):
@@ -100,12 +108,51 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
         )
 
-
     def test_update_raster(self):
-        pass
+        # Add raster
+        test_raster = os.path.join(
+            NIAMOTO_HOME,
+            "data",
+            "raster",
+            "rainfall_wgs84.tif"
+        )
+        RasterManager.add_raster(
+            test_raster,
+            "rainfall",
+            200, 200,
+            database=DB,
+        )
+        # Update raster
+        RasterManager.update_raster(
+            test_raster,
+            "rainfall",
+            100, 100,
+            database=DB,
+        )
+        df = RasterManager.get_raster_list(database=DB)
+        self.assertEqual(df.iloc[0]['tile_width'], 100)
+        self.assertEqual(df.iloc[0]['tile_height'], 100)
+        engine = Connector.get_engine(database=DB)
+        inspector = Inspector.from_engine(engine)
+        self.assertIn(
+            'rainfall',
+            inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
+        )
 
     def test_delete_raster(self):
-        pass
+        test_raster = os.path.join(
+            NIAMOTO_HOME,
+            "data",
+            "raster",
+            "rainfall_wgs84.tif"
+        )
+        RasterManager.add_raster(
+            test_raster,
+            "rainfall",
+            200, 200,
+            database=DB
+        )
+        RasterManager.delete_raster("rainfall", database=DB)
 
     def test_raster_srid(self):
         test_raster = os.path.join(
@@ -116,7 +163,8 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         )
         srid = RasterManager.get_raster_srid(test_raster)
         self.assertEqual(srid, 4326)
-
+        df = RasterManager.get_raster_list(database=DB)
+        self.assertEqual(len(df), 0)
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
@@ -125,4 +173,3 @@ if __name__ == '__main__':
     TestDatabaseManager.create_schema(settings.NIAMOTO_VECTOR_SCHEMA)
     unittest.main(exit=False)
     TestDatabaseManager.teardown_test_database()
-
