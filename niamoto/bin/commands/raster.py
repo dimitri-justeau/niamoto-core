@@ -3,15 +3,7 @@
 import click
 
 
-@click.group()
-def raster():
-    """
-    Raster commands.
-    """
-    pass
-
-
-@raster.command("list")
+@click.command("rasters")
 def list_rasters():
     """
     List registered rasters.
@@ -34,7 +26,7 @@ def format_datetime_to_date(obj):
     return obj.strftime("%Y/%m/%d")
 
 
-@raster.command('add')
+@click.command('add_raster')
 @click.option(
     '--srid',
     default=None,
@@ -68,7 +60,7 @@ def add_raster(name, tile_width, tile_height, raster_file_path, srid=None):
         click.get_current_context().exit(code=1)
 
 
-@raster.command('update')
+@click.command('update_raster')
 @click.option(
     '--srid',
     default=None,
@@ -101,7 +93,7 @@ def update_raster(name, tile_width, tile_height, raster_file_path, srid=None):
         click.get_current_context().exit(code=1)
 
 
-@raster.command('delete')
+@click.command('delete_raster')
 @click.argument('name')
 def delete_raster(name):
     """

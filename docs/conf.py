@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Niamoto core'
-copyright = '2017, Dimitri Justeau (IAC)'
+copyright = '2017, Province Nord de Nouvelle Calédonie IAC, CIRAD-AMAP'
 author = 'Dimitri Justeau'
 
 # The version info for the project you're documenting, acts as replacement for

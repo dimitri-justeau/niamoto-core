@@ -3,7 +3,7 @@
 import click
 
 
-@click.command()
+@click.command('init_db')
 def init_db():
     """
     Initialize the Niamoto database.

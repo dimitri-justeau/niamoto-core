@@ -4,7 +4,8 @@ import os
 
 import click
 
-from niamoto.bin.commands.raster import raster
+from niamoto.bin.commands.raster import list_rasters, add_raster, \
+    update_raster, delete_raster
 from niamoto.bin.commands.init_db import init_db
 
 
@@ -26,7 +27,10 @@ def niamoto_cli(context, niamoto_home=None):
     os.environ['NIAMOTO_HOME'] = niamoto_home
 
 
-niamoto_cli.add_command(raster)
+niamoto_cli.add_command(list_rasters)
+niamoto_cli.add_command(add_raster)
+niamoto_cli.add_command(update_raster)
+niamoto_cli.add_command(delete_raster)
 niamoto_cli.add_command(init_db)
 
 

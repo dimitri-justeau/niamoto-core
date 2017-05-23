@@ -3,4 +3,4 @@
 Quickstart
 ==========
 
-(coming soon)
+(Available soon)
