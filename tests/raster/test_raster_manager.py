@@ -92,7 +92,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         self.assertEqual(df.iloc[0]['tile_width'], 200)
         self.assertEqual(df.iloc[0]['tile_height'], 200)
         self.assertEqual(df.iloc[0]['srid'], 4326)
-        # TODO Check that the raster table had been created
+        # TODO Check that the raster table had been created.
 
     def test_update_raster(self):
         pass
