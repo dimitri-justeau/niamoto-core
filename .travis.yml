@@ -21,7 +21,7 @@ before_script:
 addons:
   postgresql: "9.5"
     apt:
-    packages:
-      - postgresql-9.5-postgis-2.3
+      packages:
+        - postgresql-9.5-postgis-2.3
 after_success:
   - codecov
