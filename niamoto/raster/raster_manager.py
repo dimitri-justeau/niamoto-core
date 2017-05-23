@@ -57,9 +57,11 @@ class RasterManager:
         dim = "{}x{}".format(tile_width, tile_height)
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
         os.environ["PGPASSWORD"] = database["PASSWORD"]
+        dev_null = open(os.devnull, 'w')  # Force quiet
         p1 = subprocess.Popen([
             "raster2pgsql", "-c", "-q", '-t', dim, '-I', raster_file_path, tb,
-        ], stdout=subprocess.PIPE)
+        ], stdout=subprocess.PIPE, stderr=dev_null)
+        dev_null.close()
         p2 = subprocess.call([
             "psql",
             "-q",
