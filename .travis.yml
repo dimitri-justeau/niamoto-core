@@ -15,6 +15,9 @@ before_script:
   - psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
   - psql -U postgres -c "CREATE EXTENSION postgis;"
   - sh tests/download_test_data.sh
+  - add-apt-repository ppa:ubuntugis/ppa
+  - apt-get update
+  - apt-get install python-numpy gdal-bin libgdal-dev
 addons:
   postgresql: "9.5"
 after_success:
