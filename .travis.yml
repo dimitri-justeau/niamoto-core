@@ -6,9 +6,8 @@ python:
   - "3.6"
 
 install:
-  - sudo apt-add-repository -y ppa:ubuntugis/ubuntugis-unstable
   - sudo apt-get -y update
-  - sudo apt-get install -y libgdal-dev build-essential gdal-bin gdal-abi-2-1-0 libgdal20 libspatialite-dev
+  - sudo apt-get install -y libgdal-dev gdal-bin
   - pip install -r requirements.txt
   - pip install codecov
   - pip install coverage
