@@ -4,7 +4,8 @@ import unittest
 import os
 from datetime import datetime
 
-from sqlalchemy import *
+from sqlalchemy import insert
+from sqlalchemy.engine.reflection import Inspector
 
 from niamoto.testing import set_test_path
 set_test_path()
@@ -92,7 +93,13 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         self.assertEqual(df.iloc[0]['tile_width'], 200)
         self.assertEqual(df.iloc[0]['tile_height'], 200)
         self.assertEqual(df.iloc[0]['srid'], 4326)
-        # TODO Check that the raster table had been created.
+        engine = Connector.get_engine(database=DB)
+        inspector = Inspector.from_engine(engine)
+        self.assertIn(
+            'rainfall',
+            inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
+        )
+
 
     def test_update_raster(self):
         pass
