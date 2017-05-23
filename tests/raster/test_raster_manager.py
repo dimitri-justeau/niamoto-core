@@ -17,6 +17,7 @@ from niamoto.raster.raster_manager import RasterManager
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 
+
 DB = settings.TEST_DATABASE
 
 

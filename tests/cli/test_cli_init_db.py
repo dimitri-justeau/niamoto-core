@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import unittest
+
 from click.testing import CliRunner
 
 from niamoto.testing import set_test_path
