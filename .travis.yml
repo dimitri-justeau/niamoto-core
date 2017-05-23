@@ -4,10 +4,11 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+
 install:
   - sudo apt-add-repository -y ppa:ubuntugis/ubuntugis-unstable
   - sudo apt-get -y update
-  - sudo apt-get install -y libgdal-dev build-essential gdal-bin
+  - sudo apt-get install -y libgdal-dev build-essential gdal-bin gdal-abi-2-1-0 libgdal20 libspatialite-dev
   - pip install -r requirements.txt
   - pip install codecov
   - pip install coverage
