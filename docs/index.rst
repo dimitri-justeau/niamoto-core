@@ -38,6 +38,7 @@ IRD are also implied in the project.
     :caption: Contents:
 
     overview
+    installation
     quickstart
     configuration
     contributing
