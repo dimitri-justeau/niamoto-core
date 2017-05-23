@@ -88,8 +88,8 @@ Create the PostGIS extension:
 Logout with ``\q``.
 
 
-4. Create Database Schema
-.........................
+4. Create Database Schemas
+..........................
 
 Log into PostgreSQL, with ``niamoto`` user and ``niamoto`` database:
 
@@ -97,12 +97,15 @@ Log into PostgreSQL, with ``niamoto`` user and ``niamoto`` database:
 
     psql -U niamoto -d niamoto
 
-Create the ``niamoto`` schema (see :ref:`contributing` for more details
+Create the ``niamoto``, ``niamoto_raster``, ``niamoto_vector`` schema
+(see :ref:`contributing` for more details
 and options):
 
 .. code-block:: sql
 
     CREATE SCHEMA niamoto;
+    CREATE SCHEMA niamoto_raster;
+    CREATE SCHEMA niamoto_vector;
 
 Logout with ``\q``.
 

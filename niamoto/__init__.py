@@ -1,15 +1,15 @@
 # coding: utf-8
 
-"""
-Teach psycopg2 how to handle certain datatypes.
-"""
-
-
 import numpy
 from geoalchemy2.elements import WKBElement
 from geoalchemy2.shape import to_shape
 from psycopg2.extensions import register_adapter, AsIs, adapt
 
+
+__version__ = "0.1"
+
+
+# Teach psycopg2 how to handle certain datatypes.
 
 def adapt_numpy_float64(numpy_float64):
     return AsIs(numpy_float64)
