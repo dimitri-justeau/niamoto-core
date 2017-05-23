@@ -20,5 +20,8 @@ before_script:
   - sh tests/download_test_data.sh
 addons:
   postgresql: "9.5"
+    apt:
+    packages:
+      - postgresql-9.5-postgis-2.3
 after_success:
   - codecov
