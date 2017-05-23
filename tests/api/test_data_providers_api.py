@@ -7,7 +7,7 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
-from niamoto.api.data_providers import *
+from niamoto.api.data_provider_api import *
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_database_manager import TestDatabaseManager
