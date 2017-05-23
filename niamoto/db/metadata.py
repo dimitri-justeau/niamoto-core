@@ -177,11 +177,11 @@ data_provider = Table(
 
 
 # ---------------------- #
-#  Raster manager table  #
+#  Raster registry table #
 # ---------------------- #
 
-raster_manager = Table(
-    'raster_manager',
+raster_registry = Table(
+    'raster_registry',
     metadata,
     Column('name', String(100), primary_key=True),
     Column('tile_width', Integer, nullable=False),
@@ -189,6 +189,8 @@ raster_manager = Table(
     Column('srid', Integer, nullable=False),
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=False),
+    CheckConstraint('tile_width > 0', name='tile_width_gt_0'),
+    CheckConstraint('tile_height > 0', name='tile_height_gt_0'),
     schema=settings.NIAMOTO_RASTER_SCHEMA,
 )
 
