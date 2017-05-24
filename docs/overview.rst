@@ -3,6 +3,8 @@
 Project overview
 ================
 
+What is Niamoto?
+----------------
 
 Niamoto is an ecological information system designed to fill the gap between
 scientists and decision makers. It is currently being used and developed for
@@ -20,10 +22,27 @@ warehouse. This data can be used for scheduling and running scientific
 workflows, which results can be then published for scientists (e.g. csv files,
 raster files, vector files) or for systems (e.g. databases, web services).
 
+
+Niamoto structure
+-----------------
+
 Bellow is a diagram of how Niamoto is structured in the main lines, and how
 it interacts with data sources and targets:
 
 |
 
 .. image:: _static/niamoto-core_ETL.png
+    :scale: 100 %
+
+|
+
+
+Niamoto data flow
+-----------------
+
+Here a diagram describing the Niamoto data flow in the main lines:
+
+|
+
+.. image:: _static/niamoto_data_flow.png
     :scale: 100 %
