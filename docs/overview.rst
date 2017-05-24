@@ -3,6 +3,7 @@
 Project overview
 ================
 
+
 Niamoto is an ecological information system designed to fill the gap between
 scientists and decision makers. It is currently being used and developed for
 tropical rainforest ecosystems in New Caledonia, but had been designed

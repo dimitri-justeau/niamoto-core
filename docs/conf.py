@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Niamoto core'
+project = 'Niamoto'
 copyright = '2017, Province Nord de Nouvelle Calédonie IAC, CIRAD-AMAP'
 author = 'Dimitri Justeau'
 

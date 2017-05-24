@@ -19,6 +19,7 @@
 Niamoto documentation
 =====================
 
+
 .. important::
     Niamoto is currently in active development and thus not ready for
     production use. A lot of functionalities are still to implement. If you
@@ -34,11 +35,12 @@ Agronomic Institute (IAC) and the CIRAD. The AMAP joint research unit and the
 IRD are also implied in the project.
 
 .. toctree::
-    :maxdepth: 4
+    :maxdepth: 2
     :caption: Contents:
 
     overview
     installation
     quickstart
+    tutorial
     configuration
     contributing

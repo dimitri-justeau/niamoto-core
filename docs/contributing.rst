@@ -3,6 +3,7 @@
 Contributing
 ============
 
+
 Setting up a developpment environment
 -------------------------------------
 
