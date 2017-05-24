@@ -5,6 +5,13 @@ import importlib
 from niamoto.exceptions import ImproperlyConfiguredError
 
 
+DEFAULT_SETTINGS = {
+    'NIAMOTO_SCHEMA': 'niamoto',
+    'NIAMOTO_RASTER_SCHEMA': 'niamoto_raster',
+    'NIAMOTO_VECTOR_SCHEMA': 'niamoto_vector',
+}
+
+
 class DynamicSettings:
     """
     Niamoto dynamic settings endpoint.

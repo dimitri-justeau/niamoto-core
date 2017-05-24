@@ -2,7 +2,6 @@
 
 import unittest
 import os
-from datetime import datetime
 
 from sqlalchemy.engine.reflection import Inspector
 

@@ -16,7 +16,7 @@ DB = settings.TEST_DATABASE
 
 class TestInitDbApi(BaseTestNiamotoSchemaCreated):
     """
-    Test case for init_db api.
+    Test case for init_db_cli api.
     """
 
     @classmethod

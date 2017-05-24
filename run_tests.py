@@ -8,8 +8,8 @@ set_test_path()
 
 
 if __name__ == "__main__":
-    from niamoto.conf import settings
     from niamoto.testing.test_database_manager import TestDatabaseManager
+    from niamoto.conf import settings
     TestDatabaseManager.setup_test_database()
     TestDatabaseManager.create_schema(settings.NIAMOTO_SCHEMA)
     TestDatabaseManager.create_schema(settings.NIAMOTO_RASTER_SCHEMA)

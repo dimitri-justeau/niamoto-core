@@ -16,18 +16,13 @@ class Connector:
 
     @classmethod
     @contextmanager
-    def get_connection(cls, database=settings.DEFAULT_DATABASE,
-                       schema=settings.NIAMOTO_SCHEMA):
+    def get_connection(cls, database=settings.DEFAULT_DATABASE):
         """
         :return: Return a sqlalchemy connection on a postgresql database.
         """
         try:
             engine = cls.get_engine(database=database)
-            connection = engine.connect().execution_options(
-                schema_translate_map={
-                    None: schema,
-                }
-            )
+            connection = engine.connect()
             yield connection
         finally:
             connection.close()

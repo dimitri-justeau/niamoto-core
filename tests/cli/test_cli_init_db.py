@@ -9,24 +9,32 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings
-from niamoto.bin.commands.init_db import init_db
+from niamoto.bin.commands.init_db import init_db_cli
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTest
 
-settings.DEFAULT_DATABASE = settings.TEST_DATABASE
 
 DB = settings.TEST_DATABASE
 
 
 class TestCLIInitDb(BaseTest):
     """
-    Test case for init_db cli method.
+    Test case for init_db_cli cli method.
     """
 
     def test_init_db(self):
         runner = CliRunner()
-        result = runner.invoke(init_db, [])
-        assert result.exit_code == 0
+        result = runner.invoke(
+            init_db_cli,
+            ['--database', DB],
+            catch_exceptions=False,
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            init_db_cli,
+            ['--database', None],
+        )
+        self.assertEqual(result.exit_code, 1)
 
 
 if __name__ == '__main__':
