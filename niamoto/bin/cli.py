@@ -8,7 +8,8 @@ from niamoto.bin.commands.raster import list_rasters_cli, add_raster_cli, \
     update_raster_cli, delete_raster_cli
 from niamoto.bin.commands.init_db import init_db_cli
 from niamoto.bin.commands.init_niamoto_home import init_niamoto_home_cli
-from niamoto.bin.commands.data_provider import list_data_provider_types
+from niamoto.bin.commands.data_provider import list_data_provider_types, \
+    list_data_providers
 from niamoto import conf
 
 

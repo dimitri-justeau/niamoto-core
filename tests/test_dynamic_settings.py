@@ -15,7 +15,9 @@ class DynamicSettingTest(unittest.TestCase):
             path, "test_data", "test_niamoto_home"
         ))
         settings = DynamicSettings(
-            "settings"
+            os.path.join(
+                path, "test_data", "test_niamoto_home", "settings.py"
+            )
         )
         self.assertEqual(settings.NIAMOTO_SCHEMA, settings.NIAMOTO_SCHEMA)
         self.assertEqual(settings.DATABASES, settings.DATABASES)
