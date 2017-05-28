@@ -13,3 +13,10 @@ class IncoherentDatabaseStateError(Exception):
     Error to raise when a incoherent database state is detected.
     """
     pass
+
+
+class NoRecordFoundError(Exception):
+    """
+    Error to raise when a record had not been found in database.
+    """
+    pass

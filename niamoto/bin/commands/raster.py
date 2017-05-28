@@ -3,6 +3,7 @@
 import click
 
 from niamoto.decorators import resolve_database
+from niamoto.exceptions import NoRecordFoundError
 
 
 @click.command("rasters")
@@ -53,7 +54,7 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None,
     Add a raster in Niamoto's raster database.
     """
     from niamoto.api import raster_api
-    click.echo("Adding raster in database...")
+    click.echo("Registering the raster in database...")
     try:
         raster_api.add_raster(
             raster_file_path,
@@ -63,10 +64,10 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None,
             srid=srid,
             database=database,
         )
-        click.echo("The raster had been successfully added to the Niamoto "
-                   "raster database!")
+        click.echo("The raster had been successfully registered to the Niamoto"
+                   " raster database!")
     except:
-        click.echo("An error occurred while adding the raster.")
+        click.echo("An error occurred while registering the raster.")
         click.get_current_context().exit(code=1)
 
 
@@ -121,6 +122,9 @@ def delete_raster_cli(name, database=None):
             database=database,
         )
         click.echo("The raster had been successfully deleted!")
+    except NoRecordFoundError as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
     except:
-        click.echo("An error occurred while deleting the raster.")
+        click.secho("An error occurred while deleting the raster.", fg='red')
         click.get_current_context().exit(code=1)

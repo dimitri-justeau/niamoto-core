@@ -11,6 +11,7 @@ import rasterio
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
+from niamoto.exceptions import NoRecordFoundError
 
 
 class RasterManager:
@@ -154,13 +155,17 @@ class RasterManager:
                 del_stmt = niamoto_db_meta.raster_registry.delete().where(
                     niamoto_db_meta.raster_registry.c.name == name
                 )
-                connection.execute(del_stmt)
+                r = connection.execute(del_stmt).rowcount
+                if r == 0:
+                    m = "The raster {} does not exist in" \
+                        " database.".format(name)
+                    raise NoRecordFoundError(m)
 
     @classmethod
     def get_raster_srid(cls, raster_file_path):
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
-                "The raster {} does not exist".format(raster_file_path)
+                "The raster '{}' does not exist".format(raster_file_path)
             )
         raster = rasterio.open(raster_file_path)
         srid = int(raster.crs['init'].split('epsg:')[1])

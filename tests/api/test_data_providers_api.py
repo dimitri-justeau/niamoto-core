@@ -13,6 +13,7 @@ from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.test_data_provider import TestDataProvider
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
+from niamoto.exceptions import NoRecordFoundError
 
 
 DB = settings.TEST_DATABASE
@@ -40,10 +41,10 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
             del2 = niamoto_db_meta.data_provider_type.delete()
             connection.execute(del1)
             connection.execute(del2)
-        TestDataProvider._unregister_unique_synonym_constraint(database=DB)
-        PlantnoteDataProvider._unregister_unique_synonym_constraint(
-            database=DB
-        )
+            TestDataProvider._unregister_unique_synonym_constraint(connection)
+            PlantnoteDataProvider._unregister_unique_synonym_constraint(
+                connection
+            )
 
     def test_get_data_provider_type_list(self):
         l1 = get_data_provider_type_list(database=DB)
@@ -87,6 +88,29 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         )
         l2 = get_data_provider_list(database=DB)
         self.assertEqual(len(l2), 1)
+
+    def test_delete_data_provider(self):
+        TestDataProvider.register_data_provider_type(database=DB)
+        PlantnoteDataProvider.register_data_provider_type(database=DB)
+        add_data_provider(
+            "pl@ntnote_provider_1",
+            "PLANTNOTE",
+            database=DB
+        )
+        l1 = get_data_provider_list(database=DB)
+        self.assertEqual(len(l1), 1)
+        delete_data_provider(
+            "pl@ntnote_provider_1",
+            database=DB,
+        )
+        l1 = get_data_provider_list(database=DB)
+        self.assertEqual(len(l1), 0)
+        self.assertRaises(
+            NoRecordFoundError,
+            delete_data_provider,
+            "pl@ntnote_provider_1",
+            database=DB,
+        )
 
 
 if __name__ == '__main__':

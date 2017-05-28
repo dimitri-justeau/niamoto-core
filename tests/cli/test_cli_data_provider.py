@@ -31,7 +31,7 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
         with Connector.get_connection(database=DB) as connection:
             connection.execute(del1)
             connection.execute(del2)
-        TestDataProvider._unregister_unique_synonym_constraint(database=DB)
+            TestDataProvider._unregister_unique_synonym_constraint(connection)
 
     def test_list_data_provider_types(self):
         runner = CliRunner()

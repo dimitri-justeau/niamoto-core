@@ -9,7 +9,7 @@ from niamoto.bin.commands.raster import list_rasters_cli, add_raster_cli, \
 from niamoto.bin.commands.init_db import init_db_cli
 from niamoto.bin.commands.init_niamoto_home import init_niamoto_home_cli
 from niamoto.bin.commands.data_provider import list_data_provider_types, \
-    list_data_providers
+    list_data_providers, add_data_provider, delete_data_provider
 from niamoto import conf
 
 
@@ -38,6 +38,8 @@ niamoto_cli.add_command(update_raster_cli)
 niamoto_cli.add_command(delete_raster_cli)
 niamoto_cli.add_command(list_data_provider_types)
 niamoto_cli.add_command(list_data_providers)
+niamoto_cli.add_command(add_data_provider)
+niamoto_cli.add_command(delete_data_provider)
 
 
 if __name__ == '__main__':

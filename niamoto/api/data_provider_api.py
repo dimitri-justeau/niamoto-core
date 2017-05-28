@@ -10,6 +10,7 @@ import pandas as pd
 from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db.metadata import data_provider_type, data_provider
+from niamoto.data_providers.base_data_provider import BaseDataProvider
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 
 
@@ -54,7 +55,7 @@ def add_data_provider(name, provider_type, *args,
                       properties={}, return_object=False, **kwargs):
     """
     Register a data provider in a given Niamoto database.
-    :param name: The name of the provider to register (must not be unique).
+    :param name: The name of the provider to register (must be unique).
     :param provider_type: The type of the provider to register. Must be a
     string value among:
         - 'PLANTNOTE': The Pl@ntnote data provider.
@@ -81,3 +82,12 @@ def add_data_provider(name, provider_type, *args,
         return_object=return_object,
         **kwargs
     )
+
+
+def delete_data_provider(name, database=settings.DEFAULT_DATABASE):
+    """
+    Register a data provider in a given Niamoto database.
+    :param name: The name of the provider to register (must be unique).
+    :param database: The database to work with.
+    """
+    BaseDataProvider.unregister_data_provider(name, database=database)

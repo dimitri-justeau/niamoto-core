@@ -5,6 +5,7 @@ from sqlalchemy import select, Index
 from niamoto.conf import settings
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
+from niamoto.exceptions import NoRecordFoundError
 
 
 class BaseDataProvider:
@@ -126,16 +127,13 @@ class BaseDataProvider:
         niamoto_db_meta.taxon.indexes.remove(index)
 
     @classmethod
-    def _unregister_unique_synonym_constraint(
-            cls,
-            database=settings.DEFAULT_DATABASE):
+    def _unregister_unique_synonym_constraint(cls, connection):
         index = Index(
             "{}_unique_synonym".format(cls.get_type_name()),
             niamoto_db_meta.taxon.c.synonyms[cls.get_type_name()],
             unique=True,
         )
-        with Connector.get_connection(database=database) as connection:
-            index.drop(connection)
+        index.drop(connection)
         niamoto_db_meta.taxon.indexes.remove(index)
 
     @classmethod
@@ -153,3 +151,22 @@ class BaseDataProvider:
             connection.execute(ins)
         if return_object:
             return cls(name, *args, database=database, **kwargs)
+
+    @classmethod
+    def unregister_data_provider(cls, name,
+                                 database=settings.DEFAULT_DATABASE):
+        """
+        Unregister a data provider from the database.
+        :param name: The name of the data provider to unregister.
+        :param database: The database to work with.
+        """
+        delete_stmt = niamoto_db_meta.data_provider.delete().where(
+            niamoto_db_meta.data_provider.c.name == name
+        )
+        with Connector.get_connection(database=database) as connection:
+            with connection.begin():
+                r = connection.execute(delete_stmt).rowcount
+                if r == 0:
+                    m = "The data provider '{}' does not exist in" \
+                        " database.".format(name)
+                    raise NoRecordFoundError(m)
