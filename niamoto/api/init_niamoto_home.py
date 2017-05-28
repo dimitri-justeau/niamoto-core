@@ -19,6 +19,6 @@ def init_niamoto_home(niamoto_home_path=DEFAULT_NIAMOTO_HOME):
         ))
     os.mkdir(niamoto_home_path)
     set_niamoto_home(niamoto_home_path)
-    from niamoto.settings import default_settings
+    from niamoto import default_settings
     path = os.path.abspath(default_settings.__file__)
     copyfile(path, os.path.join(niamoto_home_path, NIAMOTO_SETTINGS + '.py'))

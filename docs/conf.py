@@ -40,6 +40,8 @@ sys.path.insert(0, os.path.abspath('../niamoto'))
 extensions = [
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -186,5 +188,3 @@ epub_copyright = copyright
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
-
-

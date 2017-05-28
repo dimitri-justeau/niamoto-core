@@ -1,10 +1,10 @@
 # coding: utf-8
 
-import unittest
-import sys
 import os
+import sys
+import unittest
 
-from niamoto.settings.dynamic_settings import DynamicSettings
+from niamoto.dynamic_settings import DynamicSettings
 
 
 class DynamicSettingTest(unittest.TestCase):

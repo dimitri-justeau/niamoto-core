@@ -4,9 +4,8 @@ import os
 import sys
 
 from niamoto.constants import DEFAULT_NIAMOTO_HOME, HOME_ENVIRONMENT_VARIABLE
+from niamoto.dynamic_settings import DynamicSettings
 from niamoto.exceptions import ImproperlyConfiguredError
-from niamoto.settings.dynamic_settings import DynamicSettings
-
 
 #  Environment variable indicating the Niamoto home folder.
 
@@ -49,6 +48,3 @@ def set_settings(settings_module_path=NIAMOTO_SETTINGS):
     settings = DynamicSettings(settings_module_path)
     if not settings:
         raise ImproperlyConfiguredError("Niamoto is not properly configured.")
-
-
-set_niamoto_home()
