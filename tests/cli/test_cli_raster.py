@@ -62,6 +62,7 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
             TEST_RASTER,
         ], catch_exceptions=False)
         self.assertEqual(result.exit_code, 0)
+        runner.invoke(raster.list_rasters_cli, ['--database', DB])
         result = runner.invoke(raster.add_raster_cli, [
             '--database', "YO",
             'test_raster',

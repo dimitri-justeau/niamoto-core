@@ -13,5 +13,6 @@ def resolve_database(f):
         if database is None:
             kwargs['database'] = settings.DEFAULT_DATABASE
         return f(*args, **kwargs)
+    func.__doc__ = f.__doc__
     return func
 

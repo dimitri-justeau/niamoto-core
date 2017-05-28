@@ -9,7 +9,7 @@ from niamoto.exceptions import ImproperlyConfiguredError
 
 #  Environment variable indicating the Niamoto home folder.
 
-NIAMOTO_SETTINGS = "settings"
+NIAMOTO_SETTINGS = "settings.py"
 
 
 #  Set home var if not set
@@ -43,7 +43,12 @@ if not os.path.exists(NIAMOTO_HOME):
 settings = None
 
 
-def set_settings(settings_module_path=NIAMOTO_SETTINGS):
+def set_settings(settings_module_path=None):
+    if settings_module_path is None:
+        settings_module_path = os.path.join(
+            NIAMOTO_HOME,
+            NIAMOTO_SETTINGS
+        )
     global settings
     settings = DynamicSettings(settings_module_path)
     if not settings:
