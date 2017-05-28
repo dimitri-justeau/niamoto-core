@@ -2,17 +2,17 @@
 
 import click
 
+from niamoto.decorators import resolve_database
+
 
 @click.command("rasters")
 @click.option('--database', default=None)
+@resolve_database
 def list_rasters_cli(database=None):
     """
     List registered rasters.
     """
     from niamoto.api import raster_api
-    from niamoto.conf import settings
-    if database is None:
-        database = settings.DEFAULT_DATABASE
     try:
         raster_df = raster_api.get_raster_list(database)
         if len(raster_df) == 0:
@@ -46,15 +46,13 @@ def format_datetime_to_date(obj):
 @click.argument('tile_width')
 @click.argument('tile_height')
 @click.argument('raster_file_path')
+@resolve_database
 def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None,
                    database=None):
     """
     Add a raster in Niamoto's raster database.
     """
-    from niamoto.conf import settings
     from niamoto.api import raster_api
-    if database is None:
-        database = settings.DEFAULT_DATABASE
     click.echo("Adding raster in database...")
     try:
         raster_api.add_raster(
@@ -84,15 +82,13 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None,
 @click.argument('tile_width')
 @click.argument('tile_height')
 @click.argument('raster_file_path')
+@resolve_database
 def update_raster_cli(name, tile_width, tile_height, raster_file_path,
                       srid=None, database=None):
     """
     Update an existing raster in Niamoto's raster database.
     """
-    from niamoto.conf import settings
     from niamoto.api import raster_api
-    if database is None:
-        database = settings.DEFAULT_DATABASE
     click.echo("Updating {} raster...".format(name))
     try:
         raster_api.update_raster(
@@ -112,14 +108,12 @@ def update_raster_cli(name, tile_width, tile_height, raster_file_path,
 @click.command('delete_raster')
 @click.option('--database', default=None)
 @click.argument('name')
+@resolve_database
 def delete_raster_cli(name, database=None):
     """
     Delete an existing raster from Niamoto's raster database.
     """
-    from niamoto.conf import settings
     from niamoto.api import raster_api
-    if database is None:
-        database = settings.DEFAULT_DATABASE
     click.echo("Deleting {} raster...".format(name))
     try:
         raster_api.delete_raster(

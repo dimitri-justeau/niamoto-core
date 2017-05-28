@@ -22,7 +22,6 @@ def niamoto_cli(context, niamoto_home=conf.DEFAULT_NIAMOTO_HOME):
     """
     Niamoto command line interface.
     """
-    print(niamoto_home)
     context.params['niamoto_home'] = niamoto_home
     os.environ['NIAMOTO_HOME'] = niamoto_home
     conf.set_niamoto_home()

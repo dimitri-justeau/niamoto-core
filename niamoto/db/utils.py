@@ -59,5 +59,4 @@ def fix_db_sequences_ownership(database=settings.DEFAULT_DATABASE):
         )
         statements = res.fetchall()
         for s in statements:
-            print(statements)
             connection.execute(s[0])
