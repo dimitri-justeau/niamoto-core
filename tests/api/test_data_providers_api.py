@@ -75,6 +75,19 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         l2 = get_data_provider_list(database=DB)
         self.assertEqual(len(l2), 3)
 
+    def test_add_data_provider(self):
+        TestDataProvider.register_data_provider_type(database=DB)
+        PlantnoteDataProvider.register_data_provider_type(database=DB)
+        l1 = get_data_provider_list(database=DB)
+        self.assertEqual(len(l1), 0)
+        add_data_provider(
+            "pl@ntnote_provider_1",
+            "PLANTNOTE",
+            database=DB
+        )
+        l2 = get_data_provider_list(database=DB)
+        self.assertEqual(len(l2), 1)
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
