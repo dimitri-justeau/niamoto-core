@@ -37,6 +37,7 @@ niamoto_cli.add_command(add_raster_cli)
 niamoto_cli.add_command(update_raster_cli)
 niamoto_cli.add_command(delete_raster_cli)
 niamoto_cli.add_command(list_data_provider_types)
+niamoto_cli.add_command(list_data_providers)
 
 
 if __name__ == '__main__':

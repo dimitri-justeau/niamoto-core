@@ -31,6 +31,9 @@ def list_data_provider_types(database=None):
 @click.option('--database', default=None)
 @resolve_database
 def list_data_providers(database=None):
+    """
+    List registered data providers.
+    """
     from niamoto.api.data_provider_api import get_data_provider_list
     try:
         providers_df = get_data_provider_list(database)

@@ -20,21 +20,38 @@ class DynamicSettings:
     Loads a set of settings value from a python settings file.
     """
 
-    def __init__(self, settings_module_path):
-        self.setting_module_path = settings_module_path
+    def __init__(self, settings_module_path=None):
+        self._settings_module_path = settings_module_path
+        self.update_settings_values()
+
+    @property
+    def settings_module_path(self):
+        return self._settings_module_path
+
+    @settings_module_path.setter
+    def settings_module_path(self, value):
+        self._settings_module_path = value
+        self.update_settings_values()
+
+    def update_settings_values(self):
         try:
-            spec = importlib.util.spec_from_file_location(
-                "settings",
-                settings_module_path
-            )
-            setting_module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(setting_module)
-        except ModuleNotFoundError:
+            settings_module = None
+            if self.settings_module_path is not None:
+                spec = importlib.util.spec_from_file_location(
+                    "settings",
+                    self.settings_module_path
+                )
+                settings_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(settings_module)
+        except ImportError:
             raise ImproperlyConfiguredError(
-                    "The settings module '{}' does not exist.".format(
-                        settings_module_path
+                    "There was an error importing the settings "
+                    "module: '{}'".format(
+                        self.settings_module_path
                     )
             )
-        for setting in dir(setting_module):
-            setting_value = getattr(setting_module, setting)
+        for setting in dir(settings_module):
+            if setting.startswith('_') and setting != '__file__':
+                continue
+            setting_value = getattr(settings_module, setting)
             setattr(self, setting, setting_value)

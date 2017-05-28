@@ -40,7 +40,7 @@ if not os.path.exists(NIAMOTO_HOME):
     os.makedirs(NIAMOTO_HOME)
 
 # Global settings
-settings = None
+settings = DynamicSettings()
 
 
 def set_settings(settings_module_path=None):
@@ -50,6 +50,6 @@ def set_settings(settings_module_path=None):
             NIAMOTO_SETTINGS
         )
     global settings
-    settings = DynamicSettings(settings_module_path)
+    settings.settings_module_path = settings_module_path
     if not settings:
         raise ImproperlyConfiguredError("Niamoto is not properly configured.")
