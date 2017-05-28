@@ -1,5 +1,10 @@
 # coding: utf-8
 
+import platform
+
+if platform.python_version_tuple()[0] != '3':
+    raise SystemError("Niamoto is only compatible with Python 3.")
+
 import numpy
 from geoalchemy2.elements import WKBElement
 from geoalchemy2.shape import to_shape

@@ -1,7 +1,6 @@
 # coding: utf-8
 
-import importlib
-import importlib.util
+import platform
 
 from niamoto.exceptions import ImproperlyConfiguredError
 
@@ -37,12 +36,22 @@ class DynamicSettings:
         try:
             settings_module = None
             if self.settings_module_path is not None:
-                spec = importlib.util.spec_from_file_location(
-                    "settings",
-                    self.settings_module_path
-                )
-                settings_module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(settings_module)
+                py_version = platform.python_version_tuple()
+                if int(py_version[1]) >= 5:
+                    import importlib
+                    import importlib.util
+                    spec = importlib.util.spec_from_file_location(
+                        "settings",
+                        self.settings_module_path
+                    )
+                    settings_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(settings_module)
+                else:
+                    from importlib.machinery import SourceFileLoader
+                    settings_module = SourceFileLoader(
+                        "settings",
+                        self.settings_module_path
+                    ).load_module()
         except ImportError:
             raise ImproperlyConfiguredError(
                     "There was an error importing the settings "
