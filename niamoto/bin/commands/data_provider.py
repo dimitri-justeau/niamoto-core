@@ -123,14 +123,14 @@ def sync(name, provider_args, database=None):
     """
     from niamoto.api.data_provider_api import sync_with_data_provider
     click.echo("Syncing the Niamoto database with '{}'...".format(name))
-    args = provider_args
+    args = [name, ] + list(provider_args)
     try:
         r = sync_with_data_provider(
-            name,
             *args,
             database=database,
         )
-        m = "The Niamoto database had been successfully synced with '{}'!"
+        m = "The Niamoto database had been successfully synced with '{}'! " \
+            "Bellow is a summary of what had been done:"
         click.echo(m.format(name))
         o = r['occurrence']
         o_i, o_u, o_d = len(o['insert']), \
@@ -144,18 +144,21 @@ def sync(name, provider_args, database=None):
         po_i, po_u, po_d = len(po['insert']), \
                            len(po['update']), \
                            len(po['delete'])
-        click.secho("Occurrence:")
-        click.secho("    {} inserted".format(o_i), fg='green')
-        click.secho("    {} updated".format(o_u), fg='yellow')
-        click.secho("    {} deleted".format(o_d), fg='red')
-        click.secho("Plot:")
-        click.secho("    {} inserted".format(p_i), fg='green')
-        click.secho("    {} updated".format(p_u), fg='yellow')
-        click.secho("    {} deleted".format(p_d), fg='red')
-        click.secho("Plot / Occurrence:")
-        click.secho("    {} inserted".format(po_i), fg='green')
-        click.secho("    {} updated".format(po_u), fg='yellow')
-        click.secho("    {} deleted".format(po_d), fg='red')
+        click.secho("\n    Occurrence:")
+        click.secho("    ----------")
+        click.secho("        {} inserted".format(o_i), fg='green')
+        click.secho("        {} updated".format(o_u), fg='yellow')
+        click.secho("        {} deleted".format(o_d), fg='red')
+        click.secho("\n    Plot:")
+        click.secho("    ----")
+        click.secho("        {} inserted".format(p_i), fg='green')
+        click.secho("        {} updated".format(p_u), fg='yellow')
+        click.secho("        {} deleted".format(p_d), fg='red')
+        click.secho("\n    Plot / Occurrence:")
+        click.secho("    -----------------")
+        click.secho("        {} inserted".format(po_i), fg='green')
+        click.secho("        {} updated".format(po_u), fg='yellow')
+        click.secho("        {} deleted\n".format(po_d), fg='red')
     except NoRecordFoundError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
