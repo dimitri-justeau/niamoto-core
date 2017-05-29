@@ -15,7 +15,7 @@ from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 
 
 PROVIDER_TYPES = {
-    "PLANTNOTE": PlantnoteDataProvider,
+    PlantnoteDataProvider.get_type_name(): PlantnoteDataProvider,
 }
 
 
@@ -91,3 +91,35 @@ def delete_data_provider(name, database=settings.DEFAULT_DATABASE):
     :param database: The database to work with.
     """
     BaseDataProvider.unregister_data_provider(name, database=database)
+
+
+def sync_with_data_provider(name, *args, database=settings.DEFAULT_DATABASE,
+                            **kwargs):
+    """
+    Sync the Niamoto database with a data provider.
+    :param name: The name of the data provider.
+    :param database: The database to work with.
+    :return: The sync report.
+    """
+    sel = select([
+        data_provider.c.id,
+        data_provider.c.name,
+        data_provider_type.c.name.label('provider_type'),
+    ]).select_from(
+        data_provider.join(
+            data_provider_type,
+            data_provider.c.provider_type_id == data_provider_type.c.id
+        )
+    ).where(
+        data_provider.c.name == name
+    )
+    with Connector.get_connection(database=database) as connection:
+        r = connection.execute(sel)
+        record = r.fetchone()
+        name = record.name
+        type_key = record.provider_type
+        provider = PROVIDER_TYPES[type_key](
+            name, *args,
+            database=database, **kwargs
+        )
+        return provider.sync()

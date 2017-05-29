@@ -6,7 +6,7 @@ import os
 from niamoto.testing import set_test_path
 set_test_path()
 
-from niamoto.conf import settings, NIAMOTO_HOME
+from niamoto.conf import NIAMOTO_HOME
 from niamoto.api.data_provider_api import *
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -39,6 +39,12 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         with Connector.get_connection(database=DB) as connection:
             del1 = niamoto_db_meta.data_provider.delete()
             del2 = niamoto_db_meta.data_provider_type.delete()
+            del3 = niamoto_db_meta.occurrence.delete()
+            del4 = niamoto_db_meta.plot.delete()
+            del5 = niamoto_db_meta.plot_occurrence.delete()
+            connection.execute(del5)
+            connection.execute(del3)
+            connection.execute(del4)
             connection.execute(del1)
             connection.execute(del2)
             TestDataProvider._unregister_unique_synonym_constraint(connection)
@@ -109,6 +115,20 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
             NoRecordFoundError,
             delete_data_provider,
             "pl@ntnote_provider_1",
+            database=DB,
+        )
+
+    def test_sync_with_data_provider(self):
+        TestDataProvider.register_data_provider_type(database=DB)
+        PlantnoteDataProvider.register_data_provider_type(database=DB)
+        add_data_provider(
+            "pl@ntnote_provider_1",
+            "PLANTNOTE",
+            database=DB
+        )
+        sync_with_data_provider(
+            "pl@ntnote_provider_1",
+            self.TEST_DB_PATH,
             database=DB,
         )
 

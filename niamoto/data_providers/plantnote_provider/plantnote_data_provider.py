@@ -51,4 +51,4 @@ class PlantnoteDataProvider(BaseDataProvider):
 
     @classmethod
     def get_type_name(cls):
-        return "PLANTNOTE_DATA_PROVIDER"
+        return "PLANTNOTE"

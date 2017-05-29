@@ -68,6 +68,7 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None,
                    " raster database!")
     except RecordAlreadyExists as e:
         click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
     except:
         click.secho(
             "An error occurred while registering the raster.",
