@@ -11,7 +11,7 @@ import rasterio
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
-from niamoto.exceptions import NoRecordFoundError
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
 
 
 class RasterManager:
@@ -53,6 +53,15 @@ class RasterManager:
             raise FileNotFoundError(
                 "The raster {} does not exist".format(raster_file_path)
             )
+        # Check if the raster already exists
+        sel = niamoto_db_meta.raster_registry.select().where(
+            niamoto_db_meta.raster_registry.c.name == name
+        )
+        with Connector.get_connection(database=database) as connection:
+            r = connection.execute(sel).rowcount
+            if r > 0:
+                m = "The raster '{}' already exists in database."
+                raise RecordAlreadyExists(m.format(name))
         if srid is None:
             srid = cls.get_raster_srid(raster_file_path)
         dim = "{}x{}".format(tile_width, tile_height)
@@ -138,7 +147,11 @@ class RasterManager:
             'date_update': datetime.now(),
         }).where(niamoto_db_meta.raster_registry.c.name == name)
         with Connector.get_connection(database=database) as connection:
-            connection.execute(upd)
+            r = connection.execute(upd).rowcount
+            if r == 0:
+                m = "The raster '{}' does not exist in" \
+                    " database.".format(name)
+                raise NoRecordFoundError(m)
 
     @classmethod
     def delete_raster(cls, name, database=settings.DEFAULT_DATABASE):
@@ -157,7 +170,7 @@ class RasterManager:
                 )
                 r = connection.execute(del_stmt).rowcount
                 if r == 0:
-                    m = "The raster {} does not exist in" \
+                    m = "The raster '{}' does not exist in" \
                         " database.".format(name)
                     raise NoRecordFoundError(m)
 

@@ -24,5 +24,8 @@ def init_niamoto_home_cli(niamoto_home_path=None):
         api_init_niamoto_home.init_niamoto_home(niamoto_home_path)
         click.echo("Niamoto home directory had been successfully initialized!")
     except:
-        click.echo("An error occurred during home directory initialization.")
+        click.secho(
+            "An error occurred during home directory initialization.",
+            fg='red'
+        )
         click.get_current_context().exit(code=1)

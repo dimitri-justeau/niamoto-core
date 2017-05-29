@@ -18,5 +18,8 @@ def init_db_cli(database=None):
         api_init_db.init_db(database=database)
         click.echo("Niamoto database had been successfully initialized!")
     except:
-        click.echo("An error occurred during database initialization.")
+        click.secho(
+            "An error occurred during database initialization.",
+            fg='red'
+        )
         click.get_current_context().exit(code=1)

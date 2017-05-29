@@ -3,7 +3,7 @@
 import click
 
 from niamoto.decorators import resolve_database
-from niamoto.exceptions import NoRecordFoundError
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
 
 
 @click.command("rasters")
@@ -66,8 +66,13 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None,
         )
         click.echo("The raster had been successfully registered to the Niamoto"
                    " raster database!")
+    except RecordAlreadyExists as e:
+        click.secho(str(e), fg='red')
     except:
-        click.echo("An error occurred while registering the raster.")
+        click.secho(
+            "An error occurred while registering the raster.",
+            fg='red'
+        )
         click.get_current_context().exit(code=1)
 
 
@@ -101,8 +106,11 @@ def update_raster_cli(name, tile_width, tile_height, raster_file_path,
             database=database,
         )
         click.echo("The raster had been successfully updated!")
+    except NoRecordFoundError as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
     except:
-        click.echo("An error occurred while updating the raster.")
+        click.secho("An error occurred while updating the raster.", fg='red')
         click.get_current_context().exit(code=1)
 
 

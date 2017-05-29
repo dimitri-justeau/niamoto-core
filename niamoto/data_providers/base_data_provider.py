@@ -1,11 +1,12 @@
 # coding: utf-8
 
 from sqlalchemy import select, Index
+from sqlalchemy.exc import IntegrityError
 
 from niamoto.conf import settings
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
-from niamoto.exceptions import NoRecordFoundError
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
 
 
 class BaseDataProvider:
@@ -148,7 +149,11 @@ class BaseDataProvider:
             'properties': properties,
         })
         with Connector.get_connection(database=database) as connection:
-            connection.execute(ins)
+            try:
+                connection.execute(ins)
+            except IntegrityError:
+                m = "The data provider '{}' already exists in database."
+                raise RecordAlreadyExists(m.format(name))
         if return_object:
             return cls(name, *args, database=database, **kwargs)
 

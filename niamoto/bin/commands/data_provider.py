@@ -3,7 +3,7 @@
 import click
 
 from niamoto.decorators import resolve_database
-from niamoto.exceptions import NoRecordFoundError
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
 
 
 @click.command("provider_types")
@@ -23,8 +23,8 @@ def list_data_provider_types(database=None):
             return
         click.echo(provider_types_df.to_string())
     except:
-        click.echo("An error occurred, please ensure that Niamoto is "
-                   "properly configured.")
+        click.secho("An error occurred, please ensure that Niamoto is "
+                    "properly configured.", fg='red')
         click.get_current_context().exit(code=1)
 
 
@@ -45,8 +45,8 @@ def list_data_providers(database=None):
             return
         click.echo(providers_df.to_string())
     except:
-        click.echo("An error occurred, please ensure that Niamoto is "
-                   "properly configured.")
+        click.secho("An error occurred, please ensure that Niamoto is "
+                    "properly configured.", fg='red')
         click.get_current_context().exit(code=1)
 
 
@@ -76,9 +76,12 @@ def add_data_provider(name, provider_type, *args, database=None, **kwargs):
         )
         m = "The data provider had been successfully registered to Niamoto!"
         click.echo(m)
-    except:
+    except RecordAlreadyExists as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
+    except Exception as e:
         m = "An error occurred while registering the data provider."
-        click.echo(m)
+        click.secho(m, fg='red')
         click.get_current_context().exit(code=1)
 
 
@@ -104,5 +107,5 @@ def delete_data_provider(name, database=None):
         click.get_current_context().exit(code=1)
     except:
         m = "An error occurred while unregistering the data provider."
-        click.echo(m, fg='red')
+        click.secho(m, fg='red')
         click.get_current_context().exit(code=1)

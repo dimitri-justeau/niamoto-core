@@ -20,3 +20,9 @@ class NoRecordFoundError(Exception):
     Error to raise when a record had not been found in database.
     """
     pass
+
+
+class RecordAlreadyExists(Exception):
+    """
+    Error to raise when trying to insert a record that already exists.
+    """

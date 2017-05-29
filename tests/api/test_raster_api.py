@@ -15,6 +15,7 @@ from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.api import raster_api
+from niamoto.exceptions import NoRecordFoundError
 
 
 DB = settings.TEST_DATABASE
@@ -84,6 +85,12 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
             database=DB
         )
         raster_api.delete_raster('test_raster', database=DB)
+        self.assertRaises(
+            NoRecordFoundError,
+            raster_api.delete_raster,
+            'test_raster',
+            database=DB
+        )
 
 
 if __name__ == '__main__':
