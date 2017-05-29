@@ -103,22 +103,15 @@ Initializing the Niamoto database
 ---------------------------------
 
 Initializing the Niamoto database means creating the tables,
-populating the taxonomic referential [1]_, and registering the available data
+populating the taxonomic referential, and registering the available data
 provider types. The procedure is straightforward:
 
 .. code-block:: bash
 
     niamoto init_db
 
-
-What's next?
-------------
-
-At this point, you should have a working Niamoto environment. If you are ready
-to play, you can go to the :ref:`tutorial`!
-
-
-.. [1] For the moment, the taxonomic referential used corresponds
+.. note::
+    For the moment, the taxonomic referential used corresponds
     to the New Caledonian trees. Since Niamoto is being developed within the
     New Caledonian rainsforests context, it is ok for us, but it might be
     problematic for someone trying to test Niamoto for another context. We
@@ -127,3 +120,11 @@ to play, you can go to the :ref:`tutorial`!
     than us is using Niamoto. If you want to try Niamoto in your context and
     need those functionalities, let us know, it will be a sufficient reason
     for us to adjust our priorities.
+
+
+What's next?
+------------
+
+At this point, you should have a working Niamoto environment. If you are ready
+to play, you can go to the :ref:`tutorial`!
+
