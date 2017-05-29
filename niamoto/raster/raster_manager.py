@@ -53,7 +53,7 @@ class RasterManager:
             raise FileNotFoundError(
                 "The raster {} does not exist".format(raster_file_path)
             )
-        cls._assert_raster_does_not_exist(name, database)
+        cls.assert_raster_does_not_exist(name, database)
         if srid is None:
             srid = cls.get_raster_srid(raster_file_path)
         dim = "{}x{}".format(tile_width, tile_height)
@@ -108,7 +108,7 @@ class RasterManager:
             raise FileNotFoundError(
                 "The raster {} does not exist".format(raster_file_path)
             )
-        cls._assert_raster_exists(name, database)
+        cls.assert_raster_exists(name, database)
         if srid is None:
             srid = cls.get_raster_srid(raster_file_path)
         dim = "{}x{}".format(tile_width, tile_height)
@@ -149,7 +149,7 @@ class RasterManager:
         :param name: The name of the raster.
         :param database: The database to delete the raster from.
         """
-        cls._assert_raster_exists(name, database)
+        cls.assert_raster_exists(name, database)
         with Connector.get_connection(database=database) as connection:
             with connection.begin():
                 connection.execute("DROP TABLE IF EXISTS {};".format(
@@ -172,8 +172,7 @@ class RasterManager:
         return srid
 
     @staticmethod
-    def _assert_raster_does_not_exist(name, database):
-        # Check if the raster already exists
+    def assert_raster_does_not_exist(name, database):
         sel = niamoto_db_meta.raster_registry.select().where(
             niamoto_db_meta.raster_registry.c.name == name
         )
@@ -184,8 +183,7 @@ class RasterManager:
                 raise RecordAlreadyExists(m.format(name))
 
     @staticmethod
-    def _assert_raster_exists(name, database):
-        # Check if the raster already exists
+    def assert_raster_exists(name, database):
         sel = niamoto_db_meta.raster_registry.select().where(
             niamoto_db_meta.raster_registry.c.name == name
         )

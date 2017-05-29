@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from sqlalchemy import select, Index
-from sqlalchemy.exc import IntegrityError
 
 from niamoto.conf import settings
 from niamoto.db import metadata as niamoto_db_meta
@@ -134,13 +133,14 @@ class BaseDataProvider:
             niamoto_db_meta.taxon.c.synonyms[cls.get_type_name()],
             unique=True,
         )
-        index.drop(connection)
         niamoto_db_meta.taxon.indexes.remove(index)
+        index.drop(connection)
 
     @classmethod
     def register_data_provider(cls, name, *args,
                                database=settings.DEFAULT_DATABASE,
                                properties={}, return_object=True, **kwargs):
+        cls.assert_data_provider_does_not_exist(name, database)
         ins = niamoto_db_meta.data_provider.insert({
             'name': name,
             'provider_type_id': cls.get_data_provider_type_db_id(
@@ -149,11 +149,7 @@ class BaseDataProvider:
             'properties': properties,
         })
         with Connector.get_connection(database=database) as connection:
-            try:
-                connection.execute(ins)
-            except IntegrityError:
-                m = "The data provider '{}' already exists in database."
-                raise RecordAlreadyExists(m.format(name))
+            connection.execute(ins)
         if return_object:
             return cls(name, *args, database=database, **kwargs)
 
@@ -165,13 +161,32 @@ class BaseDataProvider:
         :param name: The name of the data provider to unregister.
         :param database: The database to work with.
         """
+        cls.assert_data_provider_exists(name, database)
         delete_stmt = niamoto_db_meta.data_provider.delete().where(
             niamoto_db_meta.data_provider.c.name == name
         )
         with Connector.get_connection(database=database) as connection:
             with connection.begin():
-                r = connection.execute(delete_stmt).rowcount
-                if r == 0:
-                    m = "The data provider '{}' does not exist in" \
-                        " database.".format(name)
-                    raise NoRecordFoundError(m)
+                connection.execute(delete_stmt)
+
+    @staticmethod
+    def assert_data_provider_does_not_exist(name, database):
+        sel = niamoto_db_meta.data_provider.select().where(
+            niamoto_db_meta.data_provider.c.name == name
+        )
+        with Connector.get_connection(database=database) as connection:
+            r = connection.execute(sel).rowcount
+            if r > 0:
+                m = "The data provider '{}' already exists in database."
+                raise RecordAlreadyExists(m.format(name))
+
+    @staticmethod
+    def assert_data_provider_exists(name, database):
+        sel = niamoto_db_meta.data_provider.select().where(
+            niamoto_db_meta.data_provider.c.name == name
+        )
+        with Connector.get_connection(database=database) as connection:
+            r = connection.execute(sel).rowcount
+            if r == 0:
+                m = "The data provider '{}' does not exist in database."
+                raise NoRecordFoundError(m.format(name))

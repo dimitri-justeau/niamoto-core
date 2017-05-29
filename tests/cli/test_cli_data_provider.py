@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import unittest
+import os
 
 from click.testing import CliRunner
 
@@ -8,7 +9,7 @@ from niamoto.testing import set_test_path
 
 set_test_path()
 
-from niamoto.conf import settings
+from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.bin.commands import data_provider
@@ -26,13 +27,31 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
     Test case for data provider cli methods.
     """
 
+    TEST_DB_PATH = os.path.join(
+        NIAMOTO_HOME,
+        'data',
+        'plantnote',
+        'ncpippn_test.sqlite',
+    )
+
     def tearDown(self):
         del1 = niamoto_db_meta.data_provider.delete()
         del2 = niamoto_db_meta.data_provider_type.delete()
         with Connector.get_connection(database=DB) as connection:
             connection.execute(del1)
             connection.execute(del2)
-            TestDataProvider._unregister_unique_synonym_constraint(connection)
+            try:
+                TestDataProvider._unregister_unique_synonym_constraint(
+                    connection
+                )
+            except:
+                pass
+            try:
+                PlantnoteDataProvider._unregister_unique_synonym_constraint(
+                    connection
+                )
+            except:
+                pass
 
     def test_list_data_provider_types(self):
         runner = CliRunner()
@@ -128,6 +147,36 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
             ['--database', 'YO', 'test_data_provider_1']
         )
         self.assertEqual(result.exit_code, 1)
+
+    def test_sync(self):
+        runner = CliRunner()
+        TestDataProvider.register_data_provider_type(
+            database=settings.TEST_DATABASE
+        )
+        PlantnoteDataProvider.register_data_provider_type(
+            database=settings.TEST_DATABASE
+        )
+        PlantnoteDataProvider.register_data_provider(
+            'plantnote_provider',
+            self.TEST_DB_PATH,
+            database=settings.TEST_DATABASE
+        )
+        result = runner.invoke(
+            data_provider.sync,
+            ['--database', DB, 'plantnote_provider', self.TEST_DB_PATH]
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            data_provider.sync,
+            ['--database', DB, 'plantnote', self.TEST_DB_PATH]
+        )
+        self.assertEqual(result.exit_code, 1)
+        result = runner.invoke(
+            data_provider.sync,
+            ['--database', DB, 'plantnote_provider', "yo"]
+        )
+        self.assertEqual(result.exit_code, 1)
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()

@@ -101,6 +101,7 @@ def sync_with_data_provider(name, *args, database=settings.DEFAULT_DATABASE,
     :param database: The database to work with.
     :return: The sync report.
     """
+    BaseDataProvider.assert_data_provider_exists(name, database)
     sel = select([
         data_provider.c.id,
         data_provider.c.name,

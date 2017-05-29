@@ -30,7 +30,11 @@ occurrence = Table(
     Column('id', Integer, primary_key=True),
     Column(
         'provider_id',
-        ForeignKey('{}.data_provider.id'.format(settings.NIAMOTO_SCHEMA)),
+        ForeignKey(
+            '{}.data_provider.id'.format(settings.NIAMOTO_SCHEMA),
+            onupdate="CASCADE",
+            ondelete="CASCADE",
+        ),
         nullable=False
     ),
     Column('provider_pk', Integer, nullable=False),
@@ -97,7 +101,11 @@ plot = Table(
     Column('id', Integer, primary_key=True),
     Column(
         'provider_id',
-        ForeignKey('{}.data_provider.id'.format(settings.NIAMOTO_SCHEMA)),
+        ForeignKey(
+            '{}.data_provider.id'.format(settings.NIAMOTO_SCHEMA),
+            onupdate="CASCADE",
+            ondelete="CASCADE",
+        ),
         nullable=False
     ),
     Column('provider_pk', Integer, nullable=False),
@@ -133,6 +141,8 @@ plot_occurrence = Table(
             '{}.plot.provider_id'.format(settings.NIAMOTO_SCHEMA),
             '{}.plot.provider_pk'.format(settings.NIAMOTO_SCHEMA)
         ],
+        onupdate="CASCADE",
+        ondelete="CASCADE",
     ),
     ForeignKeyConstraint(
         [
@@ -145,6 +155,8 @@ plot_occurrence = Table(
             '{}.occurrence.provider_id'.format(settings.NIAMOTO_SCHEMA),
             '{}.occurrence.provider_pk'.format(settings.NIAMOTO_SCHEMA)
         ],
+        onupdate="CASCADE",
+        ondelete="CASCADE",
     ),
     schema=settings.NIAMOTO_SCHEMA,
 )

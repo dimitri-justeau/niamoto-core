@@ -1,10 +1,10 @@
 # coding: utf-8
 
-from sqlalchemy.sql import select, bindparam, and_
+from sqlalchemy.sql import select, bindparam, and_, cast
+from sqlalchemy.dialects.postgresql import JSONB
 import pandas as pd
 
 from niamoto.db.metadata import plot
-from niamoto.db.connector import Connector
 
 
 class BasePlotProvider:
@@ -50,9 +50,16 @@ class BasePlotProvider:
         with connection.begin():
             if len(insert_df) > 0:
                 ins_stmt = plot.insert().values(
+                    provider_id=bindparam('provider_id'),
+                    provider_pk=bindparam('provider_pk'),
+                    name=bindparam('name'),
+                    location=bindparam('location'),
+                    properties=cast(bindparam('properties'), JSONB),
+                )
+                connection.execute(
+                    ins_stmt,
                     insert_df.to_dict(orient='records')
                 )
-                connection.execute(ins_stmt)
             if len(update_df) > 0:
                 upd_stmt = plot.update().where(
                     and_(
@@ -62,7 +69,7 @@ class BasePlotProvider:
                 ).values({
                     'location': bindparam('location'),
                     'name': bindparam('name'),
-                    'properties': bindparam('properties'),
+                    'properties': cast(bindparam('properties'), JSONB),
                 })
                 connection.execute(
                     upd_stmt,

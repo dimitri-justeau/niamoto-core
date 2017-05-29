@@ -26,3 +26,9 @@ class RecordAlreadyExists(Exception):
     """
     Error to raise when trying to insert a record that already exists.
     """
+
+
+class BaseDataProviderException(Exception):
+    """
+    Base class for errors specific to data providers implementations.
+    """
