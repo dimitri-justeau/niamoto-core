@@ -52,9 +52,17 @@ class BaseDataProvider:
     def plot_occurrence_provider(self):
         raise NotImplementedError()
 
-    def sync(self):
+    def sync(self, insert=True, update=True, delete=True,
+             sync_occurrence=True, sync_plot=True,
+             sync_plot_occurrence=True):
         """
         Sync Niamoto database with providers data.
+        :param insert: if False, skip insert operation.
+        :param update: if False, skip update operation.
+        :param delete: if False, skip delete operation.
+        :param sync_occurrence: if False, skip occurrence sync.
+        :param sync_plot: if False, skip plot sync.
+        :param sync_plot_occurrence: if skip plot-occurrence sync.
         :return A dict containing the insert / update / delete dataframes for
         each specialized provider:
             {
@@ -69,10 +77,25 @@ class BaseDataProvider:
         """
         with Connector.get_connection(database=self.database) as connection:
             with connection.begin():
-                i1, u1, d1 = self.occurrence_provider.sync(connection)
-                i2, u2, d2 = self.plot_provider.sync(connection)
+                i1, u1, d1 = self.occurrence_provider.sync(
+                    connection,
+                    insert=insert,
+                    update=update,
+                    delete=delete,
+                ) if sync_occurrence else [], [], []
+                i2, u2, d2 = self.plot_provider.sync(
+                    connection,
+                    insert=insert,
+                    update=update,
+                    delete=delete,
+                ) if sync_plot else [], [], []
             with connection.begin():
-                i3, u3, d3 = self.plot_occurrence_provider.sync(connection)
+                i3, u3, d3 = self.plot_occurrence_provider.sync(
+                    connection,
+                    insert=insert,
+                    update=update,
+                    delete=delete,
+                ) if sync_plot_occurrence else [], [], []
             return {
                 'occurrence': {
                     'insert': i1,

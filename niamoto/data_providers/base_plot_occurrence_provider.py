@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from sqlalchemy.sql import *
+from sqlalchemy.sql import and_, bindparam, select
 import pandas as pd
 
 from niamoto.db.metadata import plot_occurrence, plot, occurrence
@@ -64,12 +64,15 @@ class BasePlotOccurrenceProvider:
         """
         raise NotImplementedError()
 
-    def _sync(self, df, connection):
+    def _sync(self, df, connection, insert=True, update=True, delete=True):
         niamoto_df = self.get_niamoto_plot_occurrence_dataframe(connection)
         provider_df = df
-        insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
-        update_df = self.get_update_dataframe(niamoto_df, provider_df)
-        delete_df = self.get_delete_dataframe(niamoto_df, provider_df)
+        insert_df = self.get_insert_dataframe(niamoto_df, provider_df) \
+            if insert else pd.DataFrame()
+        update_df = self.get_update_dataframe(niamoto_df, provider_df) \
+            if update else pd.DataFrame()
+        delete_df = self.get_delete_dataframe(niamoto_df, provider_df) \
+            if delete else pd.DataFrame()
         with connection.begin():
             plot_id_col = plot_occurrence.c.plot_id
             occurrence_id_col = plot_occurrence.c.occurrence_id
@@ -112,15 +115,24 @@ class BasePlotOccurrenceProvider:
                 )
         return insert_df, update_df, delete_df
 
-    def sync(self, connection):
+    def sync(self, connection, insert=True, update=True, delete=True):
         """
         Sync Niamoto database with provider.
         :param connection: A connection to the database to work with.
+        :param insert: if False, skip insert operation.
+        :param update: if False, skip update operation.
+        :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
         df = self.get_provider_plot_occurrence_dataframe()
         reindexed_df = self.get_reindexed_provider_dataframe(df)
-        return self._sync(reindexed_df, connection)
+        return self._sync(
+            reindexed_df,
+            connection,
+            insert=insert,
+            update=update,
+            delete=delete,
+        )
 
     def get_reindexed_provider_dataframe(self, dataframe):
         """

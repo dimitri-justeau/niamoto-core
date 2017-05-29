@@ -10,7 +10,7 @@ from niamoto.data_providers.plantnote_provider.plantnote_plot_provider \
     import PlantnotePlotProvider
 from niamoto.data_providers.plantnote_provider \
     .plantnote_plot_occurrence_provider import PlantnotePlotOccurrenceProvider
-from niamoto.exceptions import BaseDataProviderException
+from niamoto.exceptions import DataSourceNotFoundError
 
 
 class PlantnoteDataProvider(BaseDataProvider):
@@ -26,11 +26,11 @@ class PlantnoteDataProvider(BaseDataProvider):
             name,
             database=database
         )
-        if not exists(plantnote_db_path) and not isfile(plantnote_db_path):
+        if not exists(plantnote_db_path) or not isfile(plantnote_db_path):
             m = "The Pl@ntnote database '{}' does not exist.".format(
                 plantnote_db_path
             )
-            raise PlantnoteDatabaseDoesNotExistError(m)
+            raise DataSourceNotFoundError(m)
         self.plantnote_db_path = plantnote_db_path
         self._occurrence_provider = PlantnoteOccurrenceProvider(
             self,
@@ -60,7 +60,3 @@ class PlantnoteDataProvider(BaseDataProvider):
     @classmethod
     def get_type_name(cls):
         return "PLANTNOTE"
-
-
-class PlantnoteDatabaseDoesNotExistError(BaseDataProviderException):
-    pass

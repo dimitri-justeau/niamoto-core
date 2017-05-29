@@ -32,3 +32,15 @@ class BaseDataProviderException(Exception):
     """
     Base class for errors specific to data providers implementations.
     """
+
+
+class DataSourceNotFoundError(BaseDataProviderException):
+    """
+    Error to raise when a data source cannot be found (e.g. file, database).
+    """
+
+
+class MalformedDataSourceError(BaseDataProviderException):
+    """
+    Error to raise when a data source is malformed.
+    """

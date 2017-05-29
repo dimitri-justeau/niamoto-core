@@ -41,12 +41,15 @@ class BasePlotProvider:
         """
         raise NotImplementedError()
 
-    def _sync(self, df, connection):
+    def _sync(self, df, connection, insert=True, update=True, delete=True):
         niamoto_df = self.get_niamoto_plot_dataframe(connection)
         provider_df = df
-        insert_df = self.get_insert_dataframe(niamoto_df, provider_df)
-        update_df = self.get_update_dataframe(niamoto_df, provider_df)
-        delete_df = self.get_delete_dataframe(niamoto_df, provider_df)
+        insert_df = self.get_insert_dataframe(niamoto_df, provider_df) \
+            if insert else pd.DataFrame()
+        update_df = self.get_update_dataframe(niamoto_df, provider_df) \
+            if update else pd.DataFrame()
+        delete_df = self.get_delete_dataframe(niamoto_df, provider_df) \
+            if delete else pd.DataFrame()
         with connection.begin():
             if len(insert_df) > 0:
                 ins_stmt = plot.insert().values(
@@ -85,13 +88,22 @@ class BasePlotProvider:
                 connection.execute(del_stmt)
         return insert_df, update_df, delete_df
 
-    def sync(self, connection):
+    def sync(self, connection, insert=True, update=True, delete=True):
         """
         Sync Niamoto database with provider.
         :param connection: A connection to the database to work with.
+        :param insert: if False, skip insert operation.
+        :param update: if False, skip update operation.
+        :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
-        return self._sync(self.get_provider_plot_dataframe(), connection)
+        return self._sync(
+            self.get_provider_plot_dataframe(),
+            connection,
+            insert=insert,
+            update=update,
+            delete=delete,
+        )
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
