@@ -134,17 +134,23 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
         )
         result = runner.invoke(
             data_provider.delete_data_provider,
-            ['--database', DB, 'test_data_provider_1']
+            ['--database', DB, 'test_data_provider_1'],
+            input='N'
         )
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(
             data_provider.delete_data_provider,
-            ['--database', DB, 'test_data_provider_1']
+            ['--database', DB, '-y', True, 'test_data_provider_1']
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            data_provider.delete_data_provider,
+            ['--database', DB, '-y', True, 'test_data_provider_1']
         )
         self.assertEqual(result.exit_code, 1)
         result = runner.invoke(
             data_provider.delete_data_provider,
-            ['--database', 'YO', 'test_data_provider_1']
+            ['--database', 'YO', '-y', True, 'test_data_provider_1']
         )
         self.assertEqual(result.exit_code, 1)
 

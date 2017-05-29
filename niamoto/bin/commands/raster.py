@@ -117,12 +117,19 @@ def update_raster_cli(name, tile_width, tile_height, raster_file_path,
 
 @click.command('delete_raster')
 @click.option('--database', default=None)
+@click.option('-y', default=False)
 @click.argument('name')
 @resolve_database
-def delete_raster_cli(name, database=None):
+def delete_raster_cli(name, database=None, y=False):
     """
     Delete an existing raster from Niamoto's raster database.
     """
+    if not y:
+        m = "If you continue, the raster will be deleted from the " \
+            "database, are you sure you want to continue?"
+        if not click.confirm(m, default=True):
+            click.secho("Operation aborted.")
+            return
     from niamoto.api import raster_api
     click.echo("Deleting {} raster...".format(name))
     try:

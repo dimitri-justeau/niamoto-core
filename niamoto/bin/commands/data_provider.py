@@ -89,11 +89,18 @@ def add_data_provider(name, provider_type, *args, database=None, **kwargs):
 @click.command("delete_provider")
 @click.argument("name")
 @click.option('--database', default=None)
+@click.option('-y', default=False)
 @resolve_database
-def delete_data_provider(name, database=None):
+def delete_data_provider(name, database=None, y=False):
     """
     Delete a data provider.
     """
+    if not y:
+        m = "If you delete the data provider, all the data referring to it" \
+            " will also be deleted, do you want to continue?"
+        if not click.confirm(m, default=True):
+            click.secho("Operation aborted.")
+            return
     from niamoto.api.data_provider_api import delete_data_provider
     click.echo("Unregistering the data provider from the database...")
     try:
@@ -129,17 +136,20 @@ def sync(name, provider_args, database=None):
             "Bellow is a summary of what had been done:"
         click.echo(m.format(name))
         o = r['occurrence']
-        o_i, o_u, o_d = len(o['insert']), \
-                        len(o['update']), \
-                        len(o['delete'])
+        o_i, o_u, o_d = \
+            len(o['insert']), \
+            len(o['update']), \
+            len(o['delete'])
         p = r['plot']
-        p_i, p_u, p_d = len(p['insert']), \
-                        len(p['update']), \
-                        len(p['delete'])
+        p_i, p_u, p_d = \
+            len(p['insert']), \
+            len(p['update']), \
+            len(p['delete'])
         po = r['plot_occurrence']
-        po_i, po_u, po_d = len(po['insert']), \
-                           len(po['update']), \
-                           len(po['delete'])
+        po_i, po_u, po_d = \
+            len(po['insert']), \
+            len(po['update']), \
+            len(po['delete'])
         click.secho("\n    Occurrence:")
         click.secho("    ----------")
         click.secho("        {} inserted".format(o_i), fg='green')
