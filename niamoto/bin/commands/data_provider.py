@@ -123,12 +123,8 @@ def sync(name, provider_args, database=None):
     """
     from niamoto.api.data_provider_api import sync_with_data_provider
     click.echo("Syncing the Niamoto database with '{}'...".format(name))
-    args = [name, ] + list(provider_args)
     try:
-        r = sync_with_data_provider(
-            *args,
-            database=database,
-        )
+        r = sync_with_data_provider(name, *provider_args, database=database)
         m = "The Niamoto database had been successfully synced with '{}'! " \
             "Bellow is a summary of what had been done:"
         click.echo(m.format(name))
