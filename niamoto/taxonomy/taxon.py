@@ -90,7 +90,7 @@ class Taxon:
             sel = select([
                 niamoto_id_col.label("niamoto_taxon_id"),
                 synonym_col[provider_type].label("provider_taxon_id"),
-            ])
+            ]).where(synonym_col[provider_type].isnot(None))
             synonyms = pd.read_sql(
                 sel,
                 connection,

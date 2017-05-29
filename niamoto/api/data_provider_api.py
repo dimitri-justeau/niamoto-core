@@ -12,10 +12,12 @@ from niamoto.db.connector import Connector
 from niamoto.db.metadata import data_provider_type, data_provider
 from niamoto.data_providers.base_data_provider import BaseDataProvider
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
+from niamoto.data_providers.csv_provider import CsvDataProvider
 
 
 PROVIDER_TYPES = {
     PlantnoteDataProvider.get_type_name(): PlantnoteDataProvider,
+    CsvDataProvider.get_type_name(): CsvDataProvider,
 }
 
 
@@ -59,6 +61,7 @@ def add_data_provider(name, provider_type, *args,
     :param provider_type: The type of the provider to register. Must be a
     string value among:
         - 'PLANTNOTE': The Pl@ntnote data provider.
+        - 'CSV': The CSV data provider.
     :param args: Additional args.
     :param database: The database to work with.
     :param properties: Properties dict to store for the data provider.

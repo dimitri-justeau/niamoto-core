@@ -39,4 +39,17 @@ class CsvOccurrenceProvider(BaseOccurrenceProvider):
             m = "The csv file does not contains the required columns " \
                 "('id', 'taxon_id', 'x', 'y'), csv has: {}".format(cols)
             raise MalformedDataSourceError(m)
+        property_cols = cols.difference(self.REQUIRED_COLUMNS)
+        properties = df[list(property_cols)].apply(
+            lambda x: x.to_json(),
+            axis=1
+        )
+        df.drop(property_cols, axis=1, inplace=True)
+        df['properties'] = properties
+        location = df[['x', 'y']].apply(
+            lambda x: "SRID=4326;POINT({} {})".format(x['x'], x['y']),
+            axis=1
+        )
+        df['location'] = location
+        df.drop(['x', 'y'], axis=1, inplace=True)
         return df

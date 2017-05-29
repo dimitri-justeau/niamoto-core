@@ -150,18 +150,18 @@ def sync(name, provider_args, database=None):
             len(po['insert']), \
             len(po['update']), \
             len(po['delete'])
-        click.secho("\n    Occurrence:")
-        click.secho("    ----------")
+        click.secho("\n    Occurrences:")
+        click.secho("    -----------")
         click.secho("        {} inserted".format(o_i), fg='green')
         click.secho("        {} updated".format(o_u), fg='yellow')
         click.secho("        {} deleted".format(o_d), fg='red')
-        click.secho("\n    Plot:")
-        click.secho("    ----")
+        click.secho("\n    Plots:")
+        click.secho("    -----")
         click.secho("        {} inserted".format(p_i), fg='green')
         click.secho("        {} updated".format(p_u), fg='yellow')
         click.secho("        {} deleted".format(p_d), fg='red')
-        click.secho("\n    Plot / Occurrence:")
-        click.secho("    -----------------")
+        click.secho("\n    Plots / Occurrences:")
+        click.secho("    ------------------")
         click.secho("        {} inserted".format(po_i), fg='green')
         click.secho("        {} updated".format(po_u), fg='yellow')
         click.secho("        {} deleted\n".format(po_d), fg='red')
@@ -172,7 +172,6 @@ def sync(name, provider_args, database=None):
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
     except:
-        raise
         m = "An error occurred while syncing with '{}'.".format(name)
         click.secho(m, fg='red')
         click.get_current_context().exit(code=1)

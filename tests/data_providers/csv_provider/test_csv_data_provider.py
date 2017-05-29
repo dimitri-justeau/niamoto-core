@@ -51,8 +51,9 @@ class TestCsvDataProvider(BaseTestNiamotoSchemaCreated):
             database=DB,
             occurrence_csv_path=TEST_OCCURRENCE_CSV,
         )
-        df = csv_provider.occurrence_provider.get_provider_occurrence_dataframe()
-        print(df)
+        csv_provider.sync()
+        # Test with plots
+        # Test with plots / occurrences
 
 
 if __name__ == '__main__':

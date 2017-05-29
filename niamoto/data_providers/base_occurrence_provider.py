@@ -75,11 +75,11 @@ class BaseOccurrenceProvider:
         niamoto_df = self.get_niamoto_occurrence_dataframe(connection)
         provider_df = df.where((pd.notnull(df)), None)
         insert_df = self.get_insert_dataframe(niamoto_df, provider_df) \
-            if insert else pd.DataFrame()
+            if insert else []
         update_df = self.get_update_dataframe(niamoto_df, provider_df) \
-            if update else pd.DataFrame()
+            if update else []
         delete_df = self.get_delete_dataframe(niamoto_df, provider_df) \
-            if delete else pd.DataFrame()
+            if delete else []
         with connection.begin():
             if len(insert_df) > 0:
                 ins_stmt = occurrence.insert().values(

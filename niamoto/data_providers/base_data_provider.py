@@ -82,20 +82,20 @@ class BaseDataProvider:
                     insert=insert,
                     update=update,
                     delete=delete,
-                ) if sync_occurrence else [], [], []
+                ) if sync_occurrence else ([], [], [])
                 i2, u2, d2 = self.plot_provider.sync(
                     connection,
                     insert=insert,
                     update=update,
                     delete=delete,
-                ) if sync_plot else [], [], []
+                ) if sync_plot else ([], [], [])
             with connection.begin():
                 i3, u3, d3 = self.plot_occurrence_provider.sync(
                     connection,
                     insert=insert,
                     update=update,
                     delete=delete,
-                ) if sync_plot_occurrence else [], [], []
+                ) if sync_plot_occurrence else ([], [], [])
             return {
                 'occurrence': {
                     'insert': i1,
