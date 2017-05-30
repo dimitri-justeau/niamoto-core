@@ -117,13 +117,16 @@ def sync_with_data_provider(name, *args, database=settings.DEFAULT_DATABASE,
     ).where(
         data_provider.c.name == name
     )
+    # Look for args that must be set None
+    none_values = [None, 'none', 'None', '0', 'n', 'N',]
+    nargs = [None if i in none_values else i for i in args]
     with Connector.get_connection(database=database) as connection:
         r = connection.execute(sel)
         record = r.fetchone()
         name = record.name
         type_key = record.provider_type
         provider = PROVIDER_TYPES[type_key](
-            name, *args,
+            name, *nargs,
             database=database, **kwargs
         )
         return provider.sync()

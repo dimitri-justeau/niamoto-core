@@ -38,6 +38,11 @@ class BasePlotProvider:
         :return: A DataFrame containing the plot data currently
         available from the provider. The index of the DataFrame corresponds
         to the provider's pk.
+        The dataframe must be structure with the following columns
+            id -> The provider's pk (index).
+            name -> The name of the plot.
+            location -> Location of the plot.
+            properties -> The properties of the plot, JSON format.
         """
         raise NotImplementedError()
 

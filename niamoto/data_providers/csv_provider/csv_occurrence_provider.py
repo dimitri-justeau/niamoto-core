@@ -40,10 +40,13 @@ class CsvOccurrenceProvider(BaseOccurrenceProvider):
                 "('id', 'taxon_id', 'x', 'y'), csv has: {}".format(cols)
             raise MalformedDataSourceError(m)
         property_cols = cols.difference(self.REQUIRED_COLUMNS)
-        properties = df[list(property_cols)].apply(
-            lambda x: x.to_json(),
-            axis=1
-        )
+        if len(property_cols) > 0:
+            properties = df[list(property_cols)].apply(
+                lambda x: x.to_json(),
+                axis=1
+            )
+        else:
+            properties = '{}'
         df.drop(property_cols, axis=1, inplace=True)
         df['properties'] = properties
         location = df[['x', 'y']].apply(
