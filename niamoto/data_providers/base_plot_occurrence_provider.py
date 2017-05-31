@@ -54,8 +54,8 @@ class BasePlotOccurrenceProvider:
         and must be constitute a multi-index [provider_plot_pk,
         provider_occurrence_pk]. The structure must be the following:
             _________________________________________________________________
-           | provider_plot_pk       -> First member of the multi index       |
-           | provider_occurrence_pk -> Second member of the multi index      |
+           | plot_id       -> 1st member of the multi index, provider's id   |
+           | occurrence_id -> 2nd member of the multi index, provider's id   |
            |_________________________________________________________________|
            |-----------------------------------------------------------------|
            | occurrence_identifier -> The identifier of the occurrence in    |
@@ -138,13 +138,19 @@ class BasePlotOccurrenceProvider:
         """
         :param dataframe: The provider's DataFrame, or a subset, with index
         being a multi-index composed with
-        [provider_plot_pk, occurrence_plot_pk].
+        [plot_id, occurrence_id] (provider's ids).
         :return: The dataframe reindexed:
             provider_plot_pk -> plot_id
             provider_occurrence_pk -> occurrence_id
         """
+
         if len(dataframe) == 0:
             return dataframe
+        # Set index names
+        dataframe.index.set_names(
+            ['provider_plot_pk', 'provider_occurrence_pk'],
+            inplace=True
+        )
         db = self.data_provider.database
         with Connector.get_connection(database=db) as connection:
             sel_plot = select([

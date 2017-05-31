@@ -12,6 +12,12 @@ from niamoto.exceptions import DataSourceNotFoundError, \
 class CsvPlotProvider(BasePlotProvider):
     """
     Csv plot provider.
+    The csv file must contain AT LEAST the following columns:
+        id -> The provider's identifier for the plot.
+        name -> The name of the plot.
+        x -> The longitude of the occurrence (WGS84).
+        y -> The latitude of the occurrence (WGS84).
+    All the remaining column will be stored as properties.
     """
 
     REQUIRED_COLUMNS = set(['id', 'name', 'x', 'y'])
@@ -26,13 +32,21 @@ class CsvPlotProvider(BasePlotProvider):
         self.plot_csv_path = plot_csv_path
 
     def get_provider_plot_dataframe(self):
-        df = pd.read_csv(self.plot_csv_path)
-        cols = set(df.columns)
+        try:
+            df = pd.read_csv(self.plot_csv_path, index_col='id')
+        except ValueError:
+            m = "The csv file is not valid, it must contains the following " \
+                "columns: ('plot_id', 'occurrence_id', " \
+                "'occurrence_identifier')"
+            raise MalformedDataSourceError(m)
+        cols = set(list(df.columns) + ['id', ])
         inter = cols.intersection(self.REQUIRED_COLUMNS)
         if not inter == self.REQUIRED_COLUMNS:
             m = "The csv file does not contains the required columns " \
                 "('id', 'taxon_id', 'x', 'y'), csv has: {}".format(cols)
             raise MalformedDataSourceError(m)
+        if len(df) == 0:
+            return df
         property_cols = cols.difference(self.REQUIRED_COLUMNS)
         if len(property_cols) > 0:
             properties = df[list(property_cols)].apply(

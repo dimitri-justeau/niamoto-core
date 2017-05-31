@@ -172,6 +172,7 @@ def sync(name, provider_args, database=None):
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
     except:
+        raise
         m = "An error occurred while syncing with '{}'.".format(name)
         click.secho(m, fg='red')
         click.get_current_context().exit(code=1)

@@ -24,9 +24,9 @@ class PlantnotePlotOccurrenceProvider(BasePlotOccurrenceProvider):
             metadata.reflect(eng)
             plot_occ_table = metadata.tables['Inventaires']
             sel = select([
-                plot_occ_table.c["ID Parcelle"].label("provider_plot_pk"),
+                plot_occ_table.c["ID Parcelle"].label("plot_id"),
                 plot_occ_table.c["ID Individus"].label(
-                    "provider_occurrence_pk"
+                    "occurrence_id"
                 ),
                 plot_occ_table.c["Identifiant"].label(
                     "occurrence_identifier"
@@ -35,7 +35,7 @@ class PlantnotePlotOccurrenceProvider(BasePlotOccurrenceProvider):
             df = pd.read_sql(
                 sel,
                 connection,
-                index_col=["provider_plot_pk", "provider_occurrence_pk"]
+                index_col=["plot_id", "occurrence_id"]
             )
             return df
         except:
