@@ -10,6 +10,7 @@ import pandas as pd
 from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db.metadata import data_provider_type, data_provider
+from niamoto.db.utils import fix_db_sequences
 from niamoto.data_providers.base_data_provider import BaseDataProvider
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 from niamoto.data_providers.csv_provider import CsvDataProvider
@@ -94,6 +95,7 @@ def delete_data_provider(name, database=settings.DEFAULT_DATABASE):
     :param database: The database to work with.
     """
     BaseDataProvider.unregister_data_provider(name, database=database)
+    fix_db_sequences(database=database)
 
 
 def sync_with_data_provider(name, *args, database=settings.DEFAULT_DATABASE,
@@ -129,4 +131,6 @@ def sync_with_data_provider(name, *args, database=settings.DEFAULT_DATABASE,
             name, *nargs,
             database=database, **kwargs
         )
-        return provider.sync()
+        sync_report = provider.sync()
+    fix_db_sequences(database=database)
+    return sync_report

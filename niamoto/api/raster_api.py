@@ -5,6 +5,7 @@ Raster API module.
 """
 
 from niamoto.raster.raster_manager import RasterManager
+from niamoto.db.utils import fix_db_sequences
 from niamoto.conf import settings
 
 
@@ -62,4 +63,6 @@ def delete_raster(name, database=settings.DEFAULT_DATABASE):
     :param name: The name of the raster.
     :param database: The database to delete the raster from.
     """
-    return RasterManager.delete_raster(name, database=database)
+    result = RasterManager.delete_raster(name, database=database)
+    fix_db_sequences(database=database)
+    return result
