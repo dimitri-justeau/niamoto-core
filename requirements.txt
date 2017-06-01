@@ -16,3 +16,6 @@ rasterio
 
 # CLI
 click
+
+# Logging
+colorlog

@@ -170,22 +170,31 @@ class BasePlotOccurrenceProvider:
         LOGGER.debug("Checking plot-occurrence dataframe inconsistencies...")
         if len(dataframe) == 0:
             return dataframe
-        # Check for duplicate values of (plot_id, occurrence_identifier)
-        duplicated = dataframe.loc[
-            dataframe.duplicated(['plot_id', 'occurrence_identifier'])
-        ]
-        if len(duplicated) > 0:
+        # Check for duplicate / null values of (plot_id, occurrence_identifier)
+        duplicated = dataframe.duplicated(
+            ['plot_id', 'occurrence_identifier'],
+            keep='first'
+        )
+        null_identifiers = dataframe['occurrence_identifier'].isnull()
+        if len(null_identifiers[null_identifiers]) > 0:
+            m = "The provider's plot-occurrence dataframe contains null" \
+                " values for 'occurrence_identifier'. They will be stored in" \
+                " the Niamoto database, but you should check your data" \
+                "  source to fix such inconsistencies. " \
+                "(plot_id, occurrence_id) with null identifiers are:\n\n {}\n"
+            null_id = dataframe[null_identifiers]['occurrence_identifier']
+            LOGGER.warning(m.format(null_id.to_string(header=True)))
+        if len(duplicated[duplicated]) > 0:
             m = "The provider's plot-occurrence dataframe contains duplicate" \
                 " values for (plot_id, occurrence_identifier). Only the fist" \
                 " will be retained, but you should check your data source to" \
                 " fix such inconsistencies. " \
-                "Bellow are the duplicates:\n\n {}\n"
-            LOGGER.warning(m.format(duplicated.to_string()))
-            dataframe.drop_duplicates(
-                ['plot_id', 'occurrence_identifier'],
-                keep='first',
-                inplace=True,
-            )
+                "Dropped duplicate identifiers are:\n\n {}\n"
+            dup_without_null = dataframe[duplicated & ~null_identifiers]
+            dup_without_null = dup_without_null['occurrence_identifier']
+            LOGGER.warning(m.format(dup_without_null.to_string(header=True)))
+        if len(duplicated) > 0 or len(null_identifiers) > 0:
+            dataframe = dataframe[(~duplicated) | null_identifiers]
         return dataframe
 
     def get_reindexed_provider_dataframe(self, dataframe):
