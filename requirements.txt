@@ -1,5 +1,6 @@
 # Database libraries
 sqlalchemy
+alembic
 psycopg2
 GeoAlchemy2
 

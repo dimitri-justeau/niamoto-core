@@ -48,7 +48,7 @@ def upgrade():
         sa.Column('full_name', sa.Text(), nullable=False),
         sa.Column('rank_name', sa.Text(), nullable=False),
         sa.Column('rank', taxon_rank_enum, nullable=False),
-        sa.Column('parent_id', sa.Integer(), nullable=True),
+        sa.Column('parent_id', sa.Integer(), nullable=True, index=True),
         sa.Column('synonyms', postgresql.JSONB(), nullable=False),
         sa.Column('mptt_left', sa.Integer(), nullable=False),
         sa.Column('mptt_right', sa.Integer(), nullable=False),
@@ -70,7 +70,10 @@ def upgrade():
             'mptt_tree_id >= 0',
             name=op.f('ck_taxon_mptt_tree_id_gt_0')
         ),
-        sa.ForeignKeyConstraint(['parent_id'], ['niamoto.taxon.id'], ),
+        sa.ForeignKeyConstraint(
+            ['parent_id'],
+            ['niamoto.taxon.id'],
+        ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint(
             'full_name',
@@ -101,7 +104,12 @@ def upgrade():
         'data_provider',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),
-        sa.Column('provider_type_id', sa.Integer(), nullable=False),
+        sa.Column(
+            'provider_type_id',
+            sa.Integer(),
+            nullable=False,
+            index=True
+        ),
         sa.Column('properties', postgresql.JSONB(), nullable=False),
         sa.ForeignKeyConstraint(
             ['provider_type_id'],
@@ -114,21 +122,20 @@ def upgrade():
     op.create_table(
         'occurrence',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('provider_id', sa.Integer(), nullable=False),
+        sa.Column('provider_id', sa.Integer(), nullable=False, index=True),
         sa.Column('provider_pk', sa.Integer(), nullable=False),
         sa.Column(
             'location',
             geoalchemy2.types.Geometry(geometry_type='POINT', srid=4326),
-            nullable=False
         ),
-        sa.Column('taxon_id', sa.Integer(), nullable=True),
+        sa.Column('taxon_id', sa.Integer(), nullable=True, index=True),
         sa.Column('provider_taxon_id', sa.Integer(), nullable=True),
         sa.Column('properties', postgresql.JSONB(), nullable=False),
         sa.ForeignKeyConstraint(
             ['provider_id'],
             ['niamoto.data_provider.id'],
             onupdate='CASCADE',
-            ondelete='CASCADE'
+            ondelete='CASCADE',
         ),
         sa.ForeignKeyConstraint(
             ['taxon_id'],
@@ -146,7 +153,7 @@ def upgrade():
     op.create_table(
         'plot',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('provider_id', sa.Integer(), nullable=False),
+        sa.Column('provider_id', sa.Integer(), nullable=False, index=True),
         sa.Column('provider_pk', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column(
@@ -159,7 +166,7 @@ def upgrade():
             ['provider_id'],
             ['niamoto.data_provider.id'],
             onupdate='CASCADE',
-            ondelete='CASCADE'
+            ondelete='CASCADE',
         ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint(
@@ -173,9 +180,9 @@ def upgrade():
     )
     op.create_table(
         'plot_occurrence',
-        sa.Column('plot_id', sa.Integer(), nullable=False),
-        sa.Column('occurrence_id', sa.Integer(), nullable=False),
-        sa.Column('provider_id', sa.Integer(), nullable=True),
+        sa.Column('plot_id', sa.Integer(), nullable=False, index=True),
+        sa.Column('occurrence_id', sa.Integer(), nullable=False, index=True),
+        sa.Column('provider_id', sa.Integer(), nullable=True, index=True),
         sa.Column('provider_plot_pk', sa.Integer(), nullable=True),
         sa.Column('provider_occurrence_pk', sa.Integer(), nullable=True),
         sa.Column(
@@ -191,7 +198,7 @@ def upgrade():
                 'niamoto.occurrence.provider_pk'
             ],
             onupdate='CASCADE',
-            ondelete='CASCADE'
+            ondelete='CASCADE',
         ),
         sa.ForeignKeyConstraint(
             ['plot_id', 'provider_id', 'provider_plot_pk'],
@@ -201,7 +208,7 @@ def upgrade():
                 'niamoto.plot.provider_pk'
             ],
             onupdate='CASCADE',
-            ondelete='CASCADE'
+            ondelete='CASCADE',
         ),
         sa.PrimaryKeyConstraint('plot_id', 'occurrence_id'),
         sa.UniqueConstraint(

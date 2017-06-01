@@ -150,7 +150,9 @@ class BaseOccurrenceProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
-        LOGGER.debug(">>> Occurrence sync starting...")
+        LOGGER.debug(">>> Occurrence sync starting ('{}' - {})...".format(
+            self.data_provider.name, self.data_provider.get_type_name()
+        ))
         LOGGER.debug("Getting provider's occurrence dataframe...")
         dataframe = self.get_provider_occurrence_dataframe()
         self.map_provider_taxon_ids(dataframe)

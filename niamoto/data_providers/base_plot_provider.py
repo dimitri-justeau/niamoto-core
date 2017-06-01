@@ -119,7 +119,9 @@ class BasePlotProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
-        LOGGER.debug(">>> Plot sync starting...")
+        LOGGER.debug(">>> Plot sync starting ('{}' - {})...".format(
+            self.data_provider.name, self.data_provider.get_type_name()
+        ))
         LOGGER.debug("Getting provider's plot dataframe...")
         df = self.get_provider_plot_dataframe()
         return self._sync(

@@ -15,7 +15,7 @@ if not os.path.exists(LOGS_DIR) or not os.path.isdir(LOGS_DIR):
     os.mkdir(LOGS_DIR)
 
 
-LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s"
+LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s %(message)s"
 DATE_FORMAT = '%Y/%m/%d %H:%M:%S'
 
 

@@ -15,8 +15,10 @@ from niamoto.conf import settings
 
 metadata = MetaData(
     naming_convention={
+        "ix": "ix_%(table_name)s_%(column_0_label)s",
         "ck": "ck_%(table_name)s_%(constraint_name)s",
         "uq": "uq_%(table_name)s_%(constraint_name)s",
+
     },
 )
 
@@ -36,14 +38,16 @@ occurrence = Table(
             onupdate="CASCADE",
             ondelete="CASCADE",
         ),
-        nullable=False
+        nullable=False,
+        index=True,
     ),
     Column('provider_pk', Integer, nullable=False),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column(
         'taxon_id',
         ForeignKey('{}.taxon.id'.format(settings.NIAMOTO_SCHEMA)),
-        nullable=True
+        nullable=True,
+        index=True,
     ),
     Column('provider_taxon_id', Integer, nullable=True),
     Column('properties', JSONB, nullable=False),
@@ -86,7 +90,8 @@ taxon = Table(
     Column(
         'parent_id',
         ForeignKey('{}.taxon.id'.format(settings.NIAMOTO_SCHEMA)),
-        nullable=True
+        nullable=True,
+        index=True,
     ),
     Column('synonyms', JSONB, nullable=False),
     #  MPTT (Modified Pre-order Tree Traversal) columns
@@ -117,7 +122,8 @@ plot = Table(
             onupdate="CASCADE",
             ondelete="CASCADE",
         ),
-        nullable=False
+        nullable=False,
+        index=True,
     ),
     Column('provider_pk', Integer, nullable=False),
     Column('name', String(100), nullable=False),
@@ -140,9 +146,9 @@ plot = Table(
 plot_occurrence = Table(
     'plot_occurrence',
     metadata,
-    Column('plot_id', primary_key=True),
-    Column('occurrence_id', primary_key=True),
-    Column('provider_id'),
+    Column('plot_id', primary_key=True, index=True),
+    Column('occurrence_id', primary_key=True, index=True),
+    Column('provider_id', index=True),
     Column('provider_plot_pk'),
     Column('provider_occurrence_pk'),
     Column('occurrence_identifier', String(50)),
@@ -204,7 +210,8 @@ data_provider = Table(
     Column(
         'provider_type_id',
         ForeignKey('{}.data_provider_type.id'.format(settings.NIAMOTO_SCHEMA)),
-        nullable=False
+        nullable=False,
+        index=True,
     ),
     Column('properties', JSONB, nullable=False),
     UniqueConstraint('name', name='name'),
