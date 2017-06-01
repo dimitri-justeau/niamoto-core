@@ -139,7 +139,7 @@ class BasePlotOccurrenceProvider:
         :return: The insert, update, delete DataFrames.
         """
         t = time.time()
-        LOGGER.debug("*** Plot-occurrence sync starting ('{}' - {})...".format(
+        LOGGER.info("** Plot-occurrence sync starting ('{}' - {})...".format(
             self.data_provider.name, self.data_provider.get_type_name()
         ))
         LOGGER.debug("Getting provider's plot-occurrence dataframe...")
@@ -153,8 +153,8 @@ class BasePlotOccurrenceProvider:
             update=update,
             delete=delete,
         )
-        m = "*** Plot-occurrence sync with '{}' done ({:.2f} s)!"
-        LOGGER.debug(m.format(
+        m = "** Plot-occurrence sync with '{}' done ({:.2f} s)!"
+        LOGGER.info(m.format(
             self.data_provider.name, time.time() - t
         ))
         return sync_result

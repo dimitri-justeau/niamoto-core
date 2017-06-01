@@ -152,7 +152,7 @@ class BaseOccurrenceProvider:
         :return: The insert, update, delete DataFrames.
         """
         t = time.time()
-        LOGGER.debug(">>> Occurrence sync starting ('{}' - {})...".format(
+        LOGGER.info("** Occurrence sync starting ('{}' - {})...".format(
             self.data_provider.name, self.data_provider.get_type_name()
         ))
         LOGGER.debug("Getting provider's occurrence dataframe...")
@@ -165,7 +165,7 @@ class BaseOccurrenceProvider:
             update=update,
             delete=delete,
         )
-        LOGGER.debug(">>> Occurrence sync with '{}' done ({:.2f} s)!".format(
+        LOGGER.info("** Occurrence sync with '{}' done ({:.2f} s)!".format(
             self.data_provider.name, time.time() - t
         ))
         return sync_result

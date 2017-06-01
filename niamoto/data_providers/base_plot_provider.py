@@ -121,7 +121,7 @@ class BasePlotProvider:
         :return: The insert, update, delete DataFrames.
         """
         t = time.time()
-        LOGGER.debug("*** Plot sync starting ('{}' - {})...".format(
+        LOGGER.info("** Plot sync starting ('{}' - {})...".format(
             self.data_provider.name, self.data_provider.get_type_name()
         ))
         LOGGER.debug("Getting provider's plot dataframe...")
@@ -133,7 +133,7 @@ class BasePlotProvider:
             update=update,
             delete=delete,
         )
-        LOGGER.debug("*** Plot sync with '{}' done ({:.2f} s)!".format(
+        LOGGER.info("** Plot sync with '{}' done ({:.2f} s)!".format(
             self.data_provider.name, time.time() - t
         ))
         return sync_result
