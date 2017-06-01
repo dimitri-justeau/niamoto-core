@@ -372,27 +372,27 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
                 {
                     'plot_id': 0,
                     'occurrence_id': 0,
-                    'occurrence_identifier': 'PLOT1_000',
+                    'occurrence_identifier': 'PLOT1_001',
                 },
                 {
                     'plot_id': 1,
                     'occurrence_id': 0,
-                    'occurrence_identifier': 'PLOT2_000',
+                    'occurrence_identifier': 'PLOT1_000',
                 },
                 {
                     'plot_id': 1,
                     'occurrence_id': 1,
-                    'occurrence_identifier': 'PLOT2_001',
+                    'occurrence_identifier': 'PLOT2_002',
                 },
                 {
                     'plot_id': 1,
                     'occurrence_id': 2,
-                    'occurrence_identifier': 'PLOT2_002',
+                    'occurrence_identifier': 'PLOT2_003',
                 },
                 {
                     'plot_id': 2,
                     'occurrence_id': 5,
-                    'occurrence_identifier': 'PLOT2_002',
+                    'occurrence_identifier': 'PLOT2_008',
                 },
             ], index=['plot_id', 'occurrence_id'])
             data = prov.get_reindexed_provider_dataframe(data)

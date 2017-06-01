@@ -1,11 +1,17 @@
 # coding: utf-8
 
-from sqlalchemy.sql import select, bindparam, and_, cast
+import json
+
+from sqlalchemy.sql import select, bindparam, and_, cast, func
 from sqlalchemy.dialects.postgresql import JSONB
 import pandas as pd
 
 from niamoto.db.metadata import occurrence
 from niamoto.taxonomy.taxon import Taxon
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 class BaseOccurrenceProvider:
@@ -25,7 +31,16 @@ class BaseOccurrenceProvider:
         :return: A DataFrame containing the occurrence data for this
         provider that is currently stored in the Niamoto database.
         """
-        sel = select([occurrence]).where(
+        LOGGER.debug("Getting Niamoto occurrence dataframe...")
+        sel = select([
+            occurrence.c.id,
+            occurrence.c.provider_id,
+            occurrence.c.provider_pk,
+            func.st_asewkt(occurrence.c.location).label('location'),
+            occurrence.c.taxon_id,
+            occurrence.c.provider_taxon_id,
+            occurrence.c.properties,
+        ]).where(
             occurrence.c.provider_id == self.data_provider.db_id
         )
         return pd.read_sql(
@@ -42,6 +57,7 @@ class BaseOccurrenceProvider:
         :return: A series with the same index, the niamoto corresponding
         taxon id as values.
         """
+        LOGGER.debug("Mapping provider's taxon ids...")
         db = self.data_provider.database
         synonyms = Taxon.get_synonyms_for_provider(
             self.data_provider,
@@ -82,6 +98,7 @@ class BaseOccurrenceProvider:
             if delete else []
         with connection.begin():
             if len(insert_df) > 0:
+                LOGGER.debug("Inserting new occurrence records...")
                 ins_stmt = occurrence.insert().values(
                     provider_id=bindparam('provider_id'),
                     provider_pk=bindparam('provider_pk'),
@@ -90,11 +107,13 @@ class BaseOccurrenceProvider:
                     provider_taxon_id=bindparam('provider_taxon_id'),
                     properties=cast(bindparam('properties'), JSONB),
                 )
+                ins_data = insert_df.to_dict(orient='records')
                 connection.execute(
                     ins_stmt,
-                    insert_df.to_dict(orient='records')
+                    ins_data
                 )
             if len(update_df) > 0:
+                LOGGER.debug("Updating existing occurrence records...")
                 upd_stmt = occurrence.update().where(
                     and_(
                         occurrence.c.provider_id == bindparam('prov_id'),
@@ -106,14 +125,16 @@ class BaseOccurrenceProvider:
                     'properties': cast(bindparam('properties'), JSONB),
                     'provider_taxon_id': bindparam('provider_taxon_id'),
                 })
+                upd_data = update_df.rename(columns={
+                    'provider_id': 'prov_id',
+                    'provider_pk': 'prov_pk',
+                }).to_dict(orient='records')
                 connection.execute(
                     upd_stmt,
-                    update_df.rename(columns={
-                        'provider_id': 'prov_id',
-                        'provider_pk': 'prov_pk',
-                    }).to_dict(orient='records')
+                    upd_data
                 )
             if len(delete_df) > 0:
+                LOGGER.debug("Deleting expired occurrence records...")
                 del_stmt = occurrence.delete().where(
                     occurrence.c.id.in_(delete_df.index)
                 )
@@ -129,6 +150,8 @@ class BaseOccurrenceProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
+        LOGGER.debug(">>> Occurrence sync starting...")
+        LOGGER.debug("Getting provider's occurrence dataframe...")
         dataframe = self.get_provider_occurrence_dataframe()
         self.map_provider_taxon_ids(dataframe)
         return self._sync(
@@ -147,6 +170,7 @@ class BaseOccurrenceProvider:
         :return: The data that is to be inserted to sync Niamoto with the
         provider (i.e. data which is in the provider, but not in Niamoto).
         """
+        LOGGER.debug("Resolving occurrence insert dataframe...")
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         diff = provider_dataframe.index.difference(niamoto_idx)
         df = provider_dataframe.loc[diff]
@@ -162,12 +186,32 @@ class BaseOccurrenceProvider:
         :return: The data that is to be updated to sync Niamoto with the
         provider (i.e. data which is both in the provider and Niamoto).
         """
+        LOGGER.debug("Resolving occurrence update dataframe...")
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         inter = provider_dataframe.index.intersection(niamoto_idx)
-        df = provider_dataframe.loc[inter]
-        df['provider_pk'] = df.index
-        df['provider_id'] = self.data_provider.db_id
-        return df
+        if len(inter) > 0:
+            prov_df = provider_dataframe.loc[inter]
+            niamoto_df = niamoto_dataframe.set_index('provider_pk').loc[inter]
+            # Fill na with negative, comparable value
+            niamoto_df.fillna(value=-9999, inplace=True)
+            prov_df.fillna(value=-9999, inplace=True)
+            compared_cols = [
+                'taxon_id', 'location', 'properties', 'provider_taxon_id'
+            ]
+            niamoto_df['properties'] = niamoto_df['properties'].apply(
+                lambda x: sorted(json.loads(json.dumps(x)).items())
+            )
+            prov_df['properties'] = prov_df['properties'].apply(
+                lambda x: sorted(json.loads(x).items())
+            )
+            changed = (prov_df[compared_cols] != niamoto_df[compared_cols]).any(1)
+            changed_idx = changed[changed].index
+            provider_dataframe = provider_dataframe.loc[changed_idx]
+        else:
+            provider_dataframe = provider_dataframe.loc[inter]
+        provider_dataframe['provider_pk'] = provider_dataframe.index
+        provider_dataframe['provider_id'] = self.data_provider.db_id
+        return provider_dataframe
 
     def get_delete_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
@@ -177,6 +221,7 @@ class BaseOccurrenceProvider:
         :return: The data that is to be deleted to sync Niamoto with the
         provider (i.e. data which is in Niamoto, but not in the provider).
         """
+        LOGGER.debug("Resolving occurrence delete dataframe...")
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         diff = niamoto_idx.difference(provider_dataframe.index)
         idx = niamoto_dataframe.reset_index().set_index(

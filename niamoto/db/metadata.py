@@ -15,7 +15,8 @@ from niamoto.conf import settings
 
 metadata = MetaData(
     naming_convention={
-        "ck": "ck_%(table_name)s_%(constraint_name)s"
+        "ck": "ck_%(table_name)s_%(constraint_name)s",
+        "uq": "uq_%(table_name)s_%(constraint_name)s",
     },
 )
 
@@ -46,7 +47,12 @@ occurrence = Table(
     ),
     Column('provider_taxon_id', Integer, nullable=True),
     Column('properties', JSONB, nullable=False),
-    UniqueConstraint('id', 'provider_id', 'provider_pk'),
+    UniqueConstraint(
+        'id',
+        'provider_id',
+        'provider_pk',
+        name='id__provider_id__provider_pk'
+    ),
     schema=settings.NIAMOTO_SCHEMA
 )
 
@@ -70,9 +76,13 @@ taxon = Table(
     'taxon',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('full_name', Text, nullable=False, unique=True),
+    Column('full_name', Text, nullable=False),
     Column('rank_name', Text, nullable=False),
-    Column('rank', Enum(TaxonRankEnum), nullable=False),
+    Column(
+        'rank',
+        Enum(TaxonRankEnum, name='taxon_rank_enum'),
+        nullable=False
+    ),
     Column(
         'parent_id',
         ForeignKey('{}.taxon.id'.format(settings.NIAMOTO_SCHEMA)),
@@ -84,6 +94,7 @@ taxon = Table(
     Column('mptt_right', Integer, nullable=False),
     Column('mptt_tree_id', Integer, nullable=False),
     Column('mptt_depth', Integer, nullable=False),
+    UniqueConstraint('full_name', name='full_name'),
     CheckConstraint('mptt_depth >= 0', name='mptt_depth_gt_0'),
     CheckConstraint('mptt_left >= 0', name='mptt_left_gt_0'),
     CheckConstraint('mptt_right >= 0', name='mptt_right_gt_0'),
@@ -109,10 +120,16 @@ plot = Table(
         nullable=False
     ),
     Column('provider_pk', Integer, nullable=False),
-    Column('name', String(100), nullable=False, unique=True),
+    Column('name', String(100), nullable=False),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column('properties', JSONB, nullable=False),
-    UniqueConstraint('id', 'provider_id', 'provider_pk'),
+    UniqueConstraint('name', name='name'),
+    UniqueConstraint(
+        'id',
+        'provider_id',
+        'provider_pk',
+        name='id__provider_id__provider_pk'
+    ),
     schema=settings.NIAMOTO_SCHEMA,
 )
 
@@ -129,7 +146,12 @@ plot_occurrence = Table(
     Column('provider_plot_pk'),
     Column('provider_occurrence_pk'),
     Column('occurrence_identifier', String(50)),
-    UniqueConstraint('plot_id', 'occurrence_identifier'),
+    UniqueConstraint(
+        'plot_id',
+        'occurrence_identifier',
+        name='plot_id__occurrence_identifier',
+        deferrable=True
+    ),
     ForeignKeyConstraint(
         [
             'plot_id',
@@ -169,7 +191,8 @@ data_provider_type = Table(
     'data_provider_type',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('name', String(100), nullable=False, unique=True),
+    Column('name', String(100), nullable=False),
+    UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
 
@@ -177,13 +200,14 @@ data_provider = Table(
     'data_provider',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('name', String(100), nullable=False, unique=True),
+    Column('name', String(100), nullable=False),
     Column(
         'provider_type_id',
         ForeignKey('{}.data_provider_type.id'.format(settings.NIAMOTO_SCHEMA)),
         nullable=False
     ),
     Column('properties', JSONB, nullable=False),
+    UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
 

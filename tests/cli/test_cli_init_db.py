@@ -32,7 +32,7 @@ class TestCLIInitDb(BaseTest):
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(
             init_db_cli,
-            ['--database', None],
+            ['--database', "CECINESTPASUNEDATABASE"],
         )
         self.assertEqual(result.exit_code, 1)
 

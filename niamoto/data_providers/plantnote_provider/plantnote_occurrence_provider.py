@@ -93,7 +93,7 @@ class PlantnoteOccurrenceProvider(BaseOccurrenceProvider):
                 "date_observation",
             ]
             properties = df[property_cols].apply(
-                lambda x: x.to_json(),
+                lambda x: x.to_json(force_ascii=False),
                 axis=1
             )
             df.drop(property_cols, axis=1, inplace=True)

@@ -1,10 +1,16 @@
 # coding: utf-8
 
-from sqlalchemy.sql import select, bindparam, and_, cast
+import json
+
+from sqlalchemy.sql import select, bindparam, and_, cast, func
 from sqlalchemy.dialects.postgresql import JSONB
 import pandas as pd
 
 from niamoto.db.metadata import plot
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 class BasePlotProvider:
@@ -24,7 +30,15 @@ class BasePlotProvider:
         :return: A DataFrame containing the plot data for this
         provider that is currently stored in the Niamoto database.
         """
-        sel = select([plot]).where(
+        LOGGER.debug("Getting Niamoto plot dataframe...")
+        sel = select([
+            plot.c.id,
+            plot.c.provider_id,
+            plot.c.provider_pk,
+            plot.c.name,
+            func.st_asewkt(plot.c.location).label('location'),
+            plot.c.properties,
+        ]).where(
             plot.c.provider_id == self.data_provider.db_id
         )
         return pd.read_sql(
@@ -57,6 +71,7 @@ class BasePlotProvider:
             if delete else pd.DataFrame()
         with connection.begin():
             if len(insert_df) > 0:
+                LOGGER.debug("Inserting new plot records...")
                 ins_stmt = plot.insert().values(
                     provider_id=bindparam('provider_id'),
                     provider_pk=bindparam('provider_pk'),
@@ -69,6 +84,7 @@ class BasePlotProvider:
                     insert_df.to_dict(orient='records')
                 )
             if len(update_df) > 0:
+                LOGGER.debug("Updating existing plot records...")
                 upd_stmt = plot.update().where(
                     and_(
                         plot.c.provider_id == bindparam('prov_id'),
@@ -87,6 +103,7 @@ class BasePlotProvider:
                     }).to_dict(orient='records')
                 )
             if len(delete_df) > 0:
+                LOGGER.debug("Deleting expired plot records...")
                 del_stmt = plot.delete().where(
                     plot.c.id.in_(delete_df.index)
                 )
@@ -102,8 +119,11 @@ class BasePlotProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
+        LOGGER.debug(">>> Plot sync starting...")
+        LOGGER.debug("Getting provider's plot dataframe...")
+        df = self.get_provider_plot_dataframe()
         return self._sync(
-            self.get_provider_plot_dataframe(),
+            df,
             connection,
             insert=insert,
             update=update,
@@ -118,6 +138,7 @@ class BasePlotProvider:
         :return: The data that is to be inserted to sync Niamoto with the
         provider (i.e. data which is in the provider, but not in Niamoto).
         """
+        LOGGER.debug("Resolving plot insert dataframe...")
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         diff = provider_dataframe.index.difference(niamoto_idx)
         df = provider_dataframe.loc[diff]
@@ -133,12 +154,34 @@ class BasePlotProvider:
         :return: The data that is to be updated to sync Niamoto with the
         provider (i.e. data which is both in the provider and Niamoto).
         """
+        LOGGER.debug("Resolving plot update dataframe...")
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         inter = provider_dataframe.index.intersection(niamoto_idx)
-        df = provider_dataframe.loc[inter]
-        df['provider_pk'] = df.index
-        df['provider_id'] = self.data_provider.db_id
-        return df
+        if len(inter) > 0:
+            prov_df = provider_dataframe.loc[inter]
+            niamoto_df = niamoto_dataframe.set_index('provider_pk').loc[inter]
+            # Fill na with negative, comparable value
+            niamoto_df.fillna(value=-9999, inplace=True)
+            prov_df.fillna(value=-9999, inplace=True)
+            compared_cols = [
+                'name', 'location', 'properties'
+            ]
+            niamoto_df['properties'] = niamoto_df['properties'].apply(
+                lambda x: sorted(json.loads(json.dumps(x)).items())
+            )
+            prov_df['properties'] = prov_df['properties'].apply(
+                lambda x: sorted(json.loads(x).items())
+            )
+            changed = (
+                prov_df[compared_cols] != niamoto_df[compared_cols]
+            ).any(1)
+            changed_idx = changed[changed].index
+            provider_dataframe = provider_dataframe.loc[changed_idx]
+        else:
+            provider_dataframe = provider_dataframe.loc[inter]
+        provider_dataframe['provider_pk'] = provider_dataframe.index
+        provider_dataframe['provider_id'] = self.data_provider.db_id
+        return provider_dataframe
 
     def get_delete_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
@@ -148,6 +191,7 @@ class BasePlotProvider:
         :return: The data that is to be deleted to sync Niamoto with the
         provider (i.e. data which is in Niamoto, but not in the provider).
         """
+        LOGGER.debug("Resolving plot delete dataframe...")
         niamoto_idx = pd.Index(niamoto_dataframe['provider_pk'])
         diff = niamoto_idx.difference(provider_dataframe.index)
         idx = niamoto_dataframe.reset_index().set_index(

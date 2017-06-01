@@ -6,6 +6,10 @@ from niamoto.conf import settings
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 class BaseDataProvider:
@@ -128,25 +132,43 @@ class BaseDataProvider:
             return result.fetchone()['id']
 
     @classmethod
-    def register_data_provider_type(cls, database=settings.DEFAULT_DATABASE):
+    def register_data_provider_type(cls, database=settings.DEFAULT_DATABASE,
+                                    connection=None):
+        """
+        Register the cls data provider type in database.
+        :param database: The database to work with.
+        :param connection: If passed, use an existing connection instead of
+        creating a new one.
+        """
         ins = niamoto_db_meta.data_provider_type.insert({
             'name': cls.get_type_name()
         })
+        if connection is not None:
+            connection.execute(ins)
+            cls._register_unique_synonym_constraint(connection=connection)
+            return
         with Connector.get_connection(database=database) as connection:
             connection.execute(ins)
             cls._register_unique_synonym_constraint(database=database)
 
     @classmethod
-    def _register_unique_synonym_constraint(
-            cls,
-            database=settings.DEFAULT_DATABASE):
+    def _register_unique_synonym_constraint(cls,
+                                            database=settings.DEFAULT_DATABASE,
+                                            connection=None):
+        """
+        :param database: The database to work with.
+        :param connection: If passed, use an existing connection instead of
+        creating a new one.
+        """
         index = Index(
             "{}_unique_synonym".format(cls.get_type_name()),
             niamoto_db_meta.taxon.c.synonyms[cls.get_type_name()],
             unique=True,
         )
-        engine = Connector.get_engine(database=database)
-        index.create(engine)
+        bind = connection
+        if bind is None:
+            bind = Connector.get_engine(database=database)
+        index.create(bind)
         niamoto_db_meta.taxon.indexes.remove(index)
 
     @classmethod

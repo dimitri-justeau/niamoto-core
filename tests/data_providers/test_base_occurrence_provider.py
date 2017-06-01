@@ -99,6 +99,8 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         occ_1 = pd.DataFrame.from_records([
             {
                 'id': 0,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
                 'properties': '{}',
             },
@@ -109,11 +111,15 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         occ_2 = pd.DataFrame.from_records([
             {
                 'id': 10,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 11,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
                 'properties': '{}',
             },
@@ -128,11 +134,15 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         occ_3 = pd.DataFrame.from_records([
             {
                 'id': 0,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 11,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
                 'properties': '{}',
             },
@@ -153,6 +163,8 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         occ_1 = pd.DataFrame.from_records([
             {
                 'id': 10,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
                 'properties': '{}',
             },
@@ -163,21 +175,29 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         occ_2 = pd.DataFrame.from_records([
             {
                 'id': 0,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 1,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 2,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 5,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
                 'properties': '{}',
             },
@@ -198,11 +218,15 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         occ_3 = pd.DataFrame.from_records([
             {
                 'id': 0,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 1,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
                 'properties': '{}',
             },
@@ -223,21 +247,29 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         occ_1 = pd.DataFrame.from_records([
             {
                 'id': 0,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.5521, -22.0939), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 1,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.551, -22.098), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 2,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.552, -22.097), srid=4326),
                 'properties': '{}',
             },
             {
                 'id': 5,
+                'taxon_id': None,
+                'provider_taxon_id': None,
                 'location': from_shape(Point(166.553, -22.099), srid=4326),
                 'properties': '{}',
             },

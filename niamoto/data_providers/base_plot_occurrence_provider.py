@@ -6,6 +6,10 @@ import pandas as pd
 from niamoto.db.metadata import plot_occurrence, plot, occurrence
 from niamoto.db.connector import Connector
 from niamoto.exceptions import IncoherentDatabaseStateError
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 class BasePlotOccurrenceProvider:
@@ -30,6 +34,7 @@ class BasePlotOccurrenceProvider:
         provider that is currently stored in the Niamoto database.
         The index is the multi-index [plot_id, occurrence_id].
         """
+        LOGGER.debug("Getting Niamoto plot-occurrence dataframe...")
         sel = select([
             plot_occurrence.c.plot_id,
             plot_occurrence.c.occurrence_id,
@@ -74,14 +79,20 @@ class BasePlotOccurrenceProvider:
         delete_df = self.get_delete_dataframe(niamoto_df, provider_df) \
             if delete else pd.DataFrame()
         with connection.begin():
+            connection.execute("SET CONSTRAINTS {}.{} DEFERRED;".format(
+                "niamoto",
+                "uq_plot_occurrence_plot_id__occurrence_identifier"
+            ))
             plot_id_col = plot_occurrence.c.plot_id
             occurrence_id_col = plot_occurrence.c.occurrence_id
             if len(insert_df) > 0:
+                LOGGER.debug("Inserting new plot-occurrence records...")
                 ins_stmt = plot_occurrence.insert().values(
                     insert_df.to_dict(orient='records')
                 )
                 connection.execute(ins_stmt)
             if len(update_df) > 0:
+                LOGGER.debug("Updating existing plot-occurrence records...")
                 upd_stmt = plot_occurrence.update().where(
                     and_(
                         plot_id_col == bindparam('_plot_id'),
@@ -100,6 +111,7 @@ class BasePlotOccurrenceProvider:
                     }).to_dict(orient='records')
                 )
             if len(delete_df) > 0:
+                LOGGER.debug("Deleting expired plot-occurrence records...")
                 del_stmt = plot_occurrence.delete().where(
                     and_(
                         plot_id_col == bindparam('plot_id'),
@@ -124,15 +136,47 @@ class BasePlotOccurrenceProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
+        LOGGER.debug(">>> Plot-occurrence sync starting...")
+        LOGGER.debug("Getting provider's plot-occurrence dataframe...")
         df = self.get_provider_plot_occurrence_dataframe()
         reindexed_df = self.get_reindexed_provider_dataframe(df)
+        fixed = self.raise_and_fix_inconsistencies(reindexed_df)
         return self._sync(
-            reindexed_df,
+            fixed,
             connection,
             insert=insert,
             update=update,
             delete=delete,
         )
+
+    def raise_and_fix_inconsistencies(self, dataframe):
+        """
+        Check the providers dataframe and look for inconsistencies. Raise them
+        (log) and fix them. Must be called after
+        get_reindexed_provider_dataframe.
+        :param dataframe: The provider dataframe.
+        :return: The fixed dataframe.
+        """
+        LOGGER.debug("Checking plot-occurrence dataframe inconsistencies...")
+        if len(dataframe) == 0:
+            return dataframe
+        # Check for duplicate values of (plot_id, occurrence_identifier)
+        duplicated = dataframe.loc[
+            dataframe.duplicated(['plot_id', 'occurrence_identifier'])
+        ]
+        if len(duplicated) > 0:
+            m = "The provider's plot-occurrence dataframe contains duplicate" \
+                " values for (plot_id, occurrence_identifier). Only the fist" \
+                " will be retained, but you should check your data source to" \
+                " fix such inconsistencies. " \
+                "Bellow are the duplicates:\n\n {}\n"
+            LOGGER.warning(m.format(duplicated.to_string()))
+            dataframe.drop_duplicates(
+                ['plot_id', 'occurrence_identifier'],
+                keep='first',
+                inplace=True,
+            )
+        return dataframe
 
     def get_reindexed_provider_dataframe(self, dataframe):
         """
@@ -143,7 +187,7 @@ class BasePlotOccurrenceProvider:
             provider_plot_pk -> plot_id
             provider_occurrence_pk -> occurrence_id
         """
-
+        LOGGER.debug("reindexing provider's plot-occurrence dataframe...")
         if len(dataframe) == 0:
             return dataframe
         # Set index names
@@ -216,6 +260,7 @@ class BasePlotOccurrenceProvider:
         :return: The data that is to be inserted to sync Niamoto with the
         provider (i.e. data which is in the provider, but not in Niamoto).
         """
+        LOGGER.debug("Resolving plot-occurrence insert dataframe...")
         if len(provider_dataframe) == 0:
             return provider_dataframe
         diff = provider_dataframe.index.difference(niamoto_dataframe.index)
@@ -229,10 +274,17 @@ class BasePlotOccurrenceProvider:
         :return: The data that is to be updated to sync Niamoto with the
         provider (i.e. data which is both in the provider and Niamoto).
         """
+        LOGGER.debug("Resolving plot-occurrence update dataframe...")
         if len(provider_dataframe) == 0:
             return provider_dataframe
         inter = provider_dataframe.index.intersection(niamoto_dataframe.index)
-        return provider_dataframe.loc[inter]
+        if len(inter) == 0:
+            return provider_dataframe.loc[inter]
+        niamoto_ids = niamoto_dataframe.loc[inter]['occurrence_identifier']
+        provider_ids = provider_dataframe.loc[inter]['occurrence_identifier']
+        changed = (provider_ids != niamoto_ids)
+        changed = changed[changed]
+        return provider_dataframe.loc[changed.index]
 
     def get_delete_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
@@ -242,6 +294,7 @@ class BasePlotOccurrenceProvider:
         :return: The data that is to be deleted to sync Niamoto with the
         provider (i.e. data which is in Niamoto, but not in the provider).
         """
+        LOGGER.debug("Resolving plot-occurrence delete dataframe...")
         if len(provider_dataframe) == 0:
             df = niamoto_dataframe
             df['plot_id'] = df.index.get_level_values('plot_id')
