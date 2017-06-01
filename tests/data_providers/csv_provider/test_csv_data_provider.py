@@ -16,6 +16,7 @@ from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
 DB = settings.TEST_DATABASE
 
+
 TEST_OCCURRENCE_CSV = os.path.join(
     NIAMOTO_HOME, 'data', 'csv', 'occurrences.csv',
 )

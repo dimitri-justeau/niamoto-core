@@ -27,11 +27,6 @@ class BaseDataProvider:
     def database(self):
         return self._database
 
-    @database.setter
-    def database(self, value):
-        self._database = value
-        self._update_db_id()
-
     @property
     def db_id(self):
         return self._db_id
