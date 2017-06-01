@@ -18,7 +18,6 @@ metadata = MetaData(
         "ix": "ix_%(table_name)s_%(column_0_label)s",
         "ck": "ck_%(table_name)s_%(constraint_name)s",
         "uq": "uq_%(table_name)s_%(constraint_name)s",
-
     },
 )
 

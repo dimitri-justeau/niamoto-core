@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import time
+
 from sqlalchemy import select, Index
 
 from niamoto.conf import settings
@@ -74,6 +76,11 @@ class BaseDataProvider:
                 'plot_occurrence': { ... },
             }
         """
+        t = time.time()
+        LOGGER.debug("\r" + "-" * 80)
+        LOGGER.info("*** Data sync starting ('{}' - {})...".format(
+            self.name, self.get_type_name()
+        ))
         with Connector.get_connection(database=self.database) as connection:
             with connection.begin():
                 i1, u1, d1 = self.occurrence_provider.sync(
@@ -95,6 +102,11 @@ class BaseDataProvider:
                     update=update,
                     delete=delete,
                 ) if sync_plot_occurrence else ([], [], [])
+            m = "*** Data sync with '{}' done (total time: {:.2f} s)!"
+            LOGGER.info(m.format(
+                self.name, time.time() - t
+            ))
+            LOGGER.debug("\r" + "-" * 80)
             return {
                 'occurrence': {
                     'insert': i1,

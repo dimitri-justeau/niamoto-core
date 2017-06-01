@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import time
+
 from sqlalchemy.sql import and_, bindparam, select
 import pandas as pd
 
@@ -136,20 +138,26 @@ class BasePlotOccurrenceProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
-        LOGGER.debug(">>> Plot-occurrence sync starting ('{}' - {})...".format(
+        t = time.time()
+        LOGGER.debug("*** Plot-occurrence sync starting ('{}' - {})...".format(
             self.data_provider.name, self.data_provider.get_type_name()
         ))
         LOGGER.debug("Getting provider's plot-occurrence dataframe...")
         df = self.get_provider_plot_occurrence_dataframe()
         reindexed_df = self.get_reindexed_provider_dataframe(df)
         fixed = self.raise_and_fix_inconsistencies(reindexed_df)
-        return self._sync(
+        sync_result = self._sync(
             fixed,
             connection,
             insert=insert,
             update=update,
             delete=delete,
         )
+        m = "*** Plot-occurrence sync with '{}' done ({:.2f} s)!"
+        LOGGER.debug(m.format(
+            self.data_provider.name, time.time() - t
+        ))
+        return sync_result
 
     def raise_and_fix_inconsistencies(self, dataframe):
         """

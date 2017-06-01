@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import time
 import json
 
 from sqlalchemy.sql import select, bindparam, and_, cast, func
@@ -150,19 +151,24 @@ class BaseOccurrenceProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
+        t = time.time()
         LOGGER.debug(">>> Occurrence sync starting ('{}' - {})...".format(
             self.data_provider.name, self.data_provider.get_type_name()
         ))
         LOGGER.debug("Getting provider's occurrence dataframe...")
         dataframe = self.get_provider_occurrence_dataframe()
         self.map_provider_taxon_ids(dataframe)
-        return self._sync(
+        sync_result = self._sync(
             dataframe,
             connection,
             insert=insert,
             update=update,
             delete=delete,
         )
+        LOGGER.debug(">>> Occurrence sync with '{}' done ({:.2f} s)!".format(
+            self.data_provider.name, time.time() - t
+        ))
+        return sync_result
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """

@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import json
+import time
 
 from sqlalchemy.sql import select, bindparam, and_, cast, func
 from sqlalchemy.dialects.postgresql import JSONB
@@ -119,18 +120,23 @@ class BasePlotProvider:
         :param delete: if False, skip delete operation.
         :return: The insert, update, delete DataFrames.
         """
-        LOGGER.debug(">>> Plot sync starting ('{}' - {})...".format(
+        t = time.time()
+        LOGGER.debug("*** Plot sync starting ('{}' - {})...".format(
             self.data_provider.name, self.data_provider.get_type_name()
         ))
         LOGGER.debug("Getting provider's plot dataframe...")
         df = self.get_provider_plot_dataframe()
-        return self._sync(
+        sync_result = self._sync(
             df,
             connection,
             insert=insert,
             update=update,
             delete=delete,
         )
+        LOGGER.debug("*** Plot sync with '{}' done ({:.2f} s)!".format(
+            self.data_provider.name, time.time() - t
+        ))
+        return sync_result
 
     def get_insert_dataframe(self, niamoto_dataframe, provider_dataframe):
         """
