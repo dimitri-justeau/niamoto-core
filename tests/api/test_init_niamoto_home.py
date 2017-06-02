@@ -21,6 +21,7 @@ class TestInitNiamotoHomeApi(BaseTest):
 
     def tearDown(self):
         shutil.rmtree(self.HOME_PATH)
+        set_test_path()
 
     @classmethod
     def setUpClass(cls):

@@ -12,10 +12,10 @@ def init_db_cli(database=None):
     """
     Initialize the Niamoto database.
     """
-    from niamoto.api import init_db as api_init_db
+    from niamoto.api import manage_db as api_manage_db
     click.echo("Initializing Niamoto database...")
     try:
-        api_init_db.init_db(database=database)
+        api_manage_db.init_db()
         click.echo("Niamoto database had been successfully initialized!")
     except:
         click.secho(

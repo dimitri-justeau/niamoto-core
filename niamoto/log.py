@@ -22,6 +22,8 @@ COLOR_LOG_FORMAT = "%(log_color)s%(asctime)s [%(levelname)s] " \
                    "<%(name)s> %(message)s"
 INFO_LOG_FORMAT = "%(log_color)s[%(levelname)s] %(message)s"
 DATE_FORMAT = '%Y/%m/%d %H:%M:%S'
+STREAM_LOGGING_LEVEL = logging.INFO
+FILE_LOGGING_LEVEL = logging.DEBUG
 
 
 class NiamotoLogFormatter(colorlog.ColoredFormatter):
@@ -50,8 +52,9 @@ class NiamotoLogFormatter(colorlog.ColoredFormatter):
 
 def get_logger(name, log_format=LOG_FORMAT, colorlog_format=COLOR_LOG_FORMAT,
                info_format=INFO_LOG_FORMAT, date_format=DATE_FORMAT,
-               log_file=LOG_FILE, file_logging_level=logging.DEBUG,
-               stream_logging_level=logging.INFO):
+               log_file=LOG_FILE):
+    file_logging_level = FILE_LOGGING_LEVEL
+    stream_logging_level = STREAM_LOGGING_LEVEL
     # Formatter
     formatter_stream = NiamotoLogFormatter(
         fmt=colorlog_format,
@@ -64,7 +67,7 @@ def get_logger(name, log_format=LOG_FORMAT, colorlog_format=COLOR_LOG_FORMAT,
     )
     # File handler
     file_handler = RotatingFileHandler(log_file, 'a', 1000000, 1)
-    file_handler.setFormatter(formatter_file)
+    file_handler.setFormatter(formatter_stream)
     # Steam handler
     stream_handler = colorlog.StreamHandler()
     stream_handler.setFormatter(formatter_stream)

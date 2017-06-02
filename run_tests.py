@@ -2,9 +2,15 @@
 
 import unittest
 import sys
+import logging
 
 from niamoto.testing import set_test_path
 set_test_path()
+
+from niamoto import log
+
+log.STREAM_LOGGING_LEVEL = logging.CRITICAL
+log.FILE_LOGGING_LEVEL = logging.DEBUG
 
 
 if __name__ == "__main__":

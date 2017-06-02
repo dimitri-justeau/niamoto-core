@@ -3,8 +3,8 @@
 import unittest
 
 from niamoto.db.connector import Connector
-from niamoto.db.creator import Creator
-from niamoto.conf import settings
+from niamoto.db.metadata import metadata
+from niamoto.db.schema_manager import SchemaManager
 from niamoto.testing.test_database_manager import TestDatabaseManager
 
 
@@ -19,17 +19,13 @@ class BaseTestNiamotoSchemaCreated(BaseTest):
 
     @classmethod
     def setUpClass(cls):
-        engine = Connector.get_engine(
-            database=settings.TEST_DATABASE,
-        )
-        Creator.create_niamoto_schema(engine)
+        engine = Connector.get_engine()
+        metadata.create_all(engine)
 
     @classmethod
     def tearDownClass(cls):
-        engine = Connector.get_engine(
-            database=settings.TEST_DATABASE,
-        )
-        Creator.drop_niamoto_schema(engine)
+        engine = Connector.get_engine()
+        metadata.drop_all(engine)
         super(BaseTestNiamotoSchemaCreated, cls).tearDownClass()
 
 

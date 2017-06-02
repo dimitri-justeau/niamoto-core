@@ -6,15 +6,15 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings
-from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
+from niamoto.testing.base_tests import BaseTest
 from niamoto.testing.test_database_manager import TestDatabaseManager
-from niamoto.api.init_db import init_db
+from niamoto.api import manage_db
 
 
-DB = settings.TEST_DATABASE
+DB = settings.DEFAULT_DATABASE
 
 
-class TestInitDbApi(BaseTestNiamotoSchemaCreated):
+class TestInitDbApi(BaseTest):
     """
     Test case for init_db_cli api.
     """
@@ -24,7 +24,7 @@ class TestInitDbApi(BaseTestNiamotoSchemaCreated):
         super(TestInitDbApi, cls).setUpClass()
 
     def test_init_db(self):
-        init_db(DB)
+        manage_db.init_db()
 
 
 if __name__ == '__main__':

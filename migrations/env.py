@@ -8,6 +8,7 @@ from niamoto import conf
 conf.set_niamoto_home()
 conf.set_settings()
 
+
 user = conf.settings.DEFAULT_DATABASE['USER']
 password = conf.settings.DEFAULT_DATABASE['PASSWORD']
 host = conf.settings.DEFAULT_DATABASE['HOST']
@@ -19,6 +20,8 @@ db_url = db_url.format(**{
     'host': host,
     'database': database,
 })
+
+print(db_url)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
