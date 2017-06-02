@@ -3,7 +3,6 @@
 from sqlalchemy import select, func, bindparam
 import pandas as pd
 
-from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 
@@ -18,13 +17,12 @@ class Taxon:
         pass
 
     @classmethod
-    def get_raw_taxon_dataframe(cls, database=settings.DEFAULT_DATABASE):
+    def get_raw_taxon_dataframe(cls):
         """
-        :param database: The database to work with.
         :return: A pandas DataFrame containing all the taxon data available
         within the given database.
         """
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             sel = select([niamoto_db_meta.taxon])
             return pd.read_sql(
                 sel,
@@ -33,19 +31,17 @@ class Taxon:
             )
 
     @classmethod
-    def delete_all_taxa(cls, database=settings.DEFAULT_DATABASE):
+    def delete_all_taxa(cls):
         """
         Delete all the taxa stored in the given database.
-        :param database: The database to work with.
         """
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             delete = niamoto_db_meta.taxon.delete()
             connection.execute(delete)
 
     @classmethod
     def add_synonym_for_single_taxon(cls, taxon_id, data_provider,
-                                     provider_taxon_id,
-                                     database=settings.DEFAULT_DATABASE):
+                                     provider_taxon_id):
         """
         For a single taxon, add the synonym corresponding to a data provider.
         :param taxon_id: The id of the taxon (in Niamoto's referential).
@@ -54,7 +50,6 @@ class Taxon:
         class attribute, this parameter can either be an instance or a class.
         :param provider_taxon_id: The id of the taxon in the provider's
         referential, i.e. the synonym.
-        :param database: The database to work with.
         """
         upd = niamoto_db_meta.taxon.update().where(
             niamoto_db_meta.taxon.c.id == taxon_id
@@ -68,22 +63,20 @@ class Taxon:
                 )
             }
         )
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(upd)
 
     @classmethod
-    def get_synonyms_for_provider(cls, data_provider,
-                                  database=settings.DEFAULT_DATABASE):
+    def get_synonyms_for_provider(cls, data_provider):
         """
         :param data_provider: The data provider corresponding to the synonym to
         get. Since the synonym is tagged with the provider's type, which is a
         class attribute, this parameter can either be an instance or a class.
-        :param database: The database to work with.
         :return: A Series with index corresponding to the data provider's
         taxa ids, and values corresponding to their synonym in Niamoto's
         referential.
         """
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             provider_type = data_provider.get_type_name()
             niamoto_id_col = niamoto_db_meta.taxon.c.id
             synonym_col = niamoto_db_meta.taxon.c.synonyms
@@ -99,14 +92,11 @@ class Taxon:
             return synonyms
 
     @classmethod
-    def make_mptt(cls, database=settings.DEFAULT_DATABASE):
+    def make_mptt(cls):
         """
         Build the mptt in database.
-        :param database: The database to work with.
         """
-        df = cls.get_raw_taxon_dataframe(
-            database=database
-        )
+        df = cls.get_raw_taxon_dataframe()
         mptt = cls.construct_mptt(df)
         mptt['taxon_id'] = mptt.index
         upd = niamoto_db_meta.taxon.update().where(
@@ -117,7 +107,7 @@ class Taxon:
             'mptt_left': bindparam('mptt_left'),
             'mptt_right': bindparam('mptt_right'),
         })
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(
                 upd,
                 mptt[[

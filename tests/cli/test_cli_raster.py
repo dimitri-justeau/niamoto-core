@@ -18,7 +18,6 @@ from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
 
-DB = settings.TEST_DATABASE
 TEST_RASTER = os.path.join(
     NIAMOTO_HOME,
     "data",
@@ -34,7 +33,7 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
 
     def tearDown(self):
         delete_stmt = niamoto_db_meta.raster_registry.delete()
-        with Connector.get_connection(database=DB) as connection:
+        with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
                 schema=settings.NIAMOTO_RASTER_SCHEMA
@@ -48,29 +47,18 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
 
     def test_list_rasters(self):
         runner = CliRunner()
-        result = runner.invoke(raster.list_rasters_cli, ['--database', DB])
+        result = runner.invoke(raster.list_rasters_cli)
         self.assertEqual(result.exit_code, 0)
-        result = runner.invoke(raster.list_rasters_cli, ['--database', "YO"])
-        self.assertEqual(result.exit_code, 1)
 
     def test_add_raster(self):
         runner = CliRunner()
         result = runner.invoke(raster.add_raster_cli, [
-            '--database', DB,
             'test_raster',
             '200', '200',
             TEST_RASTER,
         ], catch_exceptions=False)
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(raster.add_raster_cli, [
-            '--database', DB,
-            'test_raster',
-            '200', '200',
-            TEST_RASTER,
-        ])
-        self.assertEqual(result.exit_code, 1)
-        result = runner.invoke(raster.add_raster_cli, [
-            '--database', "YO",
             'test_raster',
             '200', '200',
             TEST_RASTER,
@@ -80,27 +68,17 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
     def test_update_raster(self):
         runner = CliRunner()
         runner.invoke(raster.add_raster_cli, [
-            '--database', DB,
             'test_raster',
             '200', '200',
             TEST_RASTER
         ], catch_exceptions=False)
         result = runner.invoke(raster.update_raster_cli, [
-            '--database', DB,
             'test_raster',
             '100', '100',
             TEST_RASTER
         ], catch_exceptions=False)
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(raster.update_raster_cli, [
-            '--database', "YO",
-            'test_raster',
-            '100', '100',
-            TEST_RASTER
-        ])
-        self.assertEqual(result.exit_code, 1)
-        result = runner.invoke(raster.update_raster_cli, [
-            '--database', DB,
             'yo',
             '100', '100',
             TEST_RASTER
@@ -110,30 +88,20 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
     def test_delete_raster(self):
         runner = CliRunner()
         runner.invoke(raster.add_raster_cli, [
-            '--database', DB,
             'test_raster',
             '200', '200',
             TEST_RASTER
         ], catch_exceptions=False)
         result = runner.invoke(raster.delete_raster_cli, [
-            '--database', DB,
             'test_raster',
         ], catch_exceptions=False, input='N')
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(raster.delete_raster_cli, [
-            '--database', DB,
             '-y', True,
             'test_raster',
         ], catch_exceptions=False)
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(raster.delete_raster_cli, [
-            '--database', "YO",
-            '-y', True,
-            'test_raster',
-        ])
-        self.assertEqual(result.exit_code, 1)
-        result = runner.invoke(raster.delete_raster_cli, [
-            '--database', DB,
             '-y', True,
             'yo',
         ])

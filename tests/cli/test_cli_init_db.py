@@ -14,9 +14,6 @@ from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTest
 
 
-DB = settings.TEST_DATABASE
-
-
 class TestCLIInitDb(BaseTest):
     """
     Test case for init_db_cli cli method.

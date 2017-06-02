@@ -18,9 +18,6 @@ from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 
 
-DB = settings.TEST_DATABASE
-
-
 class TestRasterManager(BaseTestNiamotoSchemaCreated):
     """
     Test case for RasterManager class.
@@ -28,7 +25,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
 
     def tearDown(self):
         delete_stmt = niamoto_db_meta.raster_registry.delete()
-        with Connector.get_connection(database=DB) as connection:
+        with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
                 schema=settings.NIAMOTO_RASTER_SCHEMA
@@ -41,7 +38,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             connection.execute(delete_stmt)
 
     def test_get_raster_list(self):
-        df1 = RasterManager.get_raster_list(database=DB)
+        df1 = RasterManager.get_raster_list()
         self.assertEqual(len(df1), 0)
         data = [
             {
@@ -70,9 +67,9 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             },
         ]
         ins = niamoto_db_meta.raster_registry.insert().values(data)
-        with Connector.get_connection(database=DB) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins)
-        df2 = RasterManager.get_raster_list(database=DB)
+        df2 = RasterManager.get_raster_list()
         self.assertEqual(len(df2), 3)
 
     def test_add_raster(self):
@@ -81,7 +78,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         self.assertRaises(
             FileNotFoundError,
             RasterManager.add_raster,
-            null_path, "null_raster", 200, 200, 4326, database=DB
+            null_path, "null_raster", 200, 200, 4326
         )
         # Test existing raster
         test_raster = os.path.join(
@@ -94,15 +91,14 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             test_raster,
             "rainfall",
             200, 200,
-            database=DB
         )
-        df = RasterManager.get_raster_list(database=DB)
+        df = RasterManager.get_raster_list()
         self.assertEqual(len(df), 1)
         self.assertEqual(df.index[0], 'rainfall')
         self.assertEqual(df.iloc[0]['tile_width'], 200)
         self.assertEqual(df.iloc[0]['tile_height'], 200)
         self.assertEqual(df.iloc[0]['srid'], 4326)
-        engine = Connector.get_engine(database=DB)
+        engine = Connector.get_engine()
         inspector = Inspector.from_engine(engine)
         self.assertIn(
             'rainfall',
@@ -121,19 +117,17 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             test_raster,
             "rainfall",
             200, 200,
-            database=DB,
         )
         # Update raster
         RasterManager.update_raster(
             test_raster,
             "rainfall",
             100, 100,
-            database=DB,
         )
-        df = RasterManager.get_raster_list(database=DB)
+        df = RasterManager.get_raster_list()
         self.assertEqual(df.iloc[0]['tile_width'], 100)
         self.assertEqual(df.iloc[0]['tile_height'], 100)
-        engine = Connector.get_engine(database=DB)
+        engine = Connector.get_engine()
         inspector = Inspector.from_engine(engine)
         self.assertIn(
             'rainfall',
@@ -151,9 +145,8 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             test_raster,
             "rainfall",
             200, 200,
-            database=DB
         )
-        RasterManager.delete_raster("rainfall", database=DB)
+        RasterManager.delete_raster("rainfall")
 
     def test_raster_srid(self):
         test_raster = os.path.join(
@@ -164,7 +157,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         )
         srid = RasterManager.get_raster_srid(test_raster)
         self.assertEqual(srid, 4326)
-        df = RasterManager.get_raster_list(database=DB)
+        df = RasterManager.get_raster_list()
         self.assertEqual(len(df), 0)
 
 if __name__ == '__main__':

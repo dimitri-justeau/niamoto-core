@@ -30,28 +30,22 @@ class TestPlantnoteOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     def setUpClass(cls):
         super(TestPlantnoteOccurrenceProvider, cls).setUpClass()
         # Register Pl@ntnote data provider
-        PlantnoteDataProvider.register_data_provider_type(
-            database=settings.TEST_DATABASE
-        )
+        PlantnoteDataProvider.register_data_provider_type()
         PlantnoteDataProvider.register_data_provider(
             'pl@ntnote_provider',
             cls.TEST_DB_PATH,
-            database=settings.TEST_DATABASE,
         )
         # Populate taxon
         populate.populate_ncpippn_taxon_database(
             populate.load_ncpippn_taxon_dataframe_from_json(),
-            database=settings.TEST_DATABASE,
         )
 
     def test_get_dataframe_and_sync(self):
-        db = settings.TEST_DATABASE
         pt_provider = PlantnoteDataProvider(
             'pl@ntnote_provider',
             self.TEST_DB_PATH,
-            database=db,
         )
-        with Connector.get_connection(database=db) as connection:
+        with Connector.get_connection() as connection:
             occ_provider = pt_provider.occurrence_provider
             df1 = occ_provider.get_provider_occurrence_dataframe()
             cols = df1.columns

@@ -16,12 +16,12 @@ class Connector:
 
     @classmethod
     @contextmanager
-    def get_connection(cls, database=settings.DEFAULT_DATABASE):
+    def get_connection(cls):
         """
         :return: Return a sqlalchemy connection on a postgresql database.
         """
         try:
-            engine = cls.get_engine(database=database)
+            engine = cls.get_engine()
             connection = engine.connect()
             yield connection
         finally:
@@ -33,11 +33,12 @@ class Connector:
             i.dispose()
 
     @classmethod
-    def get_engine(cls, database=settings.DEFAULT_DATABASE):
+    def get_engine(cls):
         """
         :return: Return a sqlalchemy engine, use internal cache to avoid
         engine duplicates.
         """
+        database = settings.NIAMOTO_DATABASE
         user = database['USER']
         password = database['PASSWORD']
         host = database['HOST']

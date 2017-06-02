@@ -19,9 +19,7 @@ class TestConnector(BaseTest):
     """
 
     def test_get_connection(self):
-        with Connector.get_connection(
-                database=settings.TEST_DATABASE
-        ) as connection:
+        with Connector.get_connection() as connection:
             self.assertIsInstance(connection, Connection)
 
 

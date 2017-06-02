@@ -20,13 +20,12 @@ class RasterManager:
     """
 
     @classmethod
-    def get_raster_list(cls, database=settings.DEFAULT_DATABASE):
+    def get_raster_list(cls):
         """
-        :param database: The database to work with.
         :return: A pandas DataFrame containing all the raster entries
         available within the given database.
         """
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             sel = select([niamoto_db_meta.raster_registry])
             return pd.read_sql(
                 sel,
@@ -36,7 +35,7 @@ class RasterManager:
 
     @classmethod
     def add_raster(cls, raster_file_path, name, tile_width, tile_height,
-                   srid=None, database=settings.DEFAULT_DATABASE):
+                   srid=None):
         """
         Add a raster in database and register it the Niamoto raster registry.
         Uses raster2pgsql command. The raster is cut in tiles, using the
@@ -47,18 +46,17 @@ class RasterManager:
         :param tile_height: The tile height.
         :param srid: SRID to assign to stored raster. If None, use raster's
         metadata to determine which SRID to store.
-        :param database: The database to store the raster.
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
                 "The raster {} does not exist".format(raster_file_path)
             )
-        cls.assert_raster_does_not_exist(name, database)
+        cls.assert_raster_does_not_exist(name)
         if srid is None:
             srid = cls.get_raster_srid(raster_file_path)
         dim = "{}x{}".format(tile_width, tile_height)
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
-        os.environ["PGPASSWORD"] = database["PASSWORD"]
+        os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
         dev_null = open(os.devnull, 'w')  # Force quiet
         p1 = subprocess.Popen([
             "raster2pgsql", "-c", '-t', dim, '-I', raster_file_path, tb,
@@ -67,10 +65,10 @@ class RasterManager:
         p2 = subprocess.call([
             "psql",
             "-q",
-            "-U", database["USER"],
-            "-h", database["HOST"],
-            "-p", database["PORT"],
-            "-d", database["NAME"],
+            "-U", settings.NIAMOTO_DATABASE["USER"],
+            "-h", settings.NIAMOTO_DATABASE["HOST"],
+            "-p", settings.NIAMOTO_DATABASE["PORT"],
+            "-d", settings.NIAMOTO_DATABASE["NAME"],
             "-w",
         ], stdin=p1.stdout)
         p1.communicate()
@@ -85,12 +83,12 @@ class RasterManager:
             'date_create': datetime.now(),
             'date_update': datetime.now(),
         })
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins)
 
     @classmethod
     def update_raster(cls, raster_file_path, name, tile_width, tile_height,
-                      srid=None, database=settings.DEFAULT_DATABASE):
+                      srid=None):
         """
         Update an existing raster in database and register it the Niamoto
         raster registry. Uses raster2pgsql command. The raster is cut in
@@ -102,18 +100,17 @@ class RasterManager:
         :param tile_height: The tile height.
         :param srid: SRID to assign to stored raster. If None, use raster's
         metadata to determine which SRID to store.
-        :param database: The database to store the raster.
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
                 "The raster {} does not exist".format(raster_file_path)
             )
-        cls.assert_raster_exists(name, database)
+        cls.assert_raster_exists(name)
         if srid is None:
             srid = cls.get_raster_srid(raster_file_path)
         dim = "{}x{}".format(tile_width, tile_height)
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
-        os.environ["PGPASSWORD"] = database["PASSWORD"]
+        os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
         dev_null = open(os.devnull, 'w')  # Force quiet
         p1 = subprocess.Popen([
             "raster2pgsql", "-d", '-t', dim, '-I', raster_file_path, tb,
@@ -122,10 +119,10 @@ class RasterManager:
         p2 = subprocess.call([
             "psql",
             "-q",
-            "-U", database["USER"],
-            "-h", database["HOST"],
-            "-p", database["PORT"],
-            "-d", database["NAME"],
+            "-U", settings.NIAMOTO_DATABASE["USER"],
+            "-h", settings.NIAMOTO_DATABASE["HOST"],
+            "-p", settings.NIAMOTO_DATABASE["PORT"],
+            "-d", settings.NIAMOTO_DATABASE["NAME"],
             "-w",
         ], stdin=p1.stdout)
         p1.communicate()
@@ -139,18 +136,17 @@ class RasterManager:
             'date_create': datetime.now(),
             'date_update': datetime.now(),
         }).where(niamoto_db_meta.raster_registry.c.name == name)
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(upd)
 
     @classmethod
-    def delete_raster(cls, name, database=settings.DEFAULT_DATABASE):
+    def delete_raster(cls, name):
         """
         Delete an existing raster.
         :param name: The name of the raster.
-        :param database: The database to delete the raster from.
         """
-        cls.assert_raster_exists(name, database)
-        with Connector.get_connection(database=database) as connection:
+        cls.assert_raster_exists(name)
+        with Connector.get_connection() as connection:
             with connection.begin():
                 connection.execute("DROP TABLE IF EXISTS {};".format(
                     "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
@@ -172,22 +168,22 @@ class RasterManager:
         return srid
 
     @staticmethod
-    def assert_raster_does_not_exist(name, database):
+    def assert_raster_does_not_exist(name):
         sel = niamoto_db_meta.raster_registry.select().where(
             niamoto_db_meta.raster_registry.c.name == name
         )
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             r = connection.execute(sel).rowcount
             if r > 0:
                 m = "The raster '{}' already exists in database."
                 raise RecordAlreadyExists(m.format(name))
 
     @staticmethod
-    def assert_raster_exists(name, database):
+    def assert_raster_exists(name):
         sel = niamoto_db_meta.raster_registry.select().where(
             niamoto_db_meta.raster_registry.c.name == name
         )
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             r = connection.execute(sel).rowcount
             if r == 0:
                 m = "The raster '{}' does not exist in database."

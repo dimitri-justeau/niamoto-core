@@ -22,7 +22,7 @@ class TestPopulateTaxon(BaseTestNiamotoSchemaCreated):
         super(TestPopulateTaxon, cls).setUpClass()
 
     def tearDown(self):
-        Taxon.delete_all_taxa(database=settings.TEST_DATABASE)
+        Taxon.delete_all_taxa()
 
     def test_load_ncpippn_taxon_dataframe_from_json(self):
         df = load_ncpippn_taxon_dataframe_from_json()
@@ -30,11 +30,8 @@ class TestPopulateTaxon(BaseTestNiamotoSchemaCreated):
 
     def test_populate_ncpippn_taxon_database(self):
         df = load_ncpippn_taxon_dataframe_from_json()
-        populate_ncpippn_taxon_database(
-            df,
-            database=settings.TEST_DATABASE,
-        )
-        taxa = Taxon.get_raw_taxon_dataframe(database=settings.TEST_DATABASE)
+        populate_ncpippn_taxon_database(df)
+        taxa = Taxon.get_raw_taxon_dataframe()
         self.assertTrue(len(taxa) > 0)
         test_taxa = taxa.iloc[20]
         synonyms = test_taxa["synonyms"]

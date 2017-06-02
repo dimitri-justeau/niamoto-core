@@ -17,21 +17,11 @@ class TestBaseDataProvider(BaseTestNiamotoSchemaCreated):
     """
 
     def test_base_data_provider(self):
-        TestDataProvider.register_data_provider_type(
-            database=settings.TEST_DATABASE
-        )
-        db_id = TestDataProvider.get_data_provider_type_db_id(
-            database=settings.TEST_DATABASE
-        )
+        TestDataProvider.register_data_provider_type()
+        db_id = TestDataProvider.get_data_provider_type_db_id()
         self.assertIsNotNone(db_id)
-        TestDataProvider.register_data_provider(
-            'test_data_provider_1',
-            database=settings.TEST_DATABASE
-        )
-        test_data_provider = TestDataProvider(
-            'test_data_provider_1',
-            database=settings.TEST_DATABASE,
-        )
+        TestDataProvider.register_data_provider('test_data_provider_1')
+        test_data_provider = TestDataProvider('test_data_provider_1')
         self.assertIsNotNone(test_data_provider)
         self.assertIsNotNone(test_data_provider.db_id)
 

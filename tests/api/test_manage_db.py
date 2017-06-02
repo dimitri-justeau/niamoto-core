@@ -11,9 +11,6 @@ from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.api import manage_db
 
 
-DB = settings.DEFAULT_DATABASE
-
-
 class TestInitDbApi(BaseTest):
     """
     Test case for init_db_cli api.

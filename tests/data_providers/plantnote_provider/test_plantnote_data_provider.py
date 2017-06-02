@@ -25,22 +25,16 @@ class TestPlantnoteDataProvider(BaseTestNiamotoSchemaCreated):
     )
 
     def test_plantnote_data_provider(self):
-        PlantnoteDataProvider.register_data_provider_type(
-            database=settings.TEST_DATABASE
-        )
-        db_id = PlantnoteDataProvider.get_data_provider_type_db_id(
-            database=settings.TEST_DATABASE
-        )
+        PlantnoteDataProvider.register_data_provider_type()
+        db_id = PlantnoteDataProvider.get_data_provider_type_db_id()
         self.assertIsNotNone(db_id)
         PlantnoteDataProvider.register_data_provider(
             'pl@ntnote_provider_1',
             self.TEST_DB_PATH,
-            database=settings.TEST_DATABASE
         )
         test_data_provider = PlantnoteDataProvider(
             'pl@ntnote_provider_1',
             self.TEST_DB_PATH,
-            database=settings.TEST_DATABASE,
         )
         self.assertIsNotNone(test_data_provider)
         self.assertIsNotNone(test_data_provider.db_id)

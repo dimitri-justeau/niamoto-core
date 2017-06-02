@@ -27,21 +27,14 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestBasePlotOccurrenceProvider, cls).setUpClass()
-        TestDataProvider.register_data_provider_type(
-            database=settings.TEST_DATABASE
-        )
+        TestDataProvider.register_data_provider_type()
         data_provider_1 = TestDataProvider.register_data_provider(
-            'test_data_provider_1',
-            database=settings.TEST_DATABASE,
+            'test_data_provider_1'
         )
         data_provider_2 = TestDataProvider.register_data_provider(
             'test_data_provider_2',
-            database=settings.TEST_DATABASE,
         )
-        TestDataProvider.register_data_provider(
-            'test_data_provider_3',
-            database=settings.TEST_DATABASE,
-        )
+        TestDataProvider.register_data_provider('test_data_provider_3')
         plot_1 = test_data.get_plot_data_1(data_provider_1)
         plot_2 = test_data.get_plot_data_2(data_provider_2)
         occ_1 = test_data.get_occurrence_data_1(data_provider_1)
@@ -53,27 +46,17 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         ins_3 = niamoto_db_meta.plot_occurrence.insert().values(
             plot_occ_1 + plot_occ_2
         )
-        with Connector.get_connection(settings.TEST_DATABASE) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins_1)
             connection.execute(ins_2)
             connection.execute(ins_3)
-        fix_db_sequences(database=settings.TEST_DATABASE)
+        fix_db_sequences()
 
     def test_get_current_plot_occ_data(self):
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        data_provider_2 = TestDataProvider(
-            'test_data_provider_2',
-            database=db,
-        )
-        data_provider_3 = TestDataProvider(
-            'test_data_provider_3',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        data_provider_2 = TestDataProvider('test_data_provider_2')
+        data_provider_3 = TestDataProvider('test_data_provider_3')
+        with Connector.get_connection() as connection:
             prov1 = BasePlotOccurrenceProvider(data_provider_1)
             prov2 = BasePlotOccurrenceProvider(data_provider_2)
             prov3 = BasePlotOccurrenceProvider(data_provider_3)
@@ -85,10 +68,7 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             self.assertEqual(len(df3), 0)
 
     def test_get_niamoto_index(self):
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=settings.TEST_DATABASE,
-        )
+        data_provider_1 = TestDataProvider('test_data_provider_1')
         prov1 = BasePlotOccurrenceProvider(data_provider_1)
         data = pd.DataFrame.from_records([
             {
@@ -114,12 +94,8 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         )
 
     def test_get_insert_dataframe(self):
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             prov1 = BasePlotOccurrenceProvider(data_provider_1)
             df1 = prov1.get_niamoto_plot_occurrence_dataframe(connection)
         #  1. Nothing to insert
@@ -178,12 +154,8 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(list(ins['provider_occurrence_pk']), [2, 5])
 
     def test_get_update_dataframe(self):
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             prov1 = BasePlotOccurrenceProvider(data_provider_1)
             df1 = prov1.get_niamoto_plot_occurrence_dataframe(connection)
         #  1. Nothing to update
@@ -242,12 +214,8 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(list(upd['occurrence_id']), [0, 2])
 
     def test_get_delete_dataframe(self):
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             prov1 = BasePlotOccurrenceProvider(data_provider_1)
             df1 = prov1.get_niamoto_plot_occurrence_dataframe(connection)
         #  1. Nothing to delete
@@ -308,25 +276,19 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     def test_sync_insert(self):
         self.tearDownClass()
         super(TestBasePlotOccurrenceProvider, self).setUpClass()
-        db = settings.TEST_DATABASE
         # Reset the data
-        TestDataProvider.register_data_provider_type(
-            database=db,
-        )
-        data_provider_1 = TestDataProvider.register_data_provider(
-            'test_data_provider_1',
-            database=db,
-        )
+        TestDataProvider.register_data_provider_type()
+        data_provider_1 = TestDataProvider.register_data_provider('test_data_provider_1')
         plot_1 = test_data.get_plot_data_1(data_provider_1)
         occ_1 = test_data.get_occurrence_data_1(data_provider_1)
         ins_1 = niamoto_db_meta.plot.insert().values(plot_1)
         ins_2 = niamoto_db_meta.occurrence.insert().values(occ_1)
-        with Connector.get_connection(settings.TEST_DATABASE) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins_1)
             connection.execute(ins_2)
-        fix_db_sequences(database=db)
+        fix_db_sequences()
         # Test
-        with Connector.get_connection(database=db) as connection:
+        with Connector.get_connection() as connection:
             prov = BasePlotOccurrenceProvider(data_provider_1)
             self.assertEqual(
                 len(prov.get_niamoto_plot_occurrence_dataframe(connection)),
@@ -357,12 +319,8 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     def test_sync_update(self):
         self.tearDownClass()
         self.setUpClass()
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             prov = BasePlotOccurrenceProvider(data_provider_1)
             self.assertEqual(
                 len(prov.get_niamoto_plot_occurrence_dataframe(connection)),
@@ -408,12 +366,8 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     def test_sync_delete(self):
         self.tearDownClass()
         self.setUpClass()
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             prov = BasePlotOccurrenceProvider(data_provider_1)
             self.assertEqual(
                 len(prov.get_niamoto_plot_occurrence_dataframe(connection)),

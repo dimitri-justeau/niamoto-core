@@ -4,7 +4,6 @@ import time
 
 from sqlalchemy import select, Index
 
-from niamoto.conf import settings
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
@@ -19,22 +18,17 @@ class BaseDataProvider:
     Abstract base class for plot and occurrence data providers.
     """
 
-    def __init__(self, name, database=settings.DEFAULT_DATABASE):
+    def __init__(self, name):
         self.name = name
         self._db_id = None
-        self._database = database
         self._update_db_id()
-
-    @property
-    def database(self):
-        return self._database
 
     @property
     def db_id(self):
         return self._db_id
 
     def _update_db_id(self):
-        with Connector.get_connection(database=self.database) as connection:
+        with Connector.get_connection() as connection:
             sel = select([niamoto_db_meta.data_provider.c.id]).where(
                 niamoto_db_meta.data_provider.c.name == self.name
             )
@@ -81,7 +75,7 @@ class BaseDataProvider:
         LOGGER.info("*** Data sync starting ('{}' - {})...".format(
             self.name, self.get_type_name()
         ))
-        with Connector.get_connection(database=self.database) as connection:
+        with Connector.get_connection() as connection:
             with connection.begin():
                 i1, u1, d1 = self.occurrence_provider.sync(
                     connection,
@@ -130,20 +124,18 @@ class BaseDataProvider:
         raise NotImplementedError()
 
     @classmethod
-    def get_data_provider_type_db_id(cls, database=settings.DEFAULT_DATABASE):
+    def get_data_provider_type_db_id(cls):
         sel = select([niamoto_db_meta.data_provider_type.c.id]).where(
             niamoto_db_meta.data_provider_type.c.name == cls.get_type_name()
         )
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             result = connection.execute(sel)
             return result.fetchone()['id']
 
     @classmethod
-    def register_data_provider_type(cls, database=settings.DEFAULT_DATABASE,
-                                    connection=None):
+    def register_data_provider_type(cls, connection=None):
         """
         Register the cls data provider type in database.
-        :param database: The database to work with.
         :param connection: If passed, use an existing connection instead of
         creating a new one.
         """
@@ -154,16 +146,13 @@ class BaseDataProvider:
             connection.execute(ins)
             cls._register_unique_synonym_constraint(connection=connection)
             return
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins)
-            cls._register_unique_synonym_constraint(database=database)
+            cls._register_unique_synonym_constraint()
 
     @classmethod
-    def _register_unique_synonym_constraint(cls,
-                                            database=settings.DEFAULT_DATABASE,
-                                            connection=None):
+    def _register_unique_synonym_constraint(cls, connection=None):
         """
-        :param database: The database to work with.
         :param connection: If passed, use an existing connection instead of
         creating a new one.
         """
@@ -174,7 +163,7 @@ class BaseDataProvider:
         )
         bind = connection
         if bind is None:
-            bind = Connector.get_engine(database=database)
+            bind = Connector.get_engine()
         index.create(bind)
         niamoto_db_meta.taxon.indexes.remove(index)
 
@@ -189,55 +178,50 @@ class BaseDataProvider:
         index.drop(connection)
 
     @classmethod
-    def register_data_provider(cls, name, *args,
-                               database=settings.DEFAULT_DATABASE,
-                               properties={}, return_object=True, **kwargs):
-        cls.assert_data_provider_does_not_exist(name, database)
+    def register_data_provider(cls, name, *args, properties={},
+                               return_object=True, **kwargs):
+        cls.assert_data_provider_does_not_exist(name)
         ins = niamoto_db_meta.data_provider.insert({
             'name': name,
-            'provider_type_id': cls.get_data_provider_type_db_id(
-                database=database
-            ),
+            'provider_type_id': cls.get_data_provider_type_db_id(),
             'properties': properties,
         })
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins)
         if return_object:
-            return cls(name, *args, database=database, **kwargs)
+            return cls(name, *args, **kwargs)
 
     @classmethod
-    def unregister_data_provider(cls, name,
-                                 database=settings.DEFAULT_DATABASE):
+    def unregister_data_provider(cls, name):
         """
         Unregister a data provider from the database.
         :param name: The name of the data provider to unregister.
-        :param database: The database to work with.
         """
-        cls.assert_data_provider_exists(name, database)
+        cls.assert_data_provider_exists(name)
         delete_stmt = niamoto_db_meta.data_provider.delete().where(
             niamoto_db_meta.data_provider.c.name == name
         )
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             with connection.begin():
                 connection.execute(delete_stmt)
 
     @staticmethod
-    def assert_data_provider_does_not_exist(name, database):
+    def assert_data_provider_does_not_exist(name):
         sel = niamoto_db_meta.data_provider.select().where(
             niamoto_db_meta.data_provider.c.name == name
         )
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             r = connection.execute(sel).rowcount
             if r > 0:
                 m = "The data provider '{}' already exists in database."
                 raise RecordAlreadyExists(m.format(name))
 
     @staticmethod
-    def assert_data_provider_exists(name, database):
+    def assert_data_provider_exists(name):
         sel = niamoto_db_meta.data_provider.select().where(
             niamoto_db_meta.data_provider.c.name == name
         )
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             r = connection.execute(sel).rowcount
             if r == 0:
                 m = "The data provider '{}' does not exist in database."

@@ -7,7 +7,6 @@ API Module for managing data providers.
 from sqlalchemy import *
 import pandas as pd
 
-from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db.metadata import data_provider_type, data_provider
 from niamoto.db.utils import fix_db_sequences
@@ -22,20 +21,18 @@ PROVIDER_TYPES = {
 }
 
 
-def get_data_provider_type_list(database=settings.DEFAULT_DATABASE):
+def get_data_provider_type_list():
     """
-    :param database The database to work with.
     :return: A Dataframe containing all the registered data provider types.
     """
     sel = select([data_provider_type])
-    with Connector.get_connection(database=database) as connection:
+    with Connector.get_connection() as connection:
         df = pd.read_sql(sel, connection, index_col='id')
     return df
 
 
-def get_data_provider_list(database=settings.DEFAULT_DATABASE):
+def get_data_provider_list():
     """
-    :param database The database to work with.
     :return: A Dataframe containing all the registered data providers.
     """
     sel = select([
@@ -48,14 +45,13 @@ def get_data_provider_list(database=settings.DEFAULT_DATABASE):
             data_provider.c.provider_type_id == data_provider_type.c.id
         )
     )
-    with Connector.get_connection(database=database) as connection:
+    with Connector.get_connection() as connection:
         df = pd.read_sql(sel, connection, index_col='id')
     return df
 
 
-def add_data_provider(name, provider_type, *args,
-                      database=settings.DEFAULT_DATABASE,
-                      properties={}, return_object=False, **kwargs):
+def add_data_provider(name, provider_type, *args, properties={},
+                      return_object=False, **kwargs):
     """
     Register a data provider in a given Niamoto database.
     :param name: The name of the provider to register (must be unique).
@@ -64,7 +60,6 @@ def add_data_provider(name, provider_type, *args,
         - 'PLANTNOTE': The Pl@ntnote data provider.
         - 'CSV': The CSV data provider.
     :param args: Additional args.
-    :param database: The database to work with.
     :param properties: Properties dict to store for the data provider.
     :param return_object: If True, return the created object.
     :param kwargs: Additional keyword args.
@@ -81,32 +76,28 @@ def add_data_provider(name, provider_type, *args,
     return provider_cls.register_data_provider(
         name,
         *args,
-        database=database,
         properties=properties,
         return_object=return_object,
         **kwargs
     )
 
 
-def delete_data_provider(name, database=settings.DEFAULT_DATABASE):
+def delete_data_provider(name):
     """
     Register a data provider in a given Niamoto database.
     :param name: The name of the provider to register (must be unique).
-    :param database: The database to work with.
     """
-    BaseDataProvider.unregister_data_provider(name, database=database)
-    fix_db_sequences(database=database)
+    BaseDataProvider.unregister_data_provider(name)
+    fix_db_sequences()
 
 
-def sync_with_data_provider(name, *args, database=settings.DEFAULT_DATABASE,
-                            **kwargs):
+def sync_with_data_provider(name, *args, **kwargs):
     """
     Sync the Niamoto database with a data provider.
     :param name: The name of the data provider.
-    :param database: The database to work with.
     :return: The sync report.
     """
-    BaseDataProvider.assert_data_provider_exists(name, database)
+    BaseDataProvider.assert_data_provider_exists(name)
     sel = select([
         data_provider.c.id,
         data_provider.c.name,
@@ -122,15 +113,12 @@ def sync_with_data_provider(name, *args, database=settings.DEFAULT_DATABASE,
     # Look for args that must be set None
     none_values = [None, 'none', 'None', '0', 'n', 'N',]
     nargs = [None if i in none_values else i for i in args]
-    with Connector.get_connection(database=database) as connection:
+    with Connector.get_connection() as connection:
         r = connection.execute(sel)
         record = r.fetchone()
         name = record.name
         type_key = record.provider_type
-        provider = PROVIDER_TYPES[type_key](
-            name, *nargs,
-            database=database, **kwargs
-        )
+        provider = PROVIDER_TYPES[type_key](name, *nargs, **kwargs)
         sync_report = provider.sync()
-    fix_db_sequences(database=database)
+    fix_db_sequences()
     return sync_report

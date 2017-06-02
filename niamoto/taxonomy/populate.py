@@ -5,7 +5,6 @@ import os
 from sqlalchemy import bindparam, func
 import pandas as pd
 
-from niamoto.conf import settings
 from niamoto.taxonomy.taxon import Taxon
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
@@ -20,12 +19,10 @@ def load_ncpippn_taxon_dataframe_from_json(path=NCPIPPN_REF):
     return pd.read_json(path)
 
 
-def populate_ncpippn_taxon_database(dataframe,
-                                    database=settings.DEFAULT_DATABASE):
+def populate_ncpippn_taxon_database(dataframe):
     """
     Populate a Niamoto database with a taxonomic referential.
     :param dataframe: The dataframe containing the taxonomic referential.
-    :param database: The database to populate in.
     """
     dataframe['tax_id'] = dataframe.index
     dataframe = dataframe.astype(object).where(pd.notnull(dataframe), None)
@@ -55,8 +52,8 @@ def populate_ncpippn_taxon_database(dataframe,
         niamoto_db_meta.TaxonRankEnum.INFRASPECIES.value,
     ]
     for l in levels:
-        with Connector.get_connection(database=database) as connection:
+        with Connector.get_connection() as connection:
             df = dataframe[dataframe['rank'] == l]
             if len(df) > 0:
                 connection.execute(ins, df.to_dict(orient='records'))
-    Taxon.make_mptt(database=database)
+    Taxon.make_mptt()

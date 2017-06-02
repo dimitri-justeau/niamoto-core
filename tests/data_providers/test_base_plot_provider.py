@@ -27,27 +27,20 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestBasePlotProvider, cls).setUpClass()
-        TestDataProvider.register_data_provider_type(
-            database=settings.TEST_DATABASE
-        )
+        TestDataProvider.register_data_provider_type()
         data_provider_1 = TestDataProvider.register_data_provider(
             'test_data_provider_1',
-            database=settings.TEST_DATABASE,
         )
         data_provider_2 = TestDataProvider.register_data_provider(
             'test_data_provider_2',
-            database=settings.TEST_DATABASE,
         )
-        TestDataProvider.register_data_provider(
-            'test_data_provider_3',
-            database=settings.TEST_DATABASE,
-        )
+        TestDataProvider.register_data_provider('test_data_provider_3')
         plot_1 = test_data.get_plot_data_1(data_provider_1)
         plot_2 = test_data.get_plot_data_2(data_provider_2)
         ins = niamoto_db_meta.plot.insert().values(plot_1 + plot_2)
-        with Connector.get_connection(settings.TEST_DATABASE) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins)
-        fix_db_sequences(database=settings.TEST_DATABASE)
+        fix_db_sequences()
 
     def test_get_current_plot_data(self):
         """
@@ -56,20 +49,10 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
             Test retrieving an empty DataFrame.
             Test retrieving a not-empty DataFrame.
         """
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        data_provider_2 = TestDataProvider(
-            'test_data_provider_2',
-            database=db,
-        )
-        data_provider_3 = TestDataProvider(
-            'test_data_provider_3',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        data_provider_2 = TestDataProvider('test_data_provider_2')
+        data_provider_3 = TestDataProvider('test_data_provider_3')
+        with Connector.get_connection() as connection:
             pp1 = BasePlotProvider(data_provider_1)
             pp2 = BasePlotProvider(data_provider_2)
             pp3 = BasePlotProvider(data_provider_3)
@@ -86,12 +69,8 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
                 self.assertIn(db_col.name, df_cols)
 
     def test_get_insert_dataframe(self):
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             pp1 = BasePlotProvider(data_provider_1)
             df1 = pp1.get_niamoto_plot_dataframe(connection)
         #  1. Nothing to insert
@@ -145,12 +124,8 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(ins), 1)
 
     def test_get_update_dataframe(self):
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             pp1 = BasePlotProvider(data_provider_1)
             df1 = pp1.get_niamoto_plot_dataframe(connection)
         #  1. Nothing to update
@@ -222,12 +197,8 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(update_df), 2)
 
     def test_get_delete_dataframe(self):
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             pp1 = BasePlotProvider(data_provider_1)
             df1 = pp1.get_niamoto_plot_dataframe(connection)
         #  1. Nothing to delete
@@ -296,12 +267,8 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
     def test_sync_insert(self):
         self.tearDownClass()
         self.setUpClass()
-        db = settings.TEST_DATABASE
-        data_provider_3 = TestDataProvider(
-            'test_data_provider_3',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_3 = TestDataProvider('test_data_provider_3')
+        with Connector.get_connection() as connection:
             pp3 = BasePlotProvider(data_provider_3)
             self.assertEqual(
                 len(pp3.get_niamoto_plot_dataframe(connection)),
@@ -340,12 +307,8 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
     def test_sync_update(self):
         self.tearDownClass()
         self.setUpClass()
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             pp1 = BasePlotProvider(data_provider_1)
             self.assertEqual(
                 len(pp1.get_niamoto_plot_dataframe(connection)),
@@ -399,12 +362,8 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
     def test_sync_delete(self):
         self.tearDownClass()
         self.setUpClass()
-        db = settings.TEST_DATABASE
-        data_provider_1 = TestDataProvider(
-            'test_data_provider_1',
-            database=db,
-        )
-        with Connector.get_connection(database=db) as connection:
+        data_provider_1 = TestDataProvider('test_data_provider_1')
+        with Connector.get_connection() as connection:
             pp1 = BasePlotProvider(data_provider_1)
             self.assertEqual(
                 len(pp1.get_niamoto_plot_dataframe(connection)),

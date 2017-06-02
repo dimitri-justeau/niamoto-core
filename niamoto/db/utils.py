@@ -1,12 +1,11 @@
 # coding: utf-8
 
-from niamoto.conf import settings
 from niamoto.db.connector import Connector
 
 
-def fix_db_sequences(database=settings.DEFAULT_DATABASE):
-    fix_db_sequences_ownership(database=database)
-    with Connector.get_connection(database=database) as connection:
+def fix_db_sequences():
+    fix_db_sequences_ownership()
+    with Connector.get_connection() as connection:
         res = connection.execute(
             """
             SELECT 'SELECT SETVAL(' ||
@@ -32,8 +31,8 @@ def fix_db_sequences(database=settings.DEFAULT_DATABASE):
             connection.execute(s[0])
 
 
-def fix_db_sequences_ownership(database=settings.DEFAULT_DATABASE):
-    with Connector.get_connection(database=database) as connection:
+def fix_db_sequences_ownership():
+    with Connector.get_connection() as connection:
         res = connection.execute(
             """
             SELECT 'ALTER SEQUENCE '|| quote_ident(MIN(schema_name)) ||'.'|| quote_ident(MIN(seq_name))

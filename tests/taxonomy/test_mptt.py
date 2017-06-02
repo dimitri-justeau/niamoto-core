@@ -26,7 +26,7 @@ class TestMPTT(BaseTestNiamotoSchemaCreated):
         super(TestMPTT, cls).setUpClass()
 
     def tearDown(self):
-        Taxon.delete_all_taxa(database=settings.TEST_DATABASE)
+        Taxon.delete_all_taxa()
 
     def test_construct_mptt_simple_tree(self):
         tree = [
@@ -35,12 +35,10 @@ class TestMPTT(BaseTestNiamotoSchemaCreated):
         ]
         data, last_id = make_taxon_tree(tree)
         ins = niamoto_db_meta.taxon.insert().values(data)
-        with Connector.get_connection(settings.TEST_DATABASE) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins)
-        Taxon.make_mptt(database=settings.TEST_DATABASE)
-        mptt = Taxon.get_raw_taxon_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        Taxon.make_mptt()
+        mptt = Taxon.get_raw_taxon_dataframe()
         self.assertEqual(list(mptt['mptt_tree_id']), [1, 1, 1, 1, 5, 5])
         self.assertEqual(list(mptt['mptt_left']), [1, 2, 4, 5, 1, 2])
         self.assertEqual(list(mptt['mptt_right']), [8, 3, 7, 6, 4, 3])
@@ -62,12 +60,10 @@ class TestMPTT(BaseTestNiamotoSchemaCreated):
         data, last_id = make_taxon_tree(tree)
         self.assertEqual(len(data), 24)
         ins = niamoto_db_meta.taxon.insert().values(data)
-        with Connector.get_connection(settings.TEST_DATABASE) as connection:
+        with Connector.get_connection() as connection:
             connection.execute(ins)
-        Taxon.make_mptt(database=settings.TEST_DATABASE)
-        mptt = Taxon.get_raw_taxon_dataframe(
-            database=settings.TEST_DATABASE
-        )
+        Taxon.make_mptt()
+        mptt = Taxon.get_raw_taxon_dataframe()
         self.assertEqual(
             list(mptt['mptt_tree_id']),
             [1, 1, 1, 1, 1, 1, 7, 7, 9, 9, 11, 11, 13, 13, 13, 13, 13, 13, 13,

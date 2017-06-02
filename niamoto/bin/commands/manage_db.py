@@ -2,13 +2,9 @@
 
 import click
 
-from niamoto.decorators import resolve_database
-
 
 @click.command('init_db')
-@click.option('--database', default=None)
-@resolve_database
-def init_db_cli(database=None):
+def init_db_cli():
     """
     Initialize the Niamoto database.
     """

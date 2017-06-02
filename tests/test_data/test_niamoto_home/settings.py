@@ -5,7 +5,7 @@ NIAMOTO_RASTER_SCHEMA = 'niamoto_raster'
 NIAMOTO_VECTOR_SCHEMA = 'niamoto_vector'
 
 DATABASES = {
-    'default': {
+    'niamoto': {
         'HOST': 'localhost',
         'PORT': '5432',
         'NAME': 'niamoto_test',
@@ -14,8 +14,8 @@ DATABASES = {
     }
 }
 
-DEFAULT_DATABASE = DATABASES['default']
-TEST_DATABASE = DEFAULT_DATABASE
+NIAMOTO_DATABASE = DATABASES['niamoto']
+TEST_DATABASE = NIAMOTO_DATABASE
 
 DEFAULT_POSTGRES_SUPERUSER = 'postgres'
 DEFAULT_POSTGRES_SUPERUSER_PASSWORD = 'postgres'

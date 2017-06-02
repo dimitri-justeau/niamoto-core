@@ -214,8 +214,7 @@ class BasePlotOccurrenceProvider:
             ['provider_plot_pk', 'provider_occurrence_pk'],
             inplace=True
         )
-        db = self.data_provider.database
-        with Connector.get_connection(database=db) as connection:
+        with Connector.get_connection() as connection:
             sel_plot = select([
                 plot.c.id.label('plot_id'),
                 plot.c.provider_pk.label('provider_plot_pk')

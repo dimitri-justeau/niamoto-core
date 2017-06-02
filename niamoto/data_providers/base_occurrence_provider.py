@@ -59,11 +59,7 @@ class BaseOccurrenceProvider:
         taxon id as values.
         """
         LOGGER.debug("Mapping provider's taxon ids...")
-        db = self.data_provider.database
-        synonyms = Taxon.get_synonyms_for_provider(
-            self.data_provider,
-            database=db
-        )
+        synonyms = Taxon.get_synonyms_for_provider(self.data_provider)
         dataframe["provider_taxon_id"] = dataframe["taxon_id"]
         dataframe["taxon_id"] = dataframe["taxon_id"].map(synonyms)
 

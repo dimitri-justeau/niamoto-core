@@ -9,10 +9,10 @@ conf.set_niamoto_home()
 conf.set_settings()
 
 
-user = conf.settings.DEFAULT_DATABASE['USER']
-password = conf.settings.DEFAULT_DATABASE['PASSWORD']
-host = conf.settings.DEFAULT_DATABASE['HOST']
-database = conf.settings.DEFAULT_DATABASE['NAME']
+user = conf.settings.NIAMOTO_DATABASE['USER']
+password = conf.settings.NIAMOTO_DATABASE['PASSWORD']
+host = conf.settings.NIAMOTO_DATABASE['HOST']
+database = conf.settings.NIAMOTO_DATABASE['NAME']
 db_url = 'postgresql+psycopg2://{user}:{password}@{host}/{database}'
 db_url = db_url.format(**{
     'user': user,

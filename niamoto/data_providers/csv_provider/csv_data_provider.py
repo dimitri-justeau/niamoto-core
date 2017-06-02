@@ -1,6 +1,5 @@
 # coding: utf-8
 
-from niamoto.conf import settings
 from niamoto.data_providers import BaseDataProvider
 from niamoto.data_providers.csv_provider.csv_occurrence_provider \
     import CsvOccurrenceProvider
@@ -16,9 +15,8 @@ class CsvDataProvider(BaseDataProvider):
     """
 
     def __init__(self, name, occurrence_csv_path=None,
-                 plot_csv_path=None, plot_occurrence_csv_path=None,
-                 database=settings.DEFAULT_DATABASE):
-        super(CsvDataProvider, self).__init__(name, database=database)
+                 plot_csv_path=None, plot_occurrence_csv_path=None):
+        super(CsvDataProvider, self).__init__(name)
         self._occurrence_provider = None
         self._plot_provider = None
         self._plot_occurrence_provider = None

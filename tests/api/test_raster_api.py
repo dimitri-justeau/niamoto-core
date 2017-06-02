@@ -18,9 +18,6 @@ from niamoto.api import raster_api
 from niamoto.exceptions import NoRecordFoundError
 
 
-DB = settings.TEST_DATABASE
-
-
 class TestRasterApi(BaseTestNiamotoSchemaCreated):
     """
     Test case for raster api.
@@ -39,7 +36,7 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
 
     def tearDown(self):
         delete_stmt = niamoto_db_meta.raster_registry.delete()
-        with Connector.get_connection(database=DB) as connection:
+        with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
                 schema=settings.NIAMOTO_RASTER_SCHEMA
@@ -52,7 +49,7 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
             connection.execute(delete_stmt)
 
     def test_get_raster_list(self):
-        df1 = raster_api.get_raster_list(database=DB)
+        df1 = raster_api.get_raster_list()
         self.assertEqual(len(df1), 0)
 
     def test_add_raster(self):
@@ -60,7 +57,6 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
             self.TEST_RASTER_PATH,
             'test_raster',
             200, 200,
-            database=DB
         )
 
     def test_update_raster(self):
@@ -68,13 +64,11 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
             self.TEST_RASTER_PATH,
             'test_raster',
             200, 200,
-            database=DB
         )
         raster_api.update_raster(
             self.TEST_RASTER_PATH,
             'test_raster',
             150, 150,
-            database=DB
         )
 
     def test_delete_raster(self):
@@ -82,14 +76,12 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
             self.TEST_RASTER_PATH,
             'test_raster',
             200, 200,
-            database=DB
         )
-        raster_api.delete_raster('test_raster', database=DB)
+        raster_api.delete_raster('test_raster')
         self.assertRaises(
             NoRecordFoundError,
             raster_api.delete_raster,
             'test_raster',
-            database=DB
         )
 
 
