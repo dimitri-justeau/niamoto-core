@@ -7,7 +7,7 @@ import pandas as pd
 from niamoto.testing import set_test_path
 set_test_path()
 
-from niamoto.taxonomy.taxon import Taxon
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
@@ -26,7 +26,7 @@ class TestMPTT(BaseTestNiamotoSchemaCreated):
         super(TestMPTT, cls).setUpClass()
 
     def tearDown(self):
-        Taxon.delete_all_taxa()
+        TaxonomyManager.delete_all_taxa()
 
     def test_construct_mptt_simple_tree(self):
         tree = [
@@ -37,8 +37,8 @@ class TestMPTT(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        Taxon.make_mptt()
-        mptt = Taxon.get_raw_taxon_dataframe()
+        TaxonomyManager.make_mptt()
+        mptt = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(list(mptt['mptt_tree_id']), [1, 1, 1, 1, 5, 5])
         self.assertEqual(list(mptt['mptt_left']), [1, 2, 4, 5, 1, 2])
         self.assertEqual(list(mptt['mptt_right']), [8, 3, 7, 6, 4, 3])
@@ -62,8 +62,8 @@ class TestMPTT(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        Taxon.make_mptt()
-        mptt = Taxon.get_raw_taxon_dataframe()
+        TaxonomyManager.make_mptt()
+        mptt = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(
             list(mptt['mptt_tree_id']),
             [1, 1, 1, 1, 1, 1, 7, 7, 9, 9, 11, 11, 13, 13, 13, 13, 13, 13, 13,

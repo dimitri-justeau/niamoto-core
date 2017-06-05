@@ -5,7 +5,7 @@ import unittest
 from niamoto.testing import set_test_path
 set_test_path()
 
-from niamoto.taxonomy.taxon import Taxon
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.conf import settings
@@ -23,10 +23,10 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
         super(TestGetTaxon, cls).setUpClass()
 
     def tearDown(self):
-        Taxon.delete_all_taxa()
+        TaxonomyManager.delete_all_taxa()
 
     def test_get_empty_raw_taxon_dataset(self):
-        df1 = Taxon.get_raw_taxon_dataframe()
+        df1 = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(len(df1), 0)
 
     def test_get_not_empty_raw_taxon_dataset(self):
@@ -71,7 +71,7 @@ class TestGetTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        df1 = Taxon.get_raw_taxon_dataframe()
+        df1 = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(len(df1), 3)
 
 if __name__ == '__main__':

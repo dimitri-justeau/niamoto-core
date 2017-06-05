@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from niamoto.testing import set_test_path
 set_test_path()
 
-from niamoto.taxonomy.taxon import Taxon
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.conf import settings
@@ -29,7 +29,7 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         TestDataProvider.register_data_provider('test_data_provider_2')
 
     def tearDown(self):
-        Taxon.delete_all_taxa()
+        TaxonomyManager.delete_all_taxa()
 
     def test_add_single_synonym(self):
         data_provider_1 = TestDataProvider('test_data_provider_1')
@@ -51,14 +51,14 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        Taxon.add_synonym_for_single_taxon(0, data_provider_1, 1)
-        df1 = Taxon.get_raw_taxon_dataframe()
+        TaxonomyManager.add_synonym_for_single_taxon(0, data_provider_1, 1)
+        df1 = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(
             df1.loc[0]['synonyms'],
             {data_provider_1.get_type_name(): 1}
         )
-        Taxon.add_synonym_for_single_taxon(0, data_provider_2, 2)
-        df2 = Taxon.get_raw_taxon_dataframe()
+        TaxonomyManager.add_synonym_for_single_taxon(0, data_provider_2, 2)
+        df2 = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(
             df2.loc[0]['synonyms'],
             {
@@ -98,10 +98,10 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        Taxon.add_synonym_for_single_taxon(0, data_provider_1, 1)
+        TaxonomyManager.add_synonym_for_single_taxon(0, data_provider_1, 1)
         self.assertRaises(
             IntegrityError,
-            Taxon.add_synonym_for_single_taxon,
+            TaxonomyManager.add_synonym_for_single_taxon,
             1, data_provider_1, 1,
         )
 
@@ -140,7 +140,7 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        synonyms = Taxon.get_synonyms_for_provider(data_provider_1)
+        synonyms = TaxonomyManager.get_synonyms_for_provider(data_provider_1)
         self.assertEqual(synonyms.loc[10], 0)
         self.assertEqual(synonyms.loc[20], 1)
 

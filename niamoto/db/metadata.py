@@ -44,7 +44,11 @@ occurrence = Table(
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column(
         'taxon_id',
-        ForeignKey('{}.taxon.id'.format(settings.NIAMOTO_SCHEMA)),
+        ForeignKey(
+            '{}.taxon.id'.format(settings.NIAMOTO_SCHEMA),
+            onupdate="CASCADE",
+            ondelete="SET NULL",
+        ),
         nullable=True,
         index=True,
     ),
@@ -88,7 +92,10 @@ taxon = Table(
     ),
     Column(
         'parent_id',
-        ForeignKey('{}.taxon.id'.format(settings.NIAMOTO_SCHEMA)),
+        ForeignKey(
+            '{}.taxon.id'.format(settings.NIAMOTO_SCHEMA),
+            deferrable=True
+        ),
         nullable=True,
         index=True,
     ),

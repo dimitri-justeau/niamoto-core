@@ -73,6 +73,7 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ['parent_id'],
             ['niamoto.taxon.id'],
+            deferrable=True,
         ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint(
@@ -140,6 +141,8 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ['taxon_id'],
             ['niamoto.taxon.id'],
+            onupdate="CASCADE",
+            ondelete="SET NULL",
         ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint(

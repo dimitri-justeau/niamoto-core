@@ -7,10 +7,9 @@ from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 
 
-class Taxon:
+class TaxonomyManager:
     """
-    Class representing a taxon and implementing class methods to retrieve
-    and manipulate the taxonomic tree.
+    Class methods for managing the taxonomy.
     """
 
     def __init__(self):
@@ -38,6 +37,15 @@ class Taxon:
         with Connector.get_connection() as connection:
             delete = niamoto_db_meta.taxon.delete()
             connection.execute(delete)
+
+    @classmethod
+    def set_taxonomy(cls, taxon_dataframe):
+        """
+        Set the taxonomy.
+        :param taxon_dataframe:
+        :return:
+        """
+        pass
 
     @classmethod
     def add_synonym_for_single_taxon(cls, taxon_id, data_provider,
@@ -135,7 +143,7 @@ class Taxon:
             df.loc[i, 'mptt_tree_id'] = i
             df.loc[i, 'mptt_depth'] = 0
             df.loc[i, 'mptt_left'] = 1
-            right = Taxon._construct_tree(df, i, 1, 1)
+            right = TaxonomyManager._construct_tree(df, i, 1, 1)
             df.loc[i, 'mptt_right'] = right
         return df
 
@@ -158,7 +166,7 @@ class Taxon:
             df.loc[i, 'mptt_tree_id'] = df.loc[parent_id]['mptt_tree_id']
             df.loc[i, 'mptt_depth'] = depth
             df.loc[i, 'mptt_left'] = right
-            right = Taxon._construct_tree(df, i, depth + 1, right)
+            right = TaxonomyManager._construct_tree(df, i, depth + 1, right)
             df.loc[i, 'mptt_right'] = right
             right += 1
         return right

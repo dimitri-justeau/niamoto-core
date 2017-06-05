@@ -5,7 +5,7 @@ import os
 from sqlalchemy import bindparam, func
 import pandas as pd
 
-from niamoto.taxonomy.taxon import Taxon
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
@@ -56,4 +56,4 @@ def populate_ncpippn_taxon_database(dataframe):
             df = dataframe[dataframe['rank'] == l]
             if len(df) > 0:
                 connection.execute(ins, df.to_dict(orient='records'))
-    Taxon.make_mptt()
+    TaxonomyManager.make_mptt()
