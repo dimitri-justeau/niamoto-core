@@ -3,29 +3,26 @@
 import click
 
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
+from niamoto.decorators import cli_catch_unknown_error
 
 
 @click.command("rasters")
+@cli_catch_unknown_error
 def list_rasters_cli():
     """
     List registered rasters.
     """
     from niamoto.api import raster_api
-    try:
-        raster_df = raster_api.get_raster_list()
-        if len(raster_df) == 0:
-            click.echo("Niamoto raster database is empty.")
-            return
-        click.echo(raster_df.to_string(
-            formatters={
-                'date_create': format_datetime_to_date,
-                'date_update': format_datetime_to_date,
-            }
-        ))
-    except:
-        click.echo("An error occurred, please ensure that Niamoto is "
-                   "properly configured.")
-        click.get_current_context().exit(code=1)
+    raster_df = raster_api.get_raster_list()
+    if len(raster_df) == 0:
+        click.echo("Niamoto raster database is empty.")
+        return
+    click.echo(raster_df.to_string(
+        formatters={
+            'date_create': format_datetime_to_date,
+            'date_update': format_datetime_to_date,
+        }
+    ))
 
 
 def format_datetime_to_date(obj):
@@ -43,6 +40,7 @@ def format_datetime_to_date(obj):
 @click.argument('tile_width')
 @click.argument('tile_height')
 @click.argument('raster_file_path')
+@cli_catch_unknown_error
 def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None):
     """
     Add a raster in Niamoto's raster database.
@@ -62,12 +60,6 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None):
     except RecordAlreadyExistsError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
-    except:
-        click.secho(
-            "An error occurred while registering the raster.",
-            fg='red'
-        )
-        click.get_current_context().exit(code=1)
 
 
 @click.command('update_raster')
@@ -81,6 +73,7 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None):
 @click.argument('tile_width')
 @click.argument('tile_height')
 @click.argument('raster_file_path')
+@cli_catch_unknown_error
 def update_raster_cli(name, tile_width, tile_height, raster_file_path,
                       srid=None):
     """
@@ -100,14 +93,12 @@ def update_raster_cli(name, tile_width, tile_height, raster_file_path,
     except NoRecordFoundError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
-    except:
-        click.secho("An error occurred while updating the raster.", fg='red')
-        click.get_current_context().exit(code=1)
 
 
 @click.command('delete_raster')
 @click.option('-y', default=False)
 @click.argument('name')
+@cli_catch_unknown_error
 def delete_raster_cli(name, y=False):
     """
     Delete an existing raster from Niamoto's raster database.
@@ -125,7 +116,4 @@ def delete_raster_cli(name, y=False):
         click.echo("The raster had been successfully deleted!")
     except NoRecordFoundError as e:
         click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
-    except:
-        click.secho("An error occurred while deleting the raster.", fg='red')
         click.get_current_context().exit(code=1)

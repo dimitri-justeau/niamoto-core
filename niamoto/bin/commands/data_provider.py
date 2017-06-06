@@ -4,51 +4,45 @@ import click
 
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
     BaseDataProviderException
+from niamoto.decorators import cli_catch_unknown_error
 
 
 @click.command("provider_types")
+@cli_catch_unknown_error
 def list_data_provider_types():
     """
     List registered data provider types.
     """
     from niamoto.api.data_provider_api import get_data_provider_type_list
-    try:
-        provider_types_df = get_data_provider_type_list()
-        if len(provider_types_df) == 0:
-            click.echo(
-                "There are no registered data provider types in the database."
-            )
-            return
-        click.echo(provider_types_df.to_string())
-    except:
-        click.secho("An error occurred, please ensure that Niamoto is "
-                    "properly configured.", fg='red')
-        click.get_current_context().exit(code=1)
+    provider_types_df = get_data_provider_type_list()
+    if len(provider_types_df) == 0:
+        click.echo(
+            "There are no registered data provider types in the database."
+        )
+        return
+    click.echo(provider_types_df.to_string())
 
 
 @click.command("providers")
+@cli_catch_unknown_error
 def list_data_providers():
     """
     List registered data providers.
     """
     from niamoto.api.data_provider_api import get_data_provider_list
-    try:
-        providers_df = get_data_provider_list()
-        if len(providers_df) == 0:
-            click.echo(
-                "There are no registered data providers in the database."
-            )
-            return
-        click.echo(providers_df.to_string())
-    except:
-        click.secho("An error occurred, please ensure that Niamoto is "
-                    "properly configured.", fg='red')
-        click.get_current_context().exit(code=1)
+    providers_df = get_data_provider_list()
+    if len(providers_df) == 0:
+        click.echo(
+            "There are no registered data providers in the database."
+        )
+        return
+    click.echo(providers_df.to_string())
 
 
 @click.command("add_provider")
 @click.argument("name")
 @click.argument("provider_type")
+@cli_catch_unknown_error
 def add_data_provider(name, provider_type, *args, **kwargs):
     """
     Register a data provider. The name of the data provider must be unique.
@@ -72,15 +66,12 @@ def add_data_provider(name, provider_type, *args, **kwargs):
     except RecordAlreadyExistsError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
-    except Exception as e:
-        m = "An error occurred while registering the data provider."
-        click.secho(m, fg='red')
-        click.get_current_context().exit(code=1)
 
 
 @click.command("delete_provider")
 @click.argument("name")
 @click.option('-y', default=False)
+@cli_catch_unknown_error
 def delete_data_provider(name, y=False):
     """
     Delete a data provider.
@@ -100,15 +91,12 @@ def delete_data_provider(name, y=False):
     except NoRecordFoundError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
-    except:
-        m = "An error occurred while unregistering the data provider."
-        click.secho(m, fg='red')
-        click.get_current_context().exit(code=1)
 
 
 @click.command("sync")
 @click.argument("name")
 @click.argument('provider_args', nargs=-1, type=click.UNPROCESSED)
+@cli_catch_unknown_error
 def sync(name, provider_args):
     """
     Sync the Niamoto database with a data provider.
@@ -155,9 +143,4 @@ def sync(name, provider_args):
         click.get_current_context().exit(code=1)
     except BaseDataProviderException as e:
         click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
-    except:
-        raise
-        m = "An error occurred while syncing with '{}'.".format(name)
-        click.secho(m, fg='red')
         click.get_current_context().exit(code=1)
