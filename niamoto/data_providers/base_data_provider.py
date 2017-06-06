@@ -201,6 +201,42 @@ class BaseDataProvider:
             return cls(name, *args, **kwargs)
 
     @classmethod
+    def update_data_provider(cls, current_name, new_name, *args, properties={},
+                             synonym_key=None, return_object=True, **kwargs):
+        m = "DataProvider(current_name='{}', new_name='{}', type_name='{}'," \
+            "properties='{}', synonym_key='{}'): updating data provider...'"
+        LOGGER.debug(
+            m.format(
+                current_name, new_name, cls.get_type_name(),
+                properties, synonym_key
+            )
+        )
+        with Connector.get_connection() as connection:
+            cls.assert_data_provider_exists(current_name, bind=connection)
+            synonym_key_id = None
+            if synonym_key is not None:
+                synonym_key_id = TaxonomyManager.get_synonym_key(
+                    synonym_key,
+                    bind=connection
+                )['id']
+            upd = niamoto_db_meta.data_provider.update().values({
+                'name': new_name,
+                'properties': properties,
+                'synonym_key_id': synonym_key_id,
+            }).where(niamoto_db_meta.data_provider.c.name == current_name)
+            connection.execute(upd)
+        m = "DataProvider(current_name='{}', new_name='{}', type_name='{}'," \
+            " properties='{}', synonym_key='{}'): Data provider had been " \
+            "successfully updated!'"
+        LOGGER.debug(
+            m.format(
+                current_name, new_name, cls.get_type_name(),
+                properties, synonym_key)
+        )
+        if return_object:
+            return cls(new_name, *args, **kwargs)
+
+    @classmethod
     def unregister_data_provider(cls, name):
         """
         Unregister a data provider from the database.
@@ -244,12 +280,15 @@ class BaseDataProvider:
             raise RecordAlreadyExistsError(m.format(name))
 
     @staticmethod
-    def assert_data_provider_exists(name):
+    def assert_data_provider_exists(name, bind=None):
         sel = niamoto_db_meta.data_provider.select().where(
             niamoto_db_meta.data_provider.c.name == name
         )
-        with Connector.get_connection() as connection:
-            r = connection.execute(sel).rowcount
-            if r == 0:
-                m = "The data provider '{}' does not exist in database."
-                raise NoRecordFoundError(m.format(name))
+        if bind is not None:
+            r = bind.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                r = connection.execute(sel).rowcount
+        if r == 0:
+            m = "The data provider '{}' does not exist in database."
+            raise NoRecordFoundError(m.format(name))

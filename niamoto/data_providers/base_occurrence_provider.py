@@ -50,11 +50,57 @@ class BaseOccurrenceProvider:
             index_col=occurrence.c.id.name,
         )
 
+    def update_synonym_mapping(self, connection):
+        """
+        Update the synonym mapping of an already stored dataframe.
+        To be called when a synonym had been defined or modified, but not
+        the occurrences.
+        """
+        # Log start
+        m = "(provider_id='{}', synonym_key='{}'): Updating synonym " \
+            "mapping..."
+        LOGGER.debug(m.format(
+            self.data_provider.db_id,
+            self.data_provider.synonym_key)
+        )
+        # Start
+        df = self.get_niamoto_occurrence_dataframe(connection)
+        synonyms = TaxonomyManager.get_synonyms_for_key(
+            self.data_provider.synonym_key
+        )
+        df["taxon_id"] = df["provider_taxon_id"].map(synonyms)
+        upd_stmt = occurrence.update().where(
+            and_(
+                occurrence.c.provider_id == bindparam('prov_id'),
+                occurrence.c.provider_pk == bindparam('prov_pk')
+            )
+        ).values({
+            'taxon_id': bindparam('taxon_id'),
+        })
+        upd_data = df.where((pd.notnull(df)), None).rename(columns={
+            'provider_id': 'prov_id',
+            'provider_pk': 'prov_pk',
+        }).to_dict(orient='records')
+        connection.execute(
+            upd_stmt,
+            upd_data
+        )
+        # Log end
+        m = "(provider_id='{}', synonym_key='{}'): {} synonym mapping had " \
+            "been updated."
+        LOGGER.debug(m.format(
+            self.data_provider.db_id,
+            self.data_provider.synonym_key,
+            len(synonyms)
+        ))
+        return df
+
     def map_provider_taxon_ids(self, dataframe):
         """
-        Map provider's taxon ids with Niamoto taxon ids.
+        Map provider's taxon ids with Niamoto taxon ids when importing data.
         :param dataframe: The dataframe where the mapping has to be done.
-        ids. The index must correspond to the provider's pk.
+        ids. The index must correspond to the provider's pk. The dataframe
+        corresponds to the provider's dataframe.
         :return: A series with the same index, the niamoto corresponding
         taxon id as values.
         """

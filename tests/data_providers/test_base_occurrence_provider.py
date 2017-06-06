@@ -1,15 +1,18 @@
 # coding: utf-8
 
 import unittest
+import os
 
 from geoalchemy2.shape import from_shape, WKTElement
 from shapely.geometry import Point
+import numpy as np
 
 from niamoto.testing import set_test_path
 set_test_path()
 
-from niamoto.conf import settings
+from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.data_providers.base_occurrence_provider import *
+from niamoto.api import taxonomy_api
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.db.utils import fix_db_sequences
@@ -34,7 +37,9 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         data_provider_2 = TestDataProvider.register_data_provider(
             'test_data_provider_2',
         )
-        TestDataProvider.register_data_provider('test_data_provider_3')
+        TestDataProvider.register_data_provider(
+            'test_data_provider_3',
+        )
         occ_1 = test_data.get_occurrence_data_1(data_provider_1)
         occ_2 = test_data.get_occurrence_data_2(data_provider_2)
         ins = niamoto_db_meta.occurrence.insert().values(occ_1 + occ_2)
@@ -394,6 +399,66 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             self.assertEqual(
                 len(op1.get_niamoto_occurrence_dataframe(connection)),
                 0
+            )
+
+    def test_update_synonym_mapping(self):
+        self.tearDownClass()
+        self.setUpClass()
+        data_provider_3 = TestDataProvider('test_data_provider_3')
+        with Connector.get_connection() as connection:
+            op3 = BaseOccurrenceProvider(data_provider_3)
+            occ = pd.DataFrame.from_records([
+                {
+                    'id': 0,
+                    'taxon_id': None,
+                    'provider_taxon_id': 20,
+                    'location': from_shape(Point(166.551, -22.039), srid=4326),
+                    'properties': '{}',
+                },
+                {
+                    'id': 1,
+                    'taxon_id': None,
+                    'provider_taxon_id': 30,
+                    'location': from_shape(Point(166.551, -22.098), srid=4326),
+                    'properties': '{}',
+                },
+                {
+                    'id': 2,
+                    'taxon_id': None,
+                    'provider_taxon_id': 60,
+                    'location': from_shape(Point(166.551, -22.098), srid=4326),
+                    'properties': '{}',
+                },
+            ], index='id')
+            op3._sync(occ, connection)
+            taxonomy_csv_path = os.path.join(
+                NIAMOTO_HOME,
+                'data',
+                'taxonomy',
+                'taxonomy_1.csv',
+            )
+            taxonomy_api.set_taxonomy(taxonomy_csv_path)
+            data_provider_3 = TestDataProvider.update_data_provider(
+                "test_data_provider_3",
+                "test_data_provider_3",
+                synonym_key='gbif'
+            )
+            op3 = BaseOccurrenceProvider(data_provider_3)
+            op3.update_synonym_mapping(connection)
+            df = op3.get_niamoto_occurrence_dataframe(connection)
+            r1 = df[df['taxon_id'].isnull()]
+            self.assertEqual(len(r1), 1)
+            self.assertEqual(r1.iloc[0]['provider_taxon_id'], 60)
+            r2 = df[~df['taxon_id'].isnull()]
+            self.assertEqual(len(r2), 2)
+            self.assertEqual(set(r2['taxon_id']), {1, 2})
+            self.assertEqual(
+                r2[r2['taxon_id'] == 1]['provider_taxon_id'].iloc[0],
+                20,
+            )
+            self.assertEqual(
+                r2[r2['taxon_id'] == 2]['provider_taxon_id'].iloc[0],
+                30,
             )
 
 
