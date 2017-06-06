@@ -2,7 +2,7 @@
 
 import click
 
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 
 
 @click.command("rasters")
@@ -59,7 +59,7 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None):
         )
         click.echo("The raster had been successfully registered to the Niamoto"
                    " raster database!")
-    except RecordAlreadyExists as e:
+    except RecordAlreadyExistsError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
     except:

@@ -1,16 +1,28 @@
 # coding: utf-8
 
-from sqlalchemy import select, func, bindparam
+from datetime import datetime
+import time
+
+from sqlalchemy import select, func, bindparam, Index, cast
+from sqlalchemy.dialects.postgresql import JSONB
 import pandas as pd
 
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
+from niamoto.exceptions import MalformedDataSourceError, \
+    NoRecordFoundError, RecordAlreadyExistsError
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 class TaxonomyManager:
     """
     Class methods for managing the taxonomy.
     """
+
+    IDENTITY_SYNONYM = 'niamoto'
 
     def __init__(self):
         pass
@@ -30,32 +42,236 @@ class TaxonomyManager:
             )
 
     @classmethod
-    def delete_all_taxa(cls):
+    def delete_all_taxa(cls, bind=None):
         """
         Delete all the taxa stored in the given database.
+        :param bind If passed, use an existing engine or connection.
         """
-        with Connector.get_connection() as connection:
-            delete = niamoto_db_meta.taxon.delete()
-            connection.execute(delete)
+        LOGGER.debug("Deleting all taxa...")
+        delete = niamoto_db_meta.taxon.delete()
+        if bind is not None:
+            result = bind.execute(delete)
+        else:
+            with Connector.get_connection() as connection:
+                result = connection.execute(delete)
+        LOGGER.debug("{} taxa had been deleted.".format(result.rowcount))
 
     @classmethod
     def set_taxonomy(cls, taxon_dataframe):
         """
-        Set the taxonomy.
-        :param taxon_dataframe:
-        :return:
+        Set the taxonomy. If a taxonomy already exist, delete it and set the
+        new one.
+        :param taxon_dataframe: A dataframe containing the taxonomy to set.
+        The dataframe must contain at least the following columns:
+            taxon_id  -> The id of the taxon (must be the index of the
+                         DataFrame).
+            parent_id -> The id of the taxon's parent.
+            rank      -> The rank of the taxon (must be a value in:
+                         'REGNUM', 'PHYLUM', 'CLASSIS', 'ORDO', 'FAMILIA',
+                         'GENUS', 'SPECIES', 'INFRASPECIES')
+            full_name -> The full name of the taxon.
+            rank_name -> The rank name of the taxon.
+        The remaining columns will be stored as synonyms, using the column
+        name.
         """
-        pass
+        LOGGER.debug("Starting set_taxonomy...")
+        required_columns = {'parent_id', 'rank', 'full_name', 'rank_name'}
+        cols = set(list(taxon_dataframe.columns))
+        inter = cols.intersection(required_columns)
+        if not inter == required_columns:
+            m = "The csv file does not contains the required columns " \
+                "('id', 'taxon_id', 'x', 'y'), csv has: {}".format(cols)
+            raise MalformedDataSourceError(m)
+        if len(taxon_dataframe) == 0:
+            return taxon_dataframe
+        synonym_cols = cols.difference(required_columns)
+        if len(synonym_cols) > 0:
+            LOGGER.debug(
+                "The following synonym keys had been detected: {}".format(
+                    ','.join(synonym_cols)
+                )
+            )
+            synonyms = taxon_dataframe[list(synonym_cols)].apply(
+                lambda x: x.to_json(),
+                axis=1
+            )
+        else:
+            LOGGER.debug("No synonym keys had been detected.")
+            synonyms = '{}'
+        taxon_dataframe.drop(synonym_cols, axis=1, inplace=True)
+        taxon_dataframe['synonyms'] = synonyms
+        for col in ['mptt_tree_id', 'mptt_depth', 'mptt_left', 'mptt_right']:
+            taxon_dataframe[col] = 0
+        taxon_dataframe = cls.construct_mptt(taxon_dataframe)
+        taxon_dataframe['taxon_id'] = taxon_dataframe.index
+        taxon_dataframe = taxon_dataframe.astype(object).where(
+            pd.notnull(taxon_dataframe), None
+        )
+        with Connector.get_connection() as connection:
+            with connection.begin():
+                connection.execute("SET CONSTRAINTS ALL DEFERRED;")
+                cls.delete_all_taxa(bind=connection)
+                # Register synonym cols
+                for synonym_key in synonym_cols:
+                    cls.register_synonym_key(synonym_key, bind=connection)
+                # Insert the data
+                LOGGER.debug("Inserting the taxonomy in database...")
+                ins = niamoto_db_meta.taxon.insert().values(
+                    id=bindparam('taxon_id'),
+                    full_name=bindparam('full_name'),
+                    rank_name=bindparam('rank_name'),
+                    rank=bindparam('rank'),
+                    parent_id=bindparam('parent_id'),
+                    synonyms=cast(bindparam('synonyms'), JSONB),
+                    mptt_left=bindparam('mptt_left'),
+                    mptt_right=bindparam('mptt_right'),
+                    mptt_tree_id=bindparam('mptt_tree_id'),
+                    mptt_depth=bindparam('mptt_depth'),
+                )
+                result = connection.execute(
+                    ins,
+                    taxon_dataframe.to_dict(orient='records')
+                )
+                m = "The taxonomy had been successfully set ({} taxa " \
+                    "inserted)!"
+                LOGGER.debug(m.format(result.rowcount))
+        return result
 
     @classmethod
-    def add_synonym_for_single_taxon(cls, taxon_id, data_provider,
+    def get_synonym_keys(cls):
+        """
+        :return: The synonym keys from the database in a pandas DataFrame.
+        """
+        with Connector.get_connection() as connection:
+            sel = select([niamoto_db_meta.synonym_key_registry])
+            return pd.read_sql(
+                sel,
+                connection,
+                index_col=niamoto_db_meta.synonym_key_registry.c.id.name,
+            )
+
+    @classmethod
+    def get_synonym_key(cls, synonym_key, bind=None):
+        sel = select([niamoto_db_meta.synonym_key_registry]).where(
+            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        )
+        if bind is not None:
+            result = bind.execute(sel)
+        else:
+            with Connector.get_connection() as connection:
+                result = connection.execute(sel)
+        if result.rowcount == 0:
+            m = "The synonym key '{}' does not exist in database."
+            raise NoRecordFoundError(m.format(synonym_key))
+        return result.fetchone()
+
+    @classmethod
+    def register_synonym_key(cls, synonym_key, bind=None):
+        """
+        Register a synonym key in database.
+        :param synonym_key: The synonym key to register
+        :param bind: If passed, use and existing engine or connection.
+        """
+        now = datetime.now()
+        ins = niamoto_db_meta.synonym_key_registry.insert({
+            'name': synonym_key,
+            'date_create': now,
+            'date_update': now,
+        })
+        if bind is not None:
+            cls.assert_synonym_key_does_not_exists(synonym_key, bind=bind)
+            bind.execute(ins)
+            cls._register_unique_synonym_key_constraint(synonym_key, bind=bind)
+            return
+        with Connector.get_connection() as connection:
+            cls.assert_synonym_key_does_not_exists(
+                synonym_key,
+                bind=connection
+            )
+            connection.execute(ins)
+            cls._register_unique_synonym_key_constraint(
+                synonym_key,
+                bind=connection
+            )
+
+    @classmethod
+    def unregister_synonym_key(cls, synonym_key, bind=None):
+        """
+        Unregister a synonym key from database.
+        :param synonym_key: The synonym key to unregister
+        :param bind: If passed, use and existing engine or connection.
+        """
+        delete_stmt = niamoto_db_meta.synonym_key_registry.delete().where(
+            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        )
+        if bind is not None:
+            cls.assert_synonym_key_exists(synonym_key, bind=bind)
+            bind.execute(delete_stmt)
+            cls._unregister_unique_synonym_key_constraint(
+                synonym_key,
+                bind=bind
+            )
+            return
+        with Connector.get_connection() as connection:
+            cls.assert_synonym_key_exists(synonym_key, bind=connection)
+            connection.execute(delete_stmt)
+            cls._unregister_unique_synonym_key_constraint(
+                synonym_key,
+                bind=connection
+            )
+
+    @classmethod
+    def unregister_all_synonym_keys(cls):
+        """
+        Unregister all the synonym keys from database.
+        """
+        with Connector.get_connection() as connection:
+            for synonym_key in cls.get_synonym_keys()['name']:
+                cls.unregister_synonym_key(synonym_key, bind=connection)
+
+    @classmethod
+    def _register_unique_synonym_key_constraint(cls, synonym_key, bind=None):
+        """
+        :param bind: If passed, use an existing connection or engine instead
+        of creating a new one.
+        """
+        synonym_col = niamoto_db_meta.taxon.c.synonyms[synonym_key]
+        index = Index(
+            "{}_unique_synonym_key".format(synonym_key),
+            synonym_col,
+            unique=True,
+            postgresql_where=(
+                synonym_col != 'null'
+            )
+        )
+        if bind is None:
+            bind = Connector.get_engine()
+        index.create(bind)
+        niamoto_db_meta.taxon.indexes.remove(index)
+
+    @classmethod
+    def _unregister_unique_synonym_key_constraint(cls, synonym_key, bind=None):
+        synonym_col = niamoto_db_meta.taxon.c.synonyms[synonym_key]
+        index = Index(
+            "{}_unique_synonym_key".format(synonym_key),
+            synonym_col,
+            unique=True,
+            postgresql_where=(
+                synonym_col != 'null'
+            )
+        )
+        niamoto_db_meta.taxon.indexes.remove(index)
+        if bind is None:
+            bind = Connector.get_engine()
+        index.drop(bind)
+
+    @classmethod
+    def add_synonym_for_single_taxon(cls, taxon_id, synonym_key,
                                      provider_taxon_id):
         """
-        For a single taxon, add the synonym corresponding to a data provider.
+        For a single taxon, add the synonym corresponding to a synonym key.
         :param taxon_id: The id of the taxon (in Niamoto's referential).
-        :param data_provider: The data provider corresponding to the synonym to
-        add. Since the synonym is tagged with the provider's type, which is a
-        class attribute, this parameter can either be an instance or a class.
+        :param synonym_key: The synonym_key.
         :param provider_taxon_id: The id of the taxon in the provider's
         referential, i.e. the synonym.
         """
@@ -65,39 +281,82 @@ class TaxonomyManager:
             {
                 'synonyms': niamoto_db_meta.taxon.c.synonyms.concat(
                     func.jsonb_build_object(
-                        data_provider.get_type_name(),
+                        synonym_key,
                         provider_taxon_id
                     )
                 )
             }
         )
         with Connector.get_connection() as connection:
+            cls.assert_synonym_key_exists(synonym_key, bind=connection)
             connection.execute(upd)
 
     @classmethod
-    def get_synonyms_for_provider(cls, data_provider):
+    def get_synonyms_for_key(cls, synonym_key):
         """
-        :param data_provider: The data provider corresponding to the synonym to
-        get. Since the synonym is tagged with the provider's type, which is a
-        class attribute, this parameter can either be an instance or a class.
+        :param synonym_key: The synonym key to consider. If synonym key is
+        'niamoto', return the niamoto id's (identity synonym).
         :return: A Series with index corresponding to the data provider's
         taxa ids, and values corresponding to their synonym in Niamoto's
         referential.
         """
         with Connector.get_connection() as connection:
-            provider_type = data_provider.get_type_name()
             niamoto_id_col = niamoto_db_meta.taxon.c.id
             synonym_col = niamoto_db_meta.taxon.c.synonyms
-            sel = select([
-                niamoto_id_col.label("niamoto_taxon_id"),
-                synonym_col[provider_type].label("provider_taxon_id"),
-            ]).where(synonym_col[provider_type].isnot(None))
+            if synonym_key == cls.IDENTITY_SYNONYM:
+                sel = select([
+                    niamoto_id_col.label("niamoto_taxon_id"),
+                    niamoto_id_col.label("provider_taxon_id"),
+                ])
+            else:
+                sel = select([
+                    niamoto_id_col.label("niamoto_taxon_id"),
+                    synonym_col[synonym_key].label("provider_taxon_id"),
+                ]).where(synonym_col[synonym_key].isnot(None))
             synonyms = pd.read_sql(
                 sel,
                 connection,
                 index_col="provider_taxon_id"
             )["niamoto_taxon_id"]
             return synonyms
+
+    @staticmethod
+    def assert_synonym_key_exists(synonym_key, bind=None):
+        """
+        Assert the existence of a synonym key in synonym key registry.
+        :param synonym_key: The synonym key to check.
+        :param bind: If passed, use an existing engine or connection.
+        """
+        sel = select([niamoto_db_meta.synonym_key_registry]).where(
+            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        )
+        if bind is not None:
+            result = bind.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                result = connection.execute(sel).rowcount
+        if result == 0:
+            m = "The synonym key '{}' does not exist in database."
+            raise NoRecordFoundError(m.format(synonym_key))
+
+    @staticmethod
+    def assert_synonym_key_does_not_exists(synonym_key, bind=None):
+        """
+        Assert the non-existence of a synonym key in synonym key registry.
+        :param synonym_key: The synonym key to check.
+        :param bind: If passed, use an existing engine or connection.
+        """
+        sel = select([niamoto_db_meta.synonym_key_registry]).where(
+            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        )
+        if bind is not None:
+            result = bind.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                result = connection.execute(sel).rowcount
+        if result > 0:
+            m = "The synonym key '{}' already exists in database."
+            raise RecordAlreadyExistsError(m.format(synonym_key))
 
     @classmethod
     def make_mptt(cls):
@@ -136,6 +395,8 @@ class TaxonomyManager:
         filled since the method will rely on it to build the mptt.
         :return: The built mptt.
         """
+        LOGGER.debug("Constructing the MPTT tree...")
+        t = time.time()
         df = dataframe.copy()
         # Find roots
         roots = dataframe[pd.isnull(dataframe['parent_id'])]
@@ -145,6 +406,8 @@ class TaxonomyManager:
             df.loc[i, 'mptt_left'] = 1
             right = TaxonomyManager._construct_tree(df, i, 1, 1)
             df.loc[i, 'mptt_right'] = right
+        m = "The MPTT tree had been successfully constructed ({:.2f} s)!"
+        LOGGER.debug(m.format(time.time() - t))
         return df
 
     @staticmethod

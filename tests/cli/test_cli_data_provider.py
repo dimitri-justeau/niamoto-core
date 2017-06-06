@@ -37,18 +37,6 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
         with Connector.get_connection() as connection:
             connection.execute(del1)
             connection.execute(del2)
-            try:
-                TestDataProvider._unregister_unique_synonym_constraint(
-                    connection
-                )
-            except:
-                pass
-            try:
-                PlantnoteDataProvider._unregister_unique_synonym_constraint(
-                    connection
-                )
-            except:
-                pass
 
     def test_list_data_provider_types(self):
         runner = CliRunner()

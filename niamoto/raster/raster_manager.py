@@ -11,7 +11,7 @@ import rasterio
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 
 
 class RasterManager:
@@ -176,7 +176,7 @@ class RasterManager:
             r = connection.execute(sel).rowcount
             if r > 0:
                 m = "The raster '{}' already exists in database."
-                raise RecordAlreadyExists(m.format(name))
+                raise RecordAlreadyExistsError(m.format(name))
 
     @staticmethod
     def assert_raster_exists(name):

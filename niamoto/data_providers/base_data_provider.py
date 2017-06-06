@@ -2,11 +2,12 @@
 
 import time
 
-from sqlalchemy import select, Index
+from sqlalchemy import select, and_
 
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 from niamoto.log import get_logger
 
 
@@ -21,11 +22,17 @@ class BaseDataProvider:
     def __init__(self, name):
         self.name = name
         self._db_id = None
+        self._synonym_key = None
         self._update_db_id()
+        self._update_synonym_key()
 
     @property
     def db_id(self):
         return self._db_id
+
+    @property
+    def synonym_key(self):
+        return self._synonym_key
 
     def _update_db_id(self):
         with Connector.get_connection() as connection:
@@ -34,6 +41,20 @@ class BaseDataProvider:
             )
             result = connection.execute(sel)
             self._db_id = result.fetchone()['id']
+
+    def _update_synonym_key(self):
+        with Connector.get_connection() as connection:
+            synonym_fk_col = niamoto_db_meta.data_provider.c.synonym_key_id
+            synonym_id_col = niamoto_db_meta.synonym_key_registry.c.id
+            sel = select([niamoto_db_meta.synonym_key_registry.c.name]).where(
+                and_(
+                    synonym_id_col == synonym_fk_col,
+                    niamoto_db_meta.data_provider.c.name == self.name
+                )
+            )
+            result = connection.execute(sel)
+            if result.rowcount > 0:
+                self._synonym_key = result.fetchone()['name']
 
     @property
     def plot_provider(self):
@@ -144,50 +165,39 @@ class BaseDataProvider:
         })
         if connection is not None:
             connection.execute(ins)
-            cls._register_unique_synonym_constraint(connection=connection)
             return
         with Connector.get_connection() as connection:
             connection.execute(ins)
-            cls._register_unique_synonym_constraint()
-
-    @classmethod
-    def _register_unique_synonym_constraint(cls, connection=None):
-        """
-        :param connection: If passed, use an existing connection instead of
-        creating a new one.
-        """
-        index = Index(
-            "{}_unique_synonym".format(cls.get_type_name()),
-            niamoto_db_meta.taxon.c.synonyms[cls.get_type_name()],
-            unique=True,
-        )
-        bind = connection
-        if bind is None:
-            bind = Connector.get_engine()
-        index.create(bind)
-        niamoto_db_meta.taxon.indexes.remove(index)
-
-    @classmethod
-    def _unregister_unique_synonym_constraint(cls, connection):
-        index = Index(
-            "{}_unique_synonym".format(cls.get_type_name()),
-            niamoto_db_meta.taxon.c.synonyms[cls.get_type_name()],
-            unique=True,
-        )
-        niamoto_db_meta.taxon.indexes.remove(index)
-        index.drop(connection)
 
     @classmethod
     def register_data_provider(cls, name, *args, properties={},
-                               return_object=True, **kwargs):
-        cls.assert_data_provider_does_not_exist(name)
-        ins = niamoto_db_meta.data_provider.insert({
-            'name': name,
-            'provider_type_id': cls.get_data_provider_type_db_id(),
-            'properties': properties,
-        })
+                               synonym_key=None, return_object=True, **kwargs):
+        m = "DataProvider(name='{}', type_name='{}', properties='{}', " \
+            "synonym_key='{}'): Registering data provider...'"
+        LOGGER.debug(
+            m.format(name, cls.get_type_name(), properties, synonym_key)
+        )
         with Connector.get_connection() as connection:
+            cls.assert_data_provider_does_not_exist(name, bind=connection)
+            synonym_key_id = None
+            if synonym_key is not None:
+                synonym_key_id = TaxonomyManager.get_synonym_key(
+                    synonym_key,
+                    bind=connection
+                )['id']
+            ins = niamoto_db_meta.data_provider.insert({
+                'name': name,
+                'provider_type_id': cls.get_data_provider_type_db_id(),
+                'properties': properties,
+                'synonym_key_id': synonym_key_id,
+            })
             connection.execute(ins)
+        m = "DataProvider(name='{}', type_name='{}', properties='{}', " \
+            "synonym_key='{}'): Data provider had been successfully" \
+            " registered!'"
+        LOGGER.debug(
+            m.format(name, cls.get_type_name(), properties, synonym_key)
+        )
         if return_object:
             return cls(name, *args, **kwargs)
 
@@ -206,15 +216,18 @@ class BaseDataProvider:
                 connection.execute(delete_stmt)
 
     @staticmethod
-    def assert_data_provider_does_not_exist(name):
+    def assert_data_provider_does_not_exist(name, bind=None):
         sel = niamoto_db_meta.data_provider.select().where(
             niamoto_db_meta.data_provider.c.name == name
         )
-        with Connector.get_connection() as connection:
-            r = connection.execute(sel).rowcount
-            if r > 0:
-                m = "The data provider '{}' already exists in database."
-                raise RecordAlreadyExists(m.format(name))
+        if bind is not None:
+            r = bind.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                r = connection.execute(sel).rowcount
+        if r > 0:
+            m = "The data provider '{}' already exists in database."
+            raise RecordAlreadyExistsError(m.format(name))
 
     @staticmethod
     def assert_data_provider_exists(name):

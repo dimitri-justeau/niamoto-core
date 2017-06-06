@@ -58,10 +58,24 @@ class BaseOccurrenceProvider:
         :return: A series with the same index, the niamoto corresponding
         taxon id as values.
         """
-        LOGGER.debug("Mapping provider's taxon ids...")
-        synonyms = TaxonomyManager.get_synonyms_for_provider(self.data_provider)
+        m = "(provider_id='{}', synonym_key='{}'): " \
+            "Mapping provider's taxon ids..."
+        LOGGER.debug(m.format(
+            self.data_provider.db_id,
+            self.data_provider.synonym_key)
+        )
+        synonyms = TaxonomyManager.get_synonyms_for_key(
+            self.data_provider.synonym_key
+        )
         dataframe["provider_taxon_id"] = dataframe["taxon_id"]
         dataframe["taxon_id"] = dataframe["taxon_id"].map(synonyms)
+        m = "(provider_id='{}', synonym_key='{}'): {} taxon ids had " \
+            "been mapped."
+        LOGGER.debug(m.format(
+            self.data_provider.db_id,
+            self.data_provider.synonym_key,
+            len(synonyms)
+        ))
 
     def get_provider_occurrence_dataframe(self):
         """

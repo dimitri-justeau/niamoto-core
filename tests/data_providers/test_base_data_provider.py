@@ -9,6 +9,7 @@ from niamoto.conf import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 
 
 class TestBaseDataProvider(BaseTestNiamotoSchemaCreated):
@@ -24,6 +25,12 @@ class TestBaseDataProvider(BaseTestNiamotoSchemaCreated):
         test_data_provider = TestDataProvider('test_data_provider_1')
         self.assertIsNotNone(test_data_provider)
         self.assertIsNotNone(test_data_provider.db_id)
+        # Test with synonym key
+        TaxonomyManager.register_synonym_key("synonym")
+        TestDataProvider.register_data_provider(
+            'test_data_provider_2',
+            synonym_key="synonym"
+        )
 
 
 if __name__ == '__main__':

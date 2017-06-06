@@ -22,7 +22,7 @@ class NoRecordFoundError(Exception):
     pass
 
 
-class RecordAlreadyExists(Exception):
+class RecordAlreadyExistsError(Exception):
     """
     Error to raise when trying to insert a record that already exists.
     """

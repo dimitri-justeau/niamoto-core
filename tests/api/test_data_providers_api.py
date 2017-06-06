@@ -45,10 +45,6 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
             connection.execute(del4)
             connection.execute(del1)
             connection.execute(del2)
-            TestDataProvider._unregister_unique_synonym_constraint(connection)
-            PlantnoteDataProvider._unregister_unique_synonym_constraint(
-                connection
-            )
 
     def test_get_data_provider_type_list(self):
         l1 = get_data_provider_type_list()

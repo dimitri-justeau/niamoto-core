@@ -83,6 +83,16 @@ def upgrade():
         schema='niamoto'
     )
     op.create_table(
+        'synonym_key_registry',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
+        sa.Column('date_create', sa.DateTime(), nullable=False),
+        sa.Column('date_update', sa.DateTime(), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('name', name=op.f('uq_synonym_key_registry_name')),
+        schema='niamoto'
+    )
+    op.create_table(
         'raster_registry',
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column('tile_width', sa.Integer(), nullable=False),
@@ -111,10 +121,20 @@ def upgrade():
             nullable=False,
             index=True
         ),
+        sa.Column(
+            'synonym_key_id',
+            sa.Integer(),
+            nullable=True,
+            index=True
+        ),
         sa.Column('properties', postgresql.JSONB(), nullable=False),
         sa.ForeignKeyConstraint(
             ['provider_type_id'],
             ['niamoto.data_provider_type.id'],
+        ),
+        sa.ForeignKeyConstraint(
+            ['synonym_key_id'],
+            ['niamoto.synonym_key_registry.id'],
         ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name', name=op.f('uq_data_provider_name')),

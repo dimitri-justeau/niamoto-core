@@ -63,10 +63,10 @@ occurrence = Table(
     schema=settings.NIAMOTO_SCHEMA
 )
 
+
 # ------------- #
 #  Taxon table  #
 # ------------- #
-
 
 class TaxonRankEnum(enum.Enum):
     REGNUM = "REGNUM"
@@ -112,6 +112,23 @@ taxon = Table(
     CheckConstraint('mptt_tree_id >= 0', name='mptt_tree_id_gt_0'),
     schema=settings.NIAMOTO_SCHEMA,
 )
+
+
+# -------------------- #
+# Synonym key registry #
+# -------------------- #
+
+synonym_key_registry = Table(
+    'synonym_key_registry',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100)),
+    Column('date_create', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=False),
+    UniqueConstraint('name', name='name'),
+    schema=settings.NIAMOTO_SCHEMA,
+)
+
 
 # ---------- #
 # Plot table #
@@ -219,6 +236,12 @@ data_provider = Table(
         nullable=False,
         index=True,
     ),
+    Column(
+        'synonym_key_id',
+        ForeignKey('{}.synonym_key_registry.id'.format(settings.NIAMOTO_SCHEMA)),
+        nullable=True,
+        index=True,
+    ),
     Column('properties', JSONB, nullable=False),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
@@ -242,4 +265,3 @@ raster_registry = Table(
     CheckConstraint('tile_height > 0', name='tile_height_gt_0'),
     schema=settings.NIAMOTO_RASTER_SCHEMA,
 )
-

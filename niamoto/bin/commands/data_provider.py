@@ -2,7 +2,7 @@
 
 import click
 
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExists, \
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
     BaseDataProviderException
 
 
@@ -69,7 +69,7 @@ def add_data_provider(name, provider_type, *args, **kwargs):
         )
         m = "The data provider had been successfully registered to Niamoto!"
         click.echo(m)
-    except RecordAlreadyExists as e:
+    except RecordAlreadyExistsError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
     except Exception as e:

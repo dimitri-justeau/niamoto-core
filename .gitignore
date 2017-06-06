@@ -98,5 +98,6 @@ ENV/
 *.ptx
 
 tests/test_data/test_niamoto_home/data
+tests/test_data/test_niamoto_home/logs
 
 TODO

@@ -8,7 +8,8 @@ from sqlalchemy import *
 import pandas as pd
 
 from niamoto.db.connector import Connector
-from niamoto.db.metadata import data_provider_type, data_provider
+from niamoto.db.metadata import data_provider_type, data_provider, \
+    synonym_key_registry
 from niamoto.db.utils import fix_db_sequences
 from niamoto.data_providers.base_data_provider import BaseDataProvider
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
@@ -39,10 +40,14 @@ def get_data_provider_list():
         data_provider.c.id,
         data_provider.c.name,
         data_provider_type.c.name.label('provider_type'),
+        synonym_key_registry.c.name.label('synonym_key')
     ]).select_from(
         data_provider.join(
             data_provider_type,
             data_provider.c.provider_type_id == data_provider_type.c.id
+        ).outerjoin(
+            synonym_key_registry,
+            synonym_key_registry.c.id == data_provider.c.synonym_key_id
         )
     )
     with Connector.get_connection() as connection:
@@ -51,7 +56,7 @@ def get_data_provider_list():
 
 
 def add_data_provider(name, provider_type, *args, properties={},
-                      return_object=False, **kwargs):
+                      synonym_key=None, return_object=False, **kwargs):
     """
     Register a data provider in a given Niamoto database.
     :param name: The name of the provider to register (must be unique).
@@ -59,6 +64,7 @@ def add_data_provider(name, provider_type, *args, properties={},
     string value among:
         - 'PLANTNOTE': The Pl@ntnote data provider.
         - 'CSV': The CSV data provider.
+    :param synonym_key: The synonym key for this provider.
     :param args: Additional args.
     :param properties: Properties dict to store for the data provider.
     :param return_object: If True, return the created object.
@@ -77,6 +83,7 @@ def add_data_provider(name, provider_type, *args, properties={},
         name,
         *args,
         properties=properties,
+        synonym_key=synonym_key,
         return_object=return_object,
         **kwargs
     )

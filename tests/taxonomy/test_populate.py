@@ -36,11 +36,6 @@ class TestPopulateTaxon(BaseTestNiamotoSchemaCreated):
         test_taxa = taxa.iloc[20]
         synonyms = test_taxa["synonyms"]
         self.assertIn("taxref", synonyms.keys())
-        self.assertIn(PlantnoteDataProvider.get_type_name(), synonyms.keys())
-        self.assertEqual(
-            synonyms[PlantnoteDataProvider.get_type_name()],
-            test_taxa.name
-        )
 
 
 if __name__ == '__main__':

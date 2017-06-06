@@ -30,10 +30,23 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
 
     def tearDown(self):
         TaxonomyManager.delete_all_taxa()
+        TaxonomyManager.unregister_all_synonym_keys()
+
+    def test_get_synonym_keys(self):
+        df = TaxonomyManager.get_synonym_keys()
+        self.assertEqual(len(df), 0)
+
+    def test_register_unregister_synonym_key(self):
+        TaxonomyManager.register_synonym_key("synonym_key_1")
+        df = TaxonomyManager.get_synonym_keys()
+        self.assertEqual(len(df), 1)
+        TaxonomyManager.unregister_synonym_key("synonym_key_1")
+        df = TaxonomyManager.get_synonym_keys()
+        self.assertEqual(len(df), 0)
 
     def test_add_single_synonym(self):
-        data_provider_1 = TestDataProvider('test_data_provider_1')
-        data_provider_2 = TestDataProvider('test_data_provider_2')
+        synonym_key = "synonym_key_1"
+        TaxonomyManager.register_synonym_key("synonym_key_1")
         data = [
             {
                 'id': 0,
@@ -51,24 +64,25 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        TaxonomyManager.add_synonym_for_single_taxon(0, data_provider_1, 1)
+        TaxonomyManager.add_synonym_for_single_taxon(0, synonym_key, 1)
         df1 = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(
             df1.loc[0]['synonyms'],
-            {data_provider_1.get_type_name(): 1}
+            {synonym_key: 1}
         )
-        TaxonomyManager.add_synonym_for_single_taxon(0, data_provider_2, 2)
+        TaxonomyManager.add_synonym_for_single_taxon(0, synonym_key, 2)
         df2 = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(
             df2.loc[0]['synonyms'],
             {
-                data_provider_1.get_type_name(): 1,
-                data_provider_2.get_type_name(): 2,
+                synonym_key: 1,
+                synonym_key: 2,
             }
         )
 
     def test_duplicate_synonym(self):
-        data_provider_1 = TestDataProvider('test_data_provider_1')
+        synonym_key = "synonym_key_1"
+        TaxonomyManager.register_synonym_key("synonym_key_1")
         data = [
             {
                 'id': 0,
@@ -98,15 +112,16 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        TaxonomyManager.add_synonym_for_single_taxon(0, data_provider_1, 1)
+        TaxonomyManager.add_synonym_for_single_taxon(0, synonym_key, 1)
         self.assertRaises(
             IntegrityError,
             TaxonomyManager.add_synonym_for_single_taxon,
-            1, data_provider_1, 1,
+            1, synonym_key, 1,
         )
 
     def test_get_synonyms_map(self):
-        data_provider_1 = TestDataProvider('test_data_provider_1')
+        synonym_key = "synonym_key_1"
+        TaxonomyManager.register_synonym_key("synonym_key_1")
         data = [
             {
                 'id': 0,
@@ -115,7 +130,7 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
                 'rank': niamoto_db_meta.TaxonRankEnum.FAMILIA,
                 'parent_id': None,
                 'synonyms': {
-                    data_provider_1.get_type_name(): 10,
+                    synonym_key: 10,
                 },
                 'mptt_left': 0,
                 'mptt_right': 0,
@@ -129,7 +144,7 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
                 'rank': niamoto_db_meta.TaxonRankEnum.FAMILIA,
                 'parent_id': None,
                 'synonyms': {
-                    data_provider_1.get_type_name(): 20,
+                    synonym_key: 20,
                 },
                 'mptt_left': 0,
                 'mptt_right': 0,
@@ -140,7 +155,7 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         ins = niamoto_db_meta.taxon.insert().values(data)
         with Connector.get_connection() as connection:
             connection.execute(ins)
-        synonyms = TaxonomyManager.get_synonyms_for_provider(data_provider_1)
+        synonyms = TaxonomyManager.get_synonyms_for_key(synonym_key)
         self.assertEqual(synonyms.loc[10], 0)
         self.assertEqual(synonyms.loc[20], 1)
 
