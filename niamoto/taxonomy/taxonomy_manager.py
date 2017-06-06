@@ -24,7 +24,6 @@ class TaxonomyManager:
 
     IDENTITY_SYNONYM_KEY = 'niamoto'
 
-
     @classmethod
     def get_raw_taxon_dataframe(cls):
         """
@@ -137,6 +136,9 @@ class TaxonomyManager:
                 LOGGER.debug(m.format(result))
         return result
 
+    def set_synonym_data(self, synonym_key, data):
+        pass
+
     @classmethod
     def get_synonym_keys(cls):
         """
@@ -193,6 +195,7 @@ class TaxonomyManager:
                 synonym_key,
                 bind=connection
             )
+        LOGGER.debug("synonym_key {} registered.".format(synonym_key))
 
     @classmethod
     def unregister_synonym_key(cls, synonym_key, bind=None):
@@ -219,6 +222,9 @@ class TaxonomyManager:
                 synonym_key,
                 bind=connection
             )
+        LOGGER.debug(
+            "synonym_key {} unregistered.".format(synonym_key)
+        )
 
     @classmethod
     def unregister_all_synonym_keys(cls):
@@ -228,6 +234,7 @@ class TaxonomyManager:
         with Connector.get_connection() as connection:
             for synonym_key in cls.get_synonym_keys()['name']:
                 cls.unregister_synonym_key(synonym_key, bind=connection)
+        LOGGER.debug("All synonym_key records unregistered.")
 
     @classmethod
     def _register_unique_synonym_key_constraint(cls, synonym_key, bind=None):
@@ -248,6 +255,9 @@ class TaxonomyManager:
             bind = Connector.get_engine()
         index.create(bind)
         niamoto_db_meta.taxon.indexes.remove(index)
+        LOGGER.debug(
+            "{}_unique_synonym_key registered.".format(synonym_key)
+        )
 
     @classmethod
     def _unregister_unique_synonym_key_constraint(cls, synonym_key, bind=None):
@@ -264,6 +274,9 @@ class TaxonomyManager:
         if bind is None:
             bind = Connector.get_engine()
         index.drop(bind)
+        LOGGER.debug(
+            "{}_unique_synonym_key unregistered.".format(synonym_key)
+        )
 
     @classmethod
     def add_synonym_for_single_taxon(cls, taxon_id, synonym_key,
