@@ -22,10 +22,8 @@ class TaxonomyManager:
     Class methods for managing the taxonomy.
     """
 
-    IDENTITY_SYNONYM = 'niamoto'
+    IDENTITY_SYNONYM_KEY = 'niamoto'
 
-    def __init__(self):
-        pass
 
     @classmethod
     def get_raw_taxon_dataframe(cls):
@@ -78,13 +76,11 @@ class TaxonomyManager:
         required_columns = {'parent_id', 'rank', 'full_name', 'rank_name'}
         cols = set(list(taxon_dataframe.columns))
         inter = cols.intersection(required_columns)
-        if not inter == required_columns:
-            m = "The csv file does not contains the required columns " \
-                "('id', 'taxon_id', 'x', 'y'), csv has: {}".format(cols)
-            raise MalformedDataSourceError(m)
-        if len(taxon_dataframe) == 0:
-            return taxon_dataframe
         synonym_cols = cols.difference(required_columns)
+        if not inter == required_columns:
+            m = "The taxon dataframe does not contains the required " \
+                "columns {}, csv has: {}".format(required_columns, cols)
+            raise MalformedDataSourceError(m)
         if len(synonym_cols) > 0:
             LOGGER.debug(
                 "The following synonym keys had been detected: {}".format(
@@ -100,7 +96,8 @@ class TaxonomyManager:
             synonyms = '{}'
         taxon_dataframe.drop(synonym_cols, axis=1, inplace=True)
         taxon_dataframe['synonyms'] = synonyms
-        for col in ['mptt_tree_id', 'mptt_depth', 'mptt_left', 'mptt_right']:
+        mptt = ['mptt_tree_id', 'mptt_depth', 'mptt_left', 'mptt_right']
+        for col in mptt:
             taxon_dataframe[col] = 0
         taxon_dataframe = cls.construct_mptt(taxon_dataframe)
         taxon_dataframe['taxon_id'] = taxon_dataframe.index
@@ -116,25 +113,28 @@ class TaxonomyManager:
                     cls.register_synonym_key(synonym_key, bind=connection)
                 # Insert the data
                 LOGGER.debug("Inserting the taxonomy in database...")
-                ins = niamoto_db_meta.taxon.insert().values(
-                    id=bindparam('taxon_id'),
-                    full_name=bindparam('full_name'),
-                    rank_name=bindparam('rank_name'),
-                    rank=bindparam('rank'),
-                    parent_id=bindparam('parent_id'),
-                    synonyms=cast(bindparam('synonyms'), JSONB),
-                    mptt_left=bindparam('mptt_left'),
-                    mptt_right=bindparam('mptt_right'),
-                    mptt_tree_id=bindparam('mptt_tree_id'),
-                    mptt_depth=bindparam('mptt_depth'),
-                )
-                result = connection.execute(
-                    ins,
-                    taxon_dataframe.to_dict(orient='records')
-                )
+                if len(taxon_dataframe) > 0:
+                    ins = niamoto_db_meta.taxon.insert().values(
+                        id=bindparam('taxon_id'),
+                        full_name=bindparam('full_name'),
+                        rank_name=bindparam('rank_name'),
+                        rank=bindparam('rank'),
+                        parent_id=bindparam('parent_id'),
+                        synonyms=cast(bindparam('synonyms'), JSONB),
+                        mptt_left=bindparam('mptt_left'),
+                        mptt_right=bindparam('mptt_right'),
+                        mptt_tree_id=bindparam('mptt_tree_id'),
+                        mptt_depth=bindparam('mptt_depth'),
+                    )
+                    result = connection.execute(
+                        ins,
+                        taxon_dataframe.to_dict(orient='records')
+                    ).rowcount
+                else:
+                    result = 0
                 m = "The taxonomy had been successfully set ({} taxa " \
                     "inserted)!"
-                LOGGER.debug(m.format(result.rowcount))
+                LOGGER.debug(m.format(result))
         return result
 
     @classmethod
@@ -303,7 +303,7 @@ class TaxonomyManager:
         with Connector.get_connection() as connection:
             niamoto_id_col = niamoto_db_meta.taxon.c.id
             synonym_col = niamoto_db_meta.taxon.c.synonyms
-            if synonym_key == cls.IDENTITY_SYNONYM:
+            if synonym_key == cls.IDENTITY_SYNONYM_KEY:
                 sel = select([
                     niamoto_id_col.label("niamoto_taxon_id"),
                     niamoto_id_col.label("provider_taxon_id"),

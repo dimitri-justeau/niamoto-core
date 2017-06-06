@@ -10,6 +10,7 @@ set_test_path()
 from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.conf import settings
+from niamoto.exceptions import MalformedDataSourceError
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
@@ -23,7 +24,43 @@ class TestSetTaxonomy(BaseTestNiamotoSchemaCreated):
     def tearDown(self):
         TaxonomyManager.delete_all_taxa()
 
+    def test_set_taxonomy_errors(self):
+        data = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'full_name': 'Family One',
+                'rank_name': 'One',
+                'rank': niamoto_db_meta.TaxonRankEnum.FAMILIA,
+            },
+            {
+                'id': 1,
+                'full_name': 'Genus Two',
+                'rank_name': 'Two',
+                'rank': niamoto_db_meta.TaxonRankEnum.GENUS,
+            },
+        ], index='id')
+        self.assertRaises(
+            MalformedDataSourceError,
+            TaxonomyManager.set_taxonomy,
+            data
+        )
+
     def test_set_taxonomy(self):
+        result = TaxonomyManager.set_taxonomy(pd.DataFrame(
+            columns=['full_name', 'rank_name', 'rank', 'parent_id'],
+        ))
+        self.assertEqual(result, 0)
+        data = pd.DataFrame.from_records([
+            {
+                'id': 0,
+                'full_name': 'Family One',
+                'rank_name': 'One',
+                'rank': niamoto_db_meta.TaxonRankEnum.FAMILIA,
+                'parent_id': None,
+            },
+        ], index='id')
+        result = TaxonomyManager.set_taxonomy(data)
+        self.assertEqual(result, 1)
         data = pd.DataFrame.from_records([
             {
                 'id': 0,
@@ -54,13 +91,13 @@ class TestSetTaxonomy(BaseTestNiamotoSchemaCreated):
             },
         ], index='id')
         result = TaxonomyManager.set_taxonomy(data)
-        self.assertEqual(result.rowcount, 3)
+        self.assertEqual(result, 3)
         df = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(len(df), 3)
         synonym_keys = TaxonomyManager.get_synonym_keys()
         self.assertEqual(len(synonym_keys), 2)
         identity_synonyms = TaxonomyManager.get_synonyms_for_key(
-            TaxonomyManager.IDENTITY_SYNONYM
+            TaxonomyManager.IDENTITY_SYNONYM_KEY
         )
         self.assertEqual(len(identity_synonyms), 3)
         null_synonyms = TaxonomyManager.get_synonyms_for_key(None)
@@ -69,6 +106,7 @@ class TestSetTaxonomy(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(gbif_synonyms), 3)
         taxref_synonyms = TaxonomyManager.get_synonyms_for_key('taxref')
         self.assertEqual(len(taxref_synonyms), 3)
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()

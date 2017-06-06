@@ -11,6 +11,8 @@ from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.conf import settings
+from niamoto.exceptions import MalformedDataSourceError, NoRecordFoundError, \
+    RecordAlreadyExistsError
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
@@ -38,11 +40,25 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
 
     def test_register_unregister_synonym_key(self):
         TaxonomyManager.register_synonym_key("synonym_key_1")
+        self.assertRaises(
+            RecordAlreadyExistsError,
+            TaxonomyManager.register_synonym_key,
+            "synonym_key_1"
+        )
         df = TaxonomyManager.get_synonym_keys()
         self.assertEqual(len(df), 1)
         TaxonomyManager.unregister_synonym_key("synonym_key_1")
+        self.assertRaises(
+            NoRecordFoundError,
+            TaxonomyManager.unregister_synonym_key,
+            "synonym_key"
+        )
         df = TaxonomyManager.get_synonym_keys()
         self.assertEqual(len(df), 0)
+        # Test with bind
+        with Connector.get_connection() as connection:
+            TaxonomyManager.register_synonym_key("test", bind=connection)
+            TaxonomyManager.unregister_synonym_key("test", bind=connection)
 
     def test_add_single_synonym(self):
         synonym_key = "synonym_key_1"
@@ -159,6 +175,20 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         self.assertEqual(synonyms.loc[10], 0)
         self.assertEqual(synonyms.loc[20], 1)
 
+    def test_get_synonym_key(self):
+        self.assertRaises(
+            NoRecordFoundError,
+            TaxonomyManager.get_synonym_key,
+            'Not existing'
+        )
+        TaxonomyManager.register_synonym_key("test")
+        TaxonomyManager.get_synonym_key("test")
+        with Connector.get_connection() as connection:
+            TaxonomyManager.get_synonym_key("test", bind=connection)
+
+    def test_register_unregister_unique_constraints(self):
+        TaxonomyManager._register_unique_synonym_key_constraint("Yo")
+        TaxonomyManager._unregister_unique_synonym_key_constraint("Yo")
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
