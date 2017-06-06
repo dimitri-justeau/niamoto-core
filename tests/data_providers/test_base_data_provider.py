@@ -6,6 +6,7 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings
+from niamoto.db.connector import Connector
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_provider import TestDataProvider
@@ -19,6 +20,12 @@ class TestBaseDataProvider(BaseTestNiamotoSchemaCreated):
 
     def test_base_data_provider(self):
         TestDataProvider.register_data_provider_type()
+        TestDataProvider.unregister_data_provider_type()
+        # Test with bind
+        with Connector.get_connection() as connection:
+            TestDataProvider.register_data_provider_type(bind=connection)
+            TestDataProvider.unregister_data_provider_type(bind=connection)
+            TestDataProvider.register_data_provider_type(bind=connection)
         db_id = TestDataProvider.get_data_provider_type_db_id()
         self.assertIsNotNone(db_id)
         TestDataProvider.register_data_provider('test_data_provider_1')

@@ -58,7 +58,12 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
         # Test with bind
         with Connector.get_connection() as connection:
             TaxonomyManager.register_synonym_key("test", bind=connection)
+            TaxonomyManager.assert_synonym_key_exists("test", bind=connection)
             TaxonomyManager.unregister_synonym_key("test", bind=connection)
+            TaxonomyManager.assert_synonym_key_does_not_exists(
+                "test",
+                bind=connection
+            )
 
     def test_add_single_synonym(self):
         synonym_key = "synonym_key_1"

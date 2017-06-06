@@ -154,17 +154,16 @@ class BaseDataProvider:
             return result.fetchone()['id']
 
     @classmethod
-    def register_data_provider_type(cls, connection=None):
+    def register_data_provider_type(cls, bind=None):
         """
         Register the cls data provider type in database.
-        :param connection: If passed, use an existing connection instead of
-        creating a new one.
+        :param bind: If passed, use an existing engine or connection.
         """
         ins = niamoto_db_meta.data_provider_type.insert({
             'name': cls.get_type_name()
         })
-        if connection is not None:
-            connection.execute(ins)
+        if bind is not None:
+            bind.execute(ins)
             return
         with Connector.get_connection() as connection:
             connection.execute(ins)
@@ -213,6 +212,21 @@ class BaseDataProvider:
         )
         with Connector.get_connection() as connection:
             with connection.begin():
+                connection.execute(delete_stmt)
+
+    @classmethod
+    def unregister_data_provider_type(cls, bind=None):
+        """
+        Unregister the cls data provider type in database.
+        :param bind: If passed, use an existing engine or connection.
+        """
+        delete_stmt = niamoto_db_meta.data_provider_type.delete().where(
+            niamoto_db_meta.data_provider_type.c.name == cls.get_type_name()
+        )
+        if bind is not None:
+            bind.execute(delete_stmt)
+        else:
+            with Connector.get_connection() as connection:
                 connection.execute(delete_stmt)
 
     @staticmethod

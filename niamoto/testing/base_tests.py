@@ -27,10 +27,3 @@ class BaseTestNiamotoSchemaCreated(BaseTest):
         engine = Connector.get_engine()
         metadata.drop_all(engine)
         super(BaseTestNiamotoSchemaCreated, cls).tearDownClass()
-
-
-if __name__ == '__main__':
-    TestDatabaseManager.setup_test_database()
-    TestDatabaseManager.create_schema('niamoto')
-    unittest.main(exit=False)
-    TestDatabaseManager.teardown_test_database()

@@ -11,6 +11,7 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
+from niamoto.api import raster_api
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.bin.commands import raster
@@ -47,6 +48,13 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
 
     def test_list_rasters(self):
         runner = CliRunner()
+        result = runner.invoke(raster.list_rasters_cli)
+        self.assertEqual(result.exit_code, 0)
+        raster_api.add_raster(
+            TEST_RASTER,
+            'test_raster',
+            '200', '200',
+        )
         result = runner.invoke(raster.list_rasters_cli)
         self.assertEqual(result.exit_code, 0)
 

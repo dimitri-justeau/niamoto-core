@@ -22,36 +22,6 @@ class TestDatabaseManager:
     TEST_DATABASE = settings.TEST_DATABASE['NAME']
 
     @classmethod
-    def prompt_superuser(cls):
-        _superuser = input(
-            "Enter the postgres superuser name (default: '{}'):".format(
-                cls.POSTGRES_SUPERUSER,
-            )
-        )
-        if _superuser is not '':
-            cls.POSTGRES_SUPERUSER = _superuser
-
-    @classmethod
-    def prompt_superuser_password(cls):
-        _superuser_password = input(
-            "Enter the postgres superuser password (default '{}'):".format(
-                cls.POSTGRES_SUPERUSER_PASSWORD,
-            )
-        )
-        if _superuser_password is not '':
-            cls.POSTGRES_SUPERUSER_PASSWORD = _superuser_password
-
-    @classmethod
-    def prompt_host(cls):
-        _host = input(
-            "Enter the postgres server host (default: '{}'):".format(
-                cls.HOST,
-            )
-        )
-        if _host is not '':
-            cls.HOST = _host
-
-    @classmethod
     def _get_superuser_connection(cls):
         connection = psycopg2.connect(
             "dbname='{}' user='{}' host='{}' password='{}'".format(
@@ -183,10 +153,6 @@ class TestDatabaseManager:
             "CREATE EXTENSION POSTGIS;"
         )
         connection.close()
-
-    @classmethod
-    def clear_test_database(cls):
-        raise NotImplementedError()
 
     @classmethod
     def setup_test_database(cls):
