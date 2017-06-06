@@ -106,6 +106,9 @@ class TaxonomyManager:
         with Connector.get_connection() as connection:
             with connection.begin():
                 connection.execute("SET CONSTRAINTS ALL DEFERRED;")
+                # Unregister synonym keys
+                cls.unregister_all_synonym_keys(bind=connection)
+                # Delete existing taxonomy
                 cls.delete_all_taxa(bind=connection)
                 # Register synonym cols
                 for synonym_key in synonym_cols:
@@ -134,7 +137,7 @@ class TaxonomyManager:
                 m = "The taxonomy had been successfully set ({} taxa " \
                     "inserted)!"
                 LOGGER.debug(m.format(result))
-        return result
+        return result, synonym_cols
 
     def set_synonym_data(self, synonym_key, data):
         pass
@@ -227,14 +230,20 @@ class TaxonomyManager:
         )
 
     @classmethod
-    def unregister_all_synonym_keys(cls):
+    def unregister_all_synonym_keys(cls, bind=None):
         """
         Unregister all the synonym keys from database.
+        :param bind: If passed, use and existing engine or connection.
         """
-        with Connector.get_connection() as connection:
-            for synonym_key in cls.get_synonym_keys()['name']:
-                cls.unregister_synonym_key(synonym_key, bind=connection)
+        close_after = False
+        if bind is None:
+            close_after = True
+            bind = Connector.get_engine().connect()
+        for synonym_key in cls.get_synonym_keys()['name']:
+            cls.unregister_synonym_key(synonym_key, bind=bind)
         LOGGER.debug("All synonym_key records unregistered.")
+        if close_after:
+            bind.close()
 
     @classmethod
     def _register_unique_synonym_key_constraint(cls, synonym_key, bind=None):

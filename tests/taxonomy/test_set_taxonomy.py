@@ -46,7 +46,7 @@ class TestSetTaxonomy(BaseTestNiamotoSchemaCreated):
         )
 
     def test_set_taxonomy(self):
-        result = TaxonomyManager.set_taxonomy(pd.DataFrame(
+        result, synonyms = TaxonomyManager.set_taxonomy(pd.DataFrame(
             columns=['full_name', 'rank_name', 'rank', 'parent_id'],
         ))
         self.assertEqual(result, 0)
@@ -59,7 +59,7 @@ class TestSetTaxonomy(BaseTestNiamotoSchemaCreated):
                 'parent_id': None,
             },
         ], index='id')
-        result = TaxonomyManager.set_taxonomy(data)
+        result, synonyms = TaxonomyManager.set_taxonomy(data)
         self.assertEqual(result, 1)
         data = pd.DataFrame.from_records([
             {
@@ -90,7 +90,7 @@ class TestSetTaxonomy(BaseTestNiamotoSchemaCreated):
                 'taxref': 3,
             },
         ], index='id')
-        result = TaxonomyManager.set_taxonomy(data)
+        result, synonyms = TaxonomyManager.set_taxonomy(data)
         self.assertEqual(result, 3)
         df = TaxonomyManager.get_raw_taxon_dataframe()
         self.assertEqual(len(df), 3)
