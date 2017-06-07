@@ -2,6 +2,7 @@
 
 import click
 
+from niamoto.bin.utils import format_datetime_to_date
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 from niamoto.decorators import cli_catch_unknown_error
 
@@ -23,10 +24,6 @@ def list_rasters_cli():
             'date_update': format_datetime_to_date,
         }
     ))
-
-
-def format_datetime_to_date(obj):
-    return obj.strftime("%Y/%m/%d")
 
 
 @click.command('add_raster')

@@ -42,6 +42,5 @@ IRD are also implied in the project.
     installation
     quickstart
     tutorial
-    taxonomy
     configuration
     contributing

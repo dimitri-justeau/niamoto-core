@@ -12,6 +12,7 @@ from sqlalchemy.dialects import postgresql
 
 from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
 from niamoto.data_providers.csv_provider import CsvDataProvider
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 
 # revision identifiers, used by Alembic.
 revision = '7f158c64c86e'
@@ -135,6 +136,7 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ['synonym_key_id'],
             ['niamoto.synonym_key_registry.id'],
+            ondelete='SET NULL',
         ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name', name=op.f('uq_data_provider_name')),
@@ -244,10 +246,14 @@ def upgrade():
     )
     connection = op.get_bind()
     PlantnoteDataProvider.register_data_provider_type(
-        connection=connection,
+        bind=connection,
     )
     CsvDataProvider.register_data_provider_type(
-        connection=connection,
+        bind=connection,
+    )
+    TaxonomyManager.register_synonym_key(
+        'niamoto',
+        bind=connection,
     )
 
 
@@ -259,4 +265,5 @@ def downgrade():
     op.drop_table('raster_registry', schema='niamoto_raster')
     op.drop_table('taxon', schema='niamoto')
     op.drop_table('data_provider_type', schema='niamoto')
+    op.drop_table('synonym_key_registry', schema='niamoto')
     taxon_rank_enum.drop(op.get_bind(), checkfirst=False)

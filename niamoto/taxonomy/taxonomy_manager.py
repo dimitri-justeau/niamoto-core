@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 import pandas as pd
 
 from niamoto.db.connector import Connector
-from niamoto.db import metadata as niamoto_db_meta
+from niamoto.db import metadata as meta
 from niamoto.exceptions import MalformedDataSourceError, \
     NoRecordFoundError, RecordAlreadyExistsError
 from niamoto.log import get_logger
@@ -31,11 +31,11 @@ class TaxonomyManager:
         within the given database.
         """
         with Connector.get_connection() as connection:
-            sel = select([niamoto_db_meta.taxon])
+            sel = select([meta.taxon])
             return pd.read_sql(
                 sel,
                 connection,
-                index_col=niamoto_db_meta.taxon.c.id.name,
+                index_col=meta.taxon.c.id.name,
             )
 
     @classmethod
@@ -45,7 +45,7 @@ class TaxonomyManager:
         :param bind If passed, use an existing engine or connection.
         """
         LOGGER.debug("Deleting all taxa...")
-        delete = niamoto_db_meta.taxon.delete()
+        delete = meta.taxon.delete()
         if bind is not None:
             result = bind.execute(delete)
         else:
@@ -76,6 +76,11 @@ class TaxonomyManager:
         cols = set(list(taxon_dataframe.columns))
         inter = cols.intersection(required_columns)
         synonym_cols = cols.difference(required_columns)
+        if cls.IDENTITY_SYNONYM_KEY in synonym_cols:
+            synonym_cols = synonym_cols.difference({cls.IDENTITY_SYNONYM_KEY})
+            m = "The '{}' synonym key is a special key reserved by Niamoto," \
+                "this column will be ignored."
+            LOGGER.warning(m.format(cls.IDENTITY_SYNONYM_KEY))
         if not inter == required_columns:
             m = "The taxon dataframe does not contains the required " \
                 "columns {}, csv has: {}".format(required_columns, cols)
@@ -104,19 +109,47 @@ class TaxonomyManager:
             pd.notnull(taxon_dataframe), None
         )
         with Connector.get_connection() as connection:
+            current_synonym_keys = set(pd.read_sql(select([
+                meta.synonym_key_registry.c.name
+            ]), connection)['name'])
+            to_add = synonym_cols.difference(current_synonym_keys)
+            to_delete = current_synonym_keys.difference(
+                synonym_cols
+            ).difference({cls.IDENTITY_SYNONYM_KEY})
+            to_keep = current_synonym_keys.intersection(synonym_cols)
+            if len(to_delete) > 0:
+                prov = meta.data_provider
+                syno = meta.synonym_key_registry
+                providers_to_update = pd.read_sql(
+                    select([prov.c.name]).select_from(
+                        prov.join(syno, syno.c.id == prov.c.synonym_key_id)
+                    ).where(syno.c.name.in_(to_delete)),
+                    connection
+                )
+                msg = "The following synonym keys will be deleted: {}. " \
+                      "The following data providers where depending on those" \
+                      " synonym keys: {} Please consider updating " \
+                      "them, or updating the taxonomy."
+                LOGGER.warning(msg.format(
+                    to_delete,
+                    set(providers_to_update['name']))
+                )
             with connection.begin():
                 connection.execute("SET CONSTRAINTS ALL DEFERRED;")
                 # Unregister synonym keys
-                cls.unregister_all_synonym_keys(bind=connection)
+                cls.unregister_all_synonym_keys(
+                    bind=connection,
+                    exclude=to_keep,
+                )
                 # Delete existing taxonomy
                 cls.delete_all_taxa(bind=connection)
                 # Register synonym cols
-                for synonym_key in synonym_cols:
+                for synonym_key in to_add:
                     cls.register_synonym_key(synonym_key, bind=connection)
                 # Insert the data
                 LOGGER.debug("Inserting the taxonomy in database...")
                 if len(taxon_dataframe) > 0:
-                    ins = niamoto_db_meta.taxon.insert().values(
+                    ins = meta.taxon.insert().values(
                         id=bindparam('taxon_id'),
                         full_name=bindparam('full_name'),
                         rank_name=bindparam('rank_name'),
@@ -148,17 +181,17 @@ class TaxonomyManager:
         :return: The synonym keys from the database in a pandas DataFrame.
         """
         with Connector.get_connection() as connection:
-            sel = select([niamoto_db_meta.synonym_key_registry])
+            sel = select([meta.synonym_key_registry])
             return pd.read_sql(
                 sel,
                 connection,
-                index_col=niamoto_db_meta.synonym_key_registry.c.id.name,
+                index_col=meta.synonym_key_registry.c.id.name,
             )
 
     @classmethod
     def get_synonym_key(cls, synonym_key, bind=None):
-        sel = select([niamoto_db_meta.synonym_key_registry]).where(
-            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        sel = select([meta.synonym_key_registry]).where(
+            meta.synonym_key_registry.c.name == synonym_key
         )
         if bind is not None:
             result = bind.execute(sel)
@@ -178,7 +211,7 @@ class TaxonomyManager:
         :param bind: If passed, use and existing engine or connection.
         """
         now = datetime.now()
-        ins = niamoto_db_meta.synonym_key_registry.insert({
+        ins = meta.synonym_key_registry.insert({
             'name': synonym_key,
             'date_create': now,
             'date_update': now,
@@ -207,8 +240,8 @@ class TaxonomyManager:
         :param synonym_key: The synonym key to unregister
         :param bind: If passed, use and existing engine or connection.
         """
-        delete_stmt = niamoto_db_meta.synonym_key_registry.delete().where(
-            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        delete_stmt = meta.synonym_key_registry.delete().where(
+            meta.synonym_key_registry.c.name == synonym_key
         )
         if bind is not None:
             cls.assert_synonym_key_exists(synonym_key, bind=bind)
@@ -230,17 +263,20 @@ class TaxonomyManager:
         )
 
     @classmethod
-    def unregister_all_synonym_keys(cls, bind=None):
+    def unregister_all_synonym_keys(cls, exclude=[], bind=None):
         """
         Unregister all the synonym keys from database.
+        :param exclude: A list of synonym keys to exclude.
         :param bind: If passed, use and existing engine or connection.
         """
         close_after = False
         if bind is None:
             close_after = True
             bind = Connector.get_engine().connect()
+        identity = cls.IDENTITY_SYNONYM_KEY
         for synonym_key in cls.get_synonym_keys()['name']:
-            cls.unregister_synonym_key(synonym_key, bind=bind)
+            if synonym_key not in exclude and synonym_key != identity:
+                cls.unregister_synonym_key(synonym_key, bind=bind)
         LOGGER.debug("All synonym_key records unregistered.")
         if close_after:
             bind.close()
@@ -251,7 +287,7 @@ class TaxonomyManager:
         :param bind: If passed, use an existing connection or engine instead
         of creating a new one.
         """
-        synonym_col = niamoto_db_meta.taxon.c.synonyms[synonym_key]
+        synonym_col = meta.taxon.c.synonyms[synonym_key]
         index = Index(
             "{}_unique_synonym_key".format(synonym_key),
             synonym_col,
@@ -263,14 +299,14 @@ class TaxonomyManager:
         if bind is None:
             bind = Connector.get_engine()
         index.create(bind)
-        niamoto_db_meta.taxon.indexes.remove(index)
+        meta.taxon.indexes.remove(index)
         LOGGER.debug(
             "{}_unique_synonym_key registered.".format(synonym_key)
         )
 
     @classmethod
     def _unregister_unique_synonym_key_constraint(cls, synonym_key, bind=None):
-        synonym_col = niamoto_db_meta.taxon.c.synonyms[synonym_key]
+        synonym_col = meta.taxon.c.synonyms[synonym_key]
         index = Index(
             "{}_unique_synonym_key".format(synonym_key),
             synonym_col,
@@ -279,7 +315,7 @@ class TaxonomyManager:
                 synonym_col != 'null'
             )
         )
-        niamoto_db_meta.taxon.indexes.remove(index)
+        meta.taxon.indexes.remove(index)
         if bind is None:
             bind = Connector.get_engine()
         index.drop(bind)
@@ -297,11 +333,11 @@ class TaxonomyManager:
         :param provider_taxon_id: The id of the taxon in the provider's
         referential, i.e. the synonym.
         """
-        upd = niamoto_db_meta.taxon.update().where(
-            niamoto_db_meta.taxon.c.id == taxon_id
+        upd = meta.taxon.update().where(
+            meta.taxon.c.id == taxon_id
         ).values(
             {
-                'synonyms': niamoto_db_meta.taxon.c.synonyms.concat(
+                'synonyms': meta.taxon.c.synonyms.concat(
                     func.jsonb_build_object(
                         synonym_key,
                         provider_taxon_id
@@ -323,8 +359,8 @@ class TaxonomyManager:
         referential.
         """
         with Connector.get_connection() as connection:
-            niamoto_id_col = niamoto_db_meta.taxon.c.id
-            synonym_col = niamoto_db_meta.taxon.c.synonyms
+            niamoto_id_col = meta.taxon.c.id
+            synonym_col = meta.taxon.c.synonyms
             if synonym_key == cls.IDENTITY_SYNONYM_KEY:
                 sel = select([
                     niamoto_id_col.label("niamoto_taxon_id"),
@@ -340,7 +376,7 @@ class TaxonomyManager:
                 connection,
                 index_col="provider_taxon_id"
             )["niamoto_taxon_id"]
-            return synonyms
+            return synonyms[synonyms.index.notnull()]
 
     @staticmethod
     def assert_synonym_key_exists(synonym_key, bind=None):
@@ -349,8 +385,8 @@ class TaxonomyManager:
         :param synonym_key: The synonym key to check.
         :param bind: If passed, use an existing engine or connection.
         """
-        sel = select([niamoto_db_meta.synonym_key_registry]).where(
-            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        sel = select([meta.synonym_key_registry]).where(
+            meta.synonym_key_registry.c.name == synonym_key
         )
         if bind is not None:
             result = bind.execute(sel).rowcount
@@ -368,8 +404,8 @@ class TaxonomyManager:
         :param synonym_key: The synonym key to check.
         :param bind: If passed, use an existing engine or connection.
         """
-        sel = select([niamoto_db_meta.synonym_key_registry]).where(
-            niamoto_db_meta.synonym_key_registry.c.name == synonym_key
+        sel = select([meta.synonym_key_registry]).where(
+            meta.synonym_key_registry.c.name == synonym_key
         )
         if bind is not None:
             result = bind.execute(sel).rowcount
@@ -388,8 +424,8 @@ class TaxonomyManager:
         df = cls.get_raw_taxon_dataframe()
         mptt = cls.construct_mptt(df)
         mptt['taxon_id'] = mptt.index
-        upd = niamoto_db_meta.taxon.update().where(
-            niamoto_db_meta.taxon.c.id == bindparam('taxon_id')
+        upd = meta.taxon.update().where(
+            meta.taxon.c.id == bindparam('taxon_id')
         ).values({
             'mptt_tree_id': bindparam('mptt_tree_id'),
             'mptt_depth': bindparam('mptt_depth'),

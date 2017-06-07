@@ -238,7 +238,10 @@ data_provider = Table(
     ),
     Column(
         'synonym_key_id',
-        ForeignKey('{}.synonym_key_registry.id'.format(settings.NIAMOTO_SCHEMA)),
+        ForeignKey(
+            '{}.synonym_key_registry.id'.format(settings.NIAMOTO_SCHEMA),
+            ondelete='SET NULL',
+        ),
         nullable=True,
         index=True,
     ),

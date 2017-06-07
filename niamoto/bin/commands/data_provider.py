@@ -42,11 +42,14 @@ def list_data_providers():
 @click.command("add_provider")
 @click.argument("name")
 @click.argument("provider_type")
+@click.argument('synonym_key', required=False, default=None)
 @cli_catch_unknown_error
-def add_data_provider(name, provider_type, *args, **kwargs):
+def add_data_provider(name, provider_type, synonym_key=None, *args, **kwargs):
     """
     Register a data provider. The name of the data provider must be unique.
-    The provider_type must be a value among: 'PLANTNOTE'.
+    The available provider types can be obtained using the
+    'niamoto provider_types' command. The available synonym keys can be
+    obtained using the 'niamoto synonym_keys" command.
     """
     from niamoto.api.data_provider_api import add_data_provider
     click.echo("Registering the data provider in database...")
@@ -59,11 +62,12 @@ def add_data_provider(name, provider_type, *args, **kwargs):
             provider_type,
             *args,
             properties=properties,
+            synonym_key=synonym_key,
             **kwargs
         )
         m = "The data provider had been successfully registered to Niamoto!"
         click.echo(m)
-    except RecordAlreadyExistsError as e:
+    except (RecordAlreadyExistsError, NoRecordFoundError) as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
 

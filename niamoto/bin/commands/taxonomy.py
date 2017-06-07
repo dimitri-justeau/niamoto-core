@@ -2,6 +2,7 @@
 
 import click
 
+from niamoto.bin.utils import format_datetime_to_date
 from niamoto.exceptions import DataSourceNotFoundError
 from niamoto.decorators import cli_catch_unknown_error
 
@@ -51,3 +52,19 @@ def map_all_synonyms_cli():
         click.secho(m)
     else:
         click.secho("All synonyms had been mapped!")
+
+
+@click.command("synonym_keys")
+@cli_catch_unknown_error
+def get_synonym_keys_cli():
+    """
+    List the registered synonym keys.
+    """
+    from niamoto.api.taxonomy_api import get_synonym_keys
+    synonym_keys = get_synonym_keys()
+    click.echo(synonym_keys.to_string(
+        formatters={
+            'date_create': format_datetime_to_date,
+            'date_update': format_datetime_to_date,
+        }
+    ))
