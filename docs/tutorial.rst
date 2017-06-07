@@ -41,7 +41,7 @@ id   parent_id rank    full_name rank_name gbif taxref
 We set this table as the Niamoto's taxonomic referential using the
 ``set_taxonomy`` command:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ niamoto set_taxonomy taxonomy.csv
     Setting the taxonomy...
@@ -65,7 +65,7 @@ in Niamoto. But before being able to do so, we need to define data providers.
 Using the command ``niamoto providers``, we can see that there are not
 registered providers in the database:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ niamoto providers
     There are no registered data providers in the database.
@@ -78,26 +78,95 @@ files. All the available provider_types can be obtained using the
 Adding a data provider can achieved using the ``niamoto add_provider`` command,
 whic have the following usage:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
     $ niamoto add_provider --help
     Usage: niamoto add_provider [OPTIONS] NAME PROVIDER_TYPE [SYNONYM_KEY]
 
       Register a data provider. The name of the data provider must be unique.
       The available provider types can be obtained using the 'niamoto
-      provider_types' command.
+      provider_types' command. The available synonym keys can be obtained using
+      the 'niamoto synonym_keys" command.
 
     Options:
       --help  Show this message and exit.
 
 Let's add three data providers: **csv_niamoto**, **csv_taxref** and
-**csv_gbif**.
+**csv_gbif**:
+
+.. code-block:: shell-session
+
+    $ niamoto add_provider csv_niamoto CSV niamoto
+      Registering the data provider in database...
+      The data provider had been successfully registered to Niamoto!
+
+.. code-block:: shell-session
+
+    $ niamoto add_provider csv_taxref CSV taxref
+      Registering the data provider in database...
+      The data provider had been successfully registered to Niamoto!
+
+.. code-block:: shell-session
+
+    $ niamoto add_provider csv_gbif CSV gbif
+      Registering the data provider in database...
+      The data provider had been successfully registered to Niamoto!
+
+They are now available with the ``niamoto providers`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto providers
+               name provider_type synonym_key
+    id
+    2   csv_niamoto           CSV     niamoto
+    3    csv_taxref           CSV      taxref
+    4      csv_gbif           CSV        gbif
+
+In the next section, we will see how to import data with these data providers.
 
 
-Importing occurrence and plot data
-----------------------------------
+Importing occurrence, plot and plot/occurrence data
+---------------------------------------------------
 
-(Available soon)
+Importing data using the csv data provider is done with three csv files:
+
+ - The **occurrences** csv file, containing the occurrence data.
+ - The **plots** csv file, containing the plot data.
+ - The **plots/occurrences** csv file, mapping plots with occurrences.
+
+All of them are optional, you can import only occurrences, only plots or only
+map existing plots with existing occurrences.
+
+In this tutorial, we will import occurrence data for the three previously
+registered data providers. We will also import plot and plot/occurrence data,
+only for the first provider.
+
+1. Importing occurrence data
+............................
+
+The occurrences csv file must have a header and contain at least the
+following column:
+
+- **id**: The provider's unique identifier for the occurrence.
+- **taxon_id**: The provider's taxon id for the occurrence.
+- **x**: The longitude of the occurrence (WGS84).
+- **y**: The latitude of the occurrence (WGS84).
+
+All the remaining column will be stored as properties.
+
+For the ``csv_niamoto`` provider, let's consider the following dataset:
+
+For the ``csv_taxref`` provider, let's consider the following dataset:
+
+For the ``csv_gbif`` provider, let's consider the following dataset:
+
+
+2. Importing plot data
+......................
+
+3. Importing plot/occurrence data
+.................................
 
 
 Managing rasters
