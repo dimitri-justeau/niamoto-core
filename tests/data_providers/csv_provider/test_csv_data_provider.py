@@ -76,11 +76,13 @@ class TestCsvDataProvider(BaseTestNiamotoSchemaCreated):
             occurrence_csv_path=TEST_OCCURRENCE_CSV,
         )
         csv_provider.sync()
-        self.assertRaises(
-            DataSourceNotFoundError,
-            CsvDataProvider,
+        csv_provider = CsvDataProvider(
             'csv_provider',
             occurrence_csv_path='YO'
+        )
+        self.assertRaises(
+            DataSourceNotFoundError,
+            csv_provider.sync,
         )
         csv_provider = CsvDataProvider(
             'csv_provider',
@@ -120,11 +122,13 @@ class TestCsvDataProvider(BaseTestNiamotoSchemaCreated):
             plot_csv_path=TEST_EMPTY_PLOT_CSV,
         )
         csv_provider.sync()
-        self.assertRaises(
-            DataSourceNotFoundError,
-            CsvDataProvider,
+        csv_provider = CsvDataProvider(
             'csv_provider',
             plot_csv_path='YO'
+        )
+        self.assertRaises(
+            DataSourceNotFoundError,
+            csv_provider.sync,
         )
         csv_provider = CsvDataProvider(
             'csv_provider',
@@ -156,11 +160,13 @@ class TestCsvDataProvider(BaseTestNiamotoSchemaCreated):
             plot_occurrence_csv_path=TEST_EMPTY_PLOT_OCC_CSV,
         )
         csv_provider.sync()
-        self.assertRaises(
-            DataSourceNotFoundError,
-            CsvDataProvider,
+        csv_provider = CsvDataProvider(
             'csv_provider',
             plot_occurrence_csv_path='YO'
+        )
+        self.assertRaises(
+            DataSourceNotFoundError,
+            csv_provider.sync,
         )
         csv_provider = CsvDataProvider(
             'csv_provider',

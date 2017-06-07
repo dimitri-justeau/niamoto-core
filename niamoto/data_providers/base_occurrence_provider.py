@@ -7,6 +7,7 @@ from sqlalchemy.sql import select, bindparam, and_, cast, func
 from sqlalchemy.dialects.postgresql import JSONB
 import pandas as pd
 
+from niamoto.db.connector import Connector
 from niamoto.db.metadata import occurrence
 from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.log import get_logger
@@ -50,11 +51,12 @@ class BaseOccurrenceProvider:
             index_col=occurrence.c.id.name,
         )
 
-    def update_synonym_mapping(self, connection):
+    def update_synonym_mapping(self, connection=None):
         """
         Update the synonym mapping of an already stored dataframe.
         To be called when a synonym had been defined or modified, but not
         the occurrences.
+        :param connection: If passed, use an existing connection.
         """
         # Log start
         m = "(provider_id='{}', synonym_key='{}'): Updating synonym " \
@@ -63,28 +65,37 @@ class BaseOccurrenceProvider:
             self.data_provider.db_id,
             self.data_provider.synonym_key)
         )
-        # Start
-        df = self.get_niamoto_occurrence_dataframe(connection)
-        synonyms = TaxonomyManager.get_synonyms_for_key(
-            self.data_provider.synonym_key
-        )
-        df["taxon_id"] = df["provider_taxon_id"].map(synonyms)
-        upd_stmt = occurrence.update().where(
-            and_(
-                occurrence.c.provider_id == bindparam('prov_id'),
-                occurrence.c.provider_pk == bindparam('prov_pk')
+        close_after = False
+        if connection is None:
+            close_after = True
+            connection = Connector.get_engine().connect()
+        with connection.begin():
+            # Start
+            df = self.get_niamoto_occurrence_dataframe(connection)
+            synonyms = TaxonomyManager.get_synonyms_for_key(
+                self.data_provider.synonym_key
             )
-        ).values({
-            'taxon_id': bindparam('taxon_id'),
-        })
-        upd_data = df.where((pd.notnull(df)), None).rename(columns={
-            'provider_id': 'prov_id',
-            'provider_pk': 'prov_pk',
-        }).to_dict(orient='records')
-        connection.execute(
-            upd_stmt,
-            upd_data
-        )
+            mapping = df["provider_taxon_id"].map(synonyms)
+            if len(df) > 0:
+                df["taxon_id"] = mapping
+                upd_stmt = occurrence.update().where(
+                    and_(
+                        occurrence.c.provider_id == bindparam('prov_id'),
+                        occurrence.c.provider_pk == bindparam('prov_pk')
+                    )
+                ).values({
+                    'taxon_id': bindparam('taxon_id'),
+                })
+                upd_data = df.where((pd.notnull(df)), None).rename(columns={
+                    'provider_id': 'prov_id',
+                    'provider_pk': 'prov_pk',
+                }).to_dict(orient='records')
+                connection.execute(
+                    upd_stmt,
+                    upd_data
+                )
+        if close_after:
+            connection.close()
         # Log end
         m = "(provider_id='{}', synonym_key='{}'): {} synonym mapping had " \
             "been updated."
@@ -93,7 +104,7 @@ class BaseOccurrenceProvider:
             self.data_provider.synonym_key,
             len(synonyms)
         ))
-        return df
+        return mapping, synonyms
 
     def map_provider_taxon_ids(self, dataframe):
         """

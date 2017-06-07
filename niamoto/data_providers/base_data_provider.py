@@ -201,8 +201,11 @@ class BaseDataProvider:
             return cls(name, *args, **kwargs)
 
     @classmethod
-    def update_data_provider(cls, current_name, new_name, *args, properties={},
-                             synonym_key=None, return_object=True, **kwargs):
+    def update_data_provider(cls, current_name, *args, new_name=None,
+                             properties={}, synonym_key=None,
+                             return_object=True, **kwargs):
+        if new_name is None:
+            new_name = current_name
         m = "DataProvider(current_name='{}', new_name='{}', type_name='{}'," \
             "properties='{}', synonym_key='{}'): updating data provider...'"
         LOGGER.debug(
@@ -237,7 +240,7 @@ class BaseDataProvider:
             return cls(new_name, *args, **kwargs)
 
     @classmethod
-    def unregister_data_provider(cls, name):
+    def unregister_data_provider(cls, name, bind=None):
         """
         Unregister a data provider from the database.
         :param name: The name of the data provider to unregister.
@@ -246,6 +249,9 @@ class BaseDataProvider:
         delete_stmt = niamoto_db_meta.data_provider.delete().where(
             niamoto_db_meta.data_provider.c.name == name
         )
+        if bind is not None:
+            bind.execute(delete_stmt)
+            return
         with Connector.get_connection() as connection:
             with connection.begin():
                 connection.execute(delete_stmt)

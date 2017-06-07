@@ -12,14 +12,7 @@ from niamoto.db.metadata import data_provider_type, data_provider, \
     synonym_key_registry
 from niamoto.db.utils import fix_db_sequences
 from niamoto.data_providers.base_data_provider import BaseDataProvider
-from niamoto.data_providers.plantnote_provider import PlantnoteDataProvider
-from niamoto.data_providers.csv_provider import CsvDataProvider
-
-
-PROVIDER_TYPES = {
-    PlantnoteDataProvider.get_type_name(): PlantnoteDataProvider,
-    CsvDataProvider.get_type_name(): CsvDataProvider,
-}
+from niamoto.data_providers.provider_types import PROVIDER_TYPES
 
 
 def get_data_provider_type_list():

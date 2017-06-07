@@ -4,7 +4,13 @@ import os
 import pandas as pd
 
 from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
+from niamoto.api.data_provider_api import get_data_provider_list, \
+    PROVIDER_TYPES
 from niamoto.exceptions import DataSourceNotFoundError
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 def set_taxonomy(csv_file_path):
@@ -29,3 +35,24 @@ def set_taxonomy(csv_file_path):
         )
     dataframe = pd.DataFrame.from_csv(csv_file_path, index_col='id')
     return TaxonomyManager.set_taxonomy(dataframe)
+
+
+def map_all_synonyms():
+    """
+    Update the synonym mapping for every data provider registered in the
+    database.
+    """
+    data_providers = get_data_provider_list()
+    for i, record in data_providers.iterrows():
+        name = record['name']
+        provider_type = record['provider_type']
+        data_provider = PROVIDER_TYPES[provider_type](name)
+        m, s = data_provider.occurrence_provider.update_synonym_mapping()
+        msg = "{}('{}'): {} taxa had been mapped, over {} occurrences."
+        LOGGER.info(msg.format(
+            provider_type,
+            name,
+            len(m[m.notnull()]),
+            len(m),
+        ))
+    return data_providers

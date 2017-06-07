@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from niamoto.data_providers import BaseDataProvider
+from niamoto.data_providers.base_data_provider import BaseDataProvider
 from niamoto.data_providers.csv_provider.csv_occurrence_provider \
     import CsvOccurrenceProvider
 from niamoto.data_providers.csv_provider.csv_plot_provider \
@@ -17,33 +17,33 @@ class CsvDataProvider(BaseDataProvider):
     def __init__(self, name, occurrence_csv_path=None,
                  plot_csv_path=None, plot_occurrence_csv_path=None):
         super(CsvDataProvider, self).__init__(name)
+        self.occurrence_csv_path = occurrence_csv_path
+        self.plot_csv_path = plot_csv_path
+        self.plot_occurrence_csv_path = plot_occurrence_csv_path
         self._occurrence_provider = None
         self._plot_provider = None
         self._plot_occurrence_provider = None
-        if occurrence_csv_path is not None:
-            self._occurrence_provider = CsvOccurrenceProvider(
-                self,
-                occurrence_csv_path
-            )
-        if plot_csv_path is not None:
-            self._plot_provider = CsvPlotProvider(
-                self,
-                plot_csv_path
-            )
-        if plot_occurrence_csv_path is not None:
-            self._plot_occurrence_provider = CsvPlotOccurrenceProvider(
-                self,
-                plot_occurrence_csv_path
-            )
+        self._occurrence_provider = CsvOccurrenceProvider(
+            self,
+            occurrence_csv_path
+        )
+        self._plot_provider = CsvPlotProvider(
+            self,
+            plot_csv_path
+        )
+        self._plot_occurrence_provider = CsvPlotOccurrenceProvider(
+            self,
+            plot_occurrence_csv_path
+        )
 
     def sync(self, insert=True, update=True, delete=True,
              sync_occurrence=True, sync_plot=True,
              sync_plot_occurrence=True):
-        if self.occurrence_provider is None:
+        if self.occurrence_csv_path is None:
             sync_occurrence = False
-        if self.plot_provider is None:
+        if self.plot_csv_path is None:
             sync_plot = False
-        if self.plot_occurrence_provider is None:
+        if self.plot_occurrence_csv_path is None:
             sync_plot_occurrence = False
         return super(CsvDataProvider, self).sync(
             insert=insert,

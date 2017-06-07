@@ -5,7 +5,6 @@ import os
 
 from geoalchemy2.shape import from_shape, WKTElement
 from shapely.geometry import Point
-import numpy as np
 
 from niamoto.testing import set_test_path
 set_test_path()
@@ -439,7 +438,6 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
             )
             taxonomy_api.set_taxonomy(taxonomy_csv_path)
             data_provider_3 = TestDataProvider.update_data_provider(
-                "test_data_provider_3",
                 "test_data_provider_3",
                 synonym_key='gbif'
             )

@@ -10,7 +10,8 @@ from niamoto.bin.commands.manage_db import init_db_cli
 from niamoto.bin.commands.init_niamoto_home import init_niamoto_home_cli
 from niamoto.bin.commands.data_provider import list_data_provider_types, \
     list_data_providers, add_data_provider, delete_data_provider, sync
-from niamoto.bin.commands.taxonomy import set_taxonomy_cli
+from niamoto.bin.commands.taxonomy import set_taxonomy_cli, \
+    map_all_synonyms_cli
 from niamoto import conf
 
 
@@ -43,6 +44,7 @@ niamoto_cli.add_command(add_data_provider)
 niamoto_cli.add_command(delete_data_provider)
 niamoto_cli.add_command(sync)
 niamoto_cli.add_command(set_taxonomy_cli)
+niamoto_cli.add_command(map_all_synonyms_cli)
 
 
 if __name__ == '__main__':

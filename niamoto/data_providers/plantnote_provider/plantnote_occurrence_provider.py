@@ -3,7 +3,8 @@
 from sqlalchemy import *
 import pandas as pd
 
-from niamoto.data_providers import BaseOccurrenceProvider
+from niamoto.data_providers.base_occurrence_provider import \
+    BaseOccurrenceProvider
 
 
 class PlantnoteOccurrenceProvider(BaseOccurrenceProvider):

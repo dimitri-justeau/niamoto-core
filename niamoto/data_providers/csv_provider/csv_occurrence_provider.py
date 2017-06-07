@@ -4,7 +4,8 @@ from os.path import exists, isfile
 
 import pandas as pd
 
-from niamoto.data_providers import BaseOccurrenceProvider
+from niamoto.data_providers.base_occurrence_provider import \
+    BaseOccurrenceProvider
 from niamoto.exceptions import DataSourceNotFoundError, \
     MalformedDataSourceError
 
@@ -24,14 +25,15 @@ class CsvOccurrenceProvider(BaseOccurrenceProvider):
 
     def __init__(self, data_provider, occurrence_csv_path):
         super(CsvOccurrenceProvider, self).__init__(data_provider)
-        if not exists(occurrence_csv_path) or not isfile(occurrence_csv_path):
-            m = "The occurrence csv file '{}' does not exist.".format(
-                occurrence_csv_path
-            )
-            raise DataSourceNotFoundError(m)
         self.occurrence_csv_path = occurrence_csv_path
 
     def get_provider_occurrence_dataframe(self):
+        path = self.occurrence_csv_path
+        if not exists(path) or not isfile(path):
+            m = "The occurrence csv file '{}' does not exist.".format(
+                path
+            )
+            raise DataSourceNotFoundError(m)
         try:
             df = pd.read_csv(self.occurrence_csv_path, index_col='id')
         except ValueError:

@@ -3,7 +3,7 @@
 from sqlalchemy import *
 import pandas as pd
 
-from niamoto.data_providers import BasePlotProvider
+from niamoto.data_providers.base_plot_provider import BasePlotProvider
 
 
 class PlantnotePlotProvider(BasePlotProvider):
