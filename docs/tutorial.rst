@@ -59,8 +59,9 @@ taxon identifiers as Niamoto.
 Managing data providers
 -----------------------
 
-Now that we set the taxonomic referential, we would like to import some data
-in Niamoto. But before being able to do so, we need to define data providers.
+Now that we have set the taxonomic referential, we would like to import some
+data within Niamoto. But before being able to do so, we need to define data
+providers.
 
 Using the command ``niamoto providers``, we can see that there are not
 registered providers in the database:
@@ -76,7 +77,7 @@ files. All the available provider_types can be obtained using the
 ``niamoto provider_types`` command.
 
 Adding a data provider can achieved using the ``niamoto add_provider`` command,
-whic have the following usage:
+which have the following usage:
 
 .. code-block:: shell-session
 
@@ -136,7 +137,21 @@ Importing data using the csv data provider is done with three csv files:
  - The **plots/occurrences** csv file, mapping plots with occurrences.
 
 All of them are optional, you can import only occurrences, only plots or only
-map existing plots with existing occurrences.
+map existing plots with existing occurrences. The command for importing data
+from a provider is ``niamoto sync PROVIDER_NAME [PROVIDER_ARGS]``. With the
+csv data provider, three arguments are needed, corresponding to the csv files
+paths:
+
+.. code-block:: shell-session
+
+    $ niamoto sync <csv_data_provider_name> <occurrences.csv> <plots.csv> <plots_occurrences.csv>
+
+Using ``0`` instead of a path means that no data is to be imported. For
+instance, importing only plot data can be achieved using:
+
+.. code-block:: shell-session
+
+    $ niamoto sync <csv_data_provider_name> 0 <plots.csv> 0
 
 In this tutorial, we will import occurrence data for the three previously
 registered data providers. We will also import plot and plot/occurrence data,
@@ -146,7 +161,7 @@ only for the first provider.
 ............................
 
 The occurrences csv file must have a header and contain at least the
-following column:
+following columns:
 
 - **id**: The provider's unique identifier for the occurrence.
 - **taxon_id**: The provider's taxon id for the occurrence.
@@ -157,26 +172,257 @@ All the remaining column will be stored as properties.
 
 For the ``csv_niamoto`` provider, let's consider the following dataset:
 
+== ======== ========= ========= ======= ======
+id taxon_id x         y         dbh     height
+== ======== ========= ========= ======= ======
+0  3        165.321   -21.47    21      18
+1  2        165.321   -21.47    20.5    14
+2  2        165.321   -21.47    22.5    16
+3  3        165.125   -21.54    18      12
+4  3        165.125   -21.54    19      18
+5  2        162.001   -18.11    11      15
+6  2        162.001   -18.11    24      20
+7  2        162.001   -18.11    25      22
+== ======== ========= ========= ======= ======
+
 For the ``csv_taxref`` provider, let's consider the following dataset:
 
+== ======== ========= ========= =======
+id taxon_id x         y         status
+== ======== ========= ========= =======
+0  4        92.321    42.40     alive
+1  4        91.224    41.56     alive
+2  4        91.015    41.11     dead
+3  4        92.221    42.10     alive
+4  4        92.221    42.10     dead
+5  4        92.221    42.10     alive
+6  4        92.221    42.10     alive
+== ======== ========= ========= =======
+
 For the ``csv_gbif`` provider, let's consider the following dataset:
+
+== ======== ========= =========
+id taxon_id x         y
+== ======== ========= =========
+0  20       11.921    11.47
+1  30       16.120    21.54
+2  30       61.045    18.12
+3  20       16.001    8.11
+== ======== ========= =========
+
+Now let's import the data:
+
+.. code-block:: shell-session
+
+    $ niamoto sync csv_niamoto csv_niamoto_occurrences.csv 0 0
+    Syncing the Niamoto database with 'csv_niamoto'...
+    [INFO] *** Data sync starting ('csv_niamoto' - CSV)...
+    [INFO] ** Occurrence sync starting ('csv_niamoto' - CSV)...
+    [INFO] ** Occurrence sync with 'csv_niamoto' done (0.08 s)!
+    [INFO] *** Data sync with 'csv_niamoto' done (total time: 0.08 s)!
+    The Niamoto database had been successfully synced with 'csv_niamoto'!
+    Bellow is a summary of what had been done:
+        Occurrences:
+            8 inserted
+            0 updated
+            0 deleted
+
+.. code-block:: shell-session
+
+    $ niamoto sync csv_taxref csv_niamoto_taxref_occurrences.csv 0 0
+    Syncing the Niamoto database with 'csv_taxref'...
+    [INFO] *** Data sync starting ('csv_taxref' - CSV)...
+    [INFO] ** Occurrence sync starting ('csv_taxref' - CSV)...
+    [INFO] ** Occurrence sync with 'csv_taxref' done (0.08 s)!
+    [INFO] *** Data sync with 'csv_taxref' done (total time: 0.08 s)!
+    The Niamoto database had been successfully synced with 'csv_taxref'!
+    Bellow is a summary of what had been done:
+        Occurrences:
+            7 inserted
+            0 updated
+            0 deleted
+
+.. code-block:: shell-session
+
+    $ niamoto sync csv_gbif csv_niamoto_gbif_occurrences.csv 0 0
+    Syncing the Niamoto database with 'csv_gbif'...
+    [INFO] *** Data sync starting ('csv_gbif' - CSV)...
+    [INFO] ** Occurrence sync starting ('csv_gbif' - CSV)...
+    [INFO] ** Occurrence sync with 'csv_gbif' done (0.08 s)!
+    [INFO] *** Data sync with 'csv_gbif' done (total time: 0.08 s)!
+    The Niamoto database had been successfully synced with 'csv_gbif'!
+    Bellow is a summary of what had been done:
+        Occurrences:
+            4 inserted
+            0 updated
+            0 deleted
+
+We now have 19 occurrences coming from 3 data providers in our Niamoto
+database, as we can see using the following command:
+
+.. code-block:: shell-session
+
+    $ niamoto status
+        3 data providers are registered.
+        4 taxa are stored.
+        3 taxon synonym keys are registered.
+        19 occurrences are stored.
+        0 plots are stored.
+        0 plots/occurrences are stored.
+        0 rasters are stored.
+        0 vectors are stored.
 
 
 2. Importing plot data
 ......................
 
+The plot csv file must have a header and contain at least the following
+columns:
+
+- **id**: The provider's identifier for the plot.
+- **name**: The name of the plot.
+- **x**: The longitude of the plot (WGS84).
+- **y**: The latitude of the plot (WGS84).
+
+All the remaining column will be stored as properties.
+
+Let's consider the following dataset for the ``csv_niamoto`` provider:
+
+== ======== ========= ========= ======= ======
+id name     x         y         width   height
+== ======== ========= ========= ======= ======
+0  plot_1   165.321   -21.47    100     100
+1  plot_2   165.125   -21.54    100     100
+2  plot_3   162.001   -18.11    100     100
+== ======== ========= ========= ======= ======
+
+We import the plot data using the following command:
+
+.. code-block:: shell-session
+
+    $ niamoto sync csv_niamoto 0 csv_niamoto_plots.csv 0
+        Syncing the Niamoto database with 'csv_niamoto'...
+        [INFO] *** Data sync starting ('csv_niamoto' - CSV)...
+        [INFO] ** Plot sync starting ('csv_niamoto' - CSV)...
+        [INFO] ** Plot sync with 'csv_niamoto' done (0.06 s)!
+        [INFO] *** Data sync with 'csv_niamoto' done (total time: 0.07 s)!
+        The Niamoto database had been successfully synced with 'csv_niamoto'!
+        Bellow is a summary of what had been done:
+            Plots:
+                3 inserted
+                0 updated
+                0 deleted
+
+
 3. Importing plot/occurrence data
 .................................
 
+The plot/occurrence data is a many to many relationship between occurrences and
+plots. A plot can contains several occurrences and an occurrence can be
+contained by several plots. The plot/occurrence csv file must have a header and
+contain at least the following columns:
 
-Managing rasters
-----------------
+- **plot_id**: The provider's id for the plot.
+- **occurrence_id**: The provider's id for the occurrence.
+- **occurrence_identifier**: The occurrence identifier in the plot.
 
-(Available soon)
+The additional columns will be ignored.
+
+Let's consider the following data, for linking ``csv_niamoto``'s occurrences
+with ``csv_niamoto``'s plots:
+
+======= ============= =====================
+plot_id occurrence_id occurrence_identifier
+======= ============= =====================
+0       0             PLOT_1__OCC_1
+0       1             PLOT_1__OCC_2
+0       2             PLOT_1__OCC_3
+1       3             PLOT_2__OCC_1
+1       4             PLOT_2__OCC_2
+2       5             PLOT_3__OCC_1
+2       6             PLOT_3__OCC_2
+2       7             PLOT_3__OCC_3
+======= ============= =====================
+
+We import the plot/occurrence data using the following command:
+
+.. code-block:: shell-session
+
+    $ niamoto sync csv_niamoto 0 0 csv_niamoto_plots_occurrences.csv
+    Syncing the Niamoto database with 'csv_niamoto'...
+    [INFO] *** Data sync starting ('csv_niamoto' - CSV)...
+    [INFO] ** Plot-occurrence sync starting ('csv_niamoto' - CSV)...
+    [INFO] ** Plot-occurrence sync with 'csv_niamoto' done (0.05 s)!
+    [INFO] *** Data sync with 'csv_niamoto' done (total time: 0.06 s)!
+    The Niamoto database had been successfully synced with 'csv_niamoto'!
+    Bellow is a summary of what had been done:
+        Plots / Occurrences:
+            8 inserted
+            0 updated
+            0 deleted
+
+We can check the Niamoto database status with the ``niamoto status`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto status
+        3 data providers are registered.
+        4 taxa are stored.
+        3 taxon synonym keys are registered.
+        19 occurrences are stored.
+        3 plots are stored.
+        8 plots/occurrences are stored.
+        0 rasters are stored.
+        0 vectors are stored.
 
 
-Managing vectors
-----------------
+Importing rasters
+-----------------
+
+Niamoto provides functionalities to import and manage raster within the Niamoto
+database, these functionalities rely on the PostGIS raster functionalities.
+The main advantage of storing rasters inside a PostGIS database is to benefit
+from the power of the SQL language, and the PostGIS spatial functions. It is
+also a convenient way for having all the data stored at the same place and for
+using the same system for querying.
+
+Importing a raster in Niamoto is straightforward using the
+``niamoto add_raster`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto add_raster --help
+    Usage: niamoto add_raster [OPTIONS] NAME TILE_WIDTH TILE_HEIGHT
+                              RASTER_FILE_PATH
+
+      Add a raster in Niamoto's raster database.
+
+    Options:
+      --srid TEXT  SRID of the raster. If not specified, it will be detected
+                   automatically.
+      --help       Show this message and exit.
+
+Now let's import a rainfall raster in our Niamoto database:
+
+.. code-block:: shell-session
+
+    $ niamoto add_raster rainfall 100 100 rainfall.tif
+    Registering the raster in database...
+    The raster had been successfully registered to the Niamoto raster database!
+
+We can see the registered rasters with the ``niamoto rasters`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto rasters
+              tile_width  tile_height  srid date_create date_update
+    name
+    rainfall         100          100  4326  2017/06/08  2017/06/08
+
+
+
+Importing vectors
+-----------------
 
 (Available soon)
 

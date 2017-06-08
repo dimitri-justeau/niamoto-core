@@ -15,8 +15,8 @@ class CsvPlotProvider(BasePlotProvider):
     The csv file must contain AT LEAST the following columns:
         id -> The provider's identifier for the plot.
         name -> The name of the plot.
-        x -> The longitude of the occurrence (WGS84).
-        y -> The latitude of the occurrence (WGS84).
+        x -> The longitude of the plot (WGS84).
+        y -> The latitude of the plot (WGS84).
     All the remaining column will be stored as properties.
     """
 

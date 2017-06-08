@@ -279,7 +279,9 @@ class BaseOccurrenceProvider:
             prov_df['properties'] = prov_df['properties'].apply(
                 lambda x: sorted(json.loads(x).items())
             )
-            changed = (prov_df[compared_cols] != niamoto_df[compared_cols]).any(1)
+            changed = (
+                prov_df[compared_cols] != niamoto_df[compared_cols]
+            ).any(1)
             changed_idx = changed[changed].index
             provider_dataframe = provider_dataframe.loc[changed_idx]
         else:

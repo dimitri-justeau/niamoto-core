@@ -98,20 +98,19 @@ def delete_data_provider(name, y=False):
 
 
 @click.command("sync")
-@click.argument("name")
+@click.argument("provider_name")
 @click.argument('provider_args', nargs=-1, type=click.UNPROCESSED)
 @cli_catch_unknown_error
-def sync(name, provider_args):
+def sync(provider_name, provider_args):
     """
     Sync the Niamoto database with a data provider.
     """
     from niamoto.api.data_provider_api import sync_with_data_provider
-    click.echo("Syncing the Niamoto database with '{}'...".format(name))
+    click.echo("Syncing the Niamoto database with '{}'...".format(
+        provider_name)
+    )
     try:
-        r = sync_with_data_provider(name, *provider_args)
-        m = "The Niamoto database had been successfully synced with '{}'! " \
-            "Bellow is a summary of what had been done:"
-        click.echo(m.format(name))
+        r = sync_with_data_provider(provider_name, *provider_args)
         o = r['occurrence']
         o_i, o_u, o_d = \
             len(o['insert']), \
@@ -127,21 +126,32 @@ def sync(name, provider_args):
             len(po['insert']), \
             len(po['update']), \
             len(po['delete'])
-        click.secho("\n    Occurrences:")
-        click.secho("    -----------")
-        click.secho("        {} inserted".format(o_i), fg='green')
-        click.secho("        {} updated".format(o_u), fg='yellow')
-        click.secho("        {} deleted".format(o_d), fg='red')
-        click.secho("\n    Plots:")
-        click.secho("    -----")
-        click.secho("        {} inserted".format(p_i), fg='green')
-        click.secho("        {} updated".format(p_u), fg='yellow')
-        click.secho("        {} deleted".format(p_d), fg='red')
-        click.secho("\n    Plots / Occurrences:")
-        click.secho("    ------------------")
-        click.secho("        {} inserted".format(po_i), fg='green')
-        click.secho("        {} updated".format(po_u), fg='yellow')
-        click.secho("        {} deleted\n".format(po_d), fg='red')
+        occ_change = o_i > 0 or o_u > 0 or o_d > 0
+        plot_change = p_i > 0 or p_u > 0 or p_d > 0
+        plot_occ_change = po_i > 0 or po_u > 0 or po_d > 0
+        if occ_change or plot_change or plot_occ_change:
+            m = "The Niamoto database had been successfully synced " \
+                "with '{}'!\nBellow is a summary of what had been done:"
+            click.echo(m.format(provider_name))
+        else:
+            m = "The Niamoto database was already up to date with '{}', " \
+                "nothing had been done."
+            click.echo(m.format(provider_name))
+        if occ_change:
+            click.secho("    Occurrences:")
+            click.secho("        {} inserted".format(o_i), fg='green')
+            click.secho("        {} updated".format(o_u), fg='yellow')
+            click.secho("        {} deleted".format(o_d), fg='red')
+        if plot_change:
+            click.secho("    Plots:")
+            click.secho("        {} inserted".format(p_i), fg='green')
+            click.secho("        {} updated".format(p_u), fg='yellow')
+            click.secho("        {} deleted".format(p_d), fg='red')
+        if plot_occ_change:
+            click.secho("    Plots / Occurrences:")
+            click.secho("        {} inserted".format(po_i), fg='green')
+            click.secho("        {} updated".format(po_u), fg='yellow')
+            click.secho("        {} deleted".format(po_d), fg='red')
     except NoRecordFoundError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
