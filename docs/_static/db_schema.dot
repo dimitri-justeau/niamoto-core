@@ -31,6 +31,10 @@
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">☆ synonym_key_id</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
         ><FONT FACE="Bitstream Vera Sans">⚪ name</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">VARCHAR(100)</FONT
@@ -38,6 +42,16 @@
         ><FONT FACE="Bitstream Vera Sans">⚪ properties</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">JSONB</FONT
+        ></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_data_provider_niamoto_data_provider_provider_type_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(provider_type_id)</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_data_provider_niamoto_data_provider_synonym_key_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(synonym_key_id)</FONT
         ></TD></TR>
         </TABLE>
     >]
@@ -96,6 +110,16 @@
         ><FONT FACE="Bitstream Vera Sans">⚪ provider_taxon_id</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_occurrence_niamoto_occurrence_provider_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(provider_id)</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_occurrence_niamoto_occurrence_taxon_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(taxon_id)</FONT
         ></TD></TR>
         </TABLE>
     >]
@@ -131,6 +155,11 @@
         ><FONT FACE="Bitstream Vera Sans">⚪ provider_pk</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_plot_niamoto_plot_provider_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(provider_id)</FONT
         ></TD></TR>
         </TABLE>
     >]
@@ -151,9 +180,98 @@
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
         ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">☆ provider_id</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">☆ provider_occurrence_pk</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">☆ provider_plot_pk</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
         ><FONT FACE="Bitstream Vera Sans">⚪ occurrence_identifier</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">VARCHAR(50)</FONT
+        ></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_plot_occurrence_niamoto_plot_occurrence_occurrence_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(occurrence_id)</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_plot_occurrence_niamoto_plot_occurrence_plot_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(plot_id)</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_plot_occurrence_niamoto_plot_occurrence_provider_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(provider_id)</FONT
+        ></TD></TR>
+        </TABLE>
+    >]
+    
+
+        raster_registry [label=<
+        <TABLE BGCOLOR="lightyellow" BORDER="0"
+            CELLBORDER="0" CELLSPACING="0">
+                <TR><TD COLSPAN="2" CELLPADDING="4"
+                        ALIGN="CENTER" BGCOLOR="palegoldenrod"
+                ><FONT FACE="Helvetica Bold" COLOR="black"
+                >raster_registry</FONT></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">★ name</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">VARCHAR(100)</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ date_create</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ date_update</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ srid</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ tile_height</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ tile_width</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR>
+        </TABLE>
+    >]
+    
+
+        synonym_key_registry [label=<
+        <TABLE BGCOLOR="lightyellow" BORDER="0"
+            CELLBORDER="0" CELLSPACING="0">
+                <TR><TD COLSPAN="2" CELLPADDING="4"
+                        ALIGN="CENTER" BGCOLOR="palegoldenrod"
+                ><FONT FACE="Helvetica Bold" COLOR="black"
+                >synonym_key_registry</FONT></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">★ id</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INTEGER</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ date_create</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ date_update</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">DATETIME</FONT
+        ></TD></TR> <TR><TD ALIGN="LEFT" BORDER="0"
+        ><FONT FACE="Bitstream Vera Sans">⚪ name</FONT
+        ></TD><TD ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">VARCHAR(100)</FONT
         ></TD></TR>
         </TABLE>
     >]
@@ -205,6 +323,11 @@
         ><FONT FACE="Bitstream Vera Sans">⚪ synonyms</FONT
         ></TD><TD ALIGN="LEFT"
         ><FONT FACE="Bitstream Vera Sans">JSONB</FONT
+        ></TD></TR><TR><TD ALIGN="LEFT" BORDER="0"
+        BGCOLOR="palegoldenrod"
+        ><FONT FACE="Bitstream Vera Sans">» ix_taxon_niamoto_taxon_parent_id</FONT></TD
+        ><TD BGCOLOR="palegoldenrod" ALIGN="LEFT"
+        ><FONT FACE="Bitstream Vera Sans">INDEX(parent_id)</FONT
         ></TD></TR>
         </TABLE>
     >]
@@ -217,10 +340,15 @@
 		arrowtail = open
 	]
 	"data_provider" -> "data_provider_type" [label = "provider_type_id"]
+	"data_provider" -> "synonym_key_registry" [label = "synonym_key_id"]
 	"occurrence" -> "data_provider" [label = "provider_id"]
 	"occurrence" -> "taxon" [label = "taxon_id"]
 	"plot" -> "data_provider" [label = "provider_id"]
 	"plot_occurrence" -> "plot" [label = "plot_id"]
 	"plot_occurrence" -> "occurrence" [label = "occurrence_id"]
+	"plot_occurrence" -> "occurrence" [label = "provider_id"]
+	"plot_occurrence" -> "plot" [label = "provider_id"]
+	"plot_occurrence" -> "plot" [label = "provider_plot_pk"]
+	"plot_occurrence" -> "occurrence" [label = "provider_occurrence_pk"]
 	"taxon" -> "taxon" [label = "parent_id"]
 }

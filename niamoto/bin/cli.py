@@ -13,6 +13,7 @@ from niamoto.bin.commands.data_provider import list_data_provider_types, \
 from niamoto.bin.commands.taxonomy import set_taxonomy_cli, \
     map_all_synonyms_cli, get_synonym_keys_cli
 from niamoto.bin.commands.status import get_general_status_cli
+from niamoto.bin.commands.publish import publish_cli
 from niamoto import conf
 
 
@@ -48,6 +49,7 @@ niamoto_cli.add_command(set_taxonomy_cli)
 niamoto_cli.add_command(map_all_synonyms_cli)
 niamoto_cli.add_command(get_synonym_keys_cli)
 niamoto_cli.add_command(get_general_status_cli)
+niamoto_cli.add_command(publish_cli)
 
 
 if __name__ == '__main__':
