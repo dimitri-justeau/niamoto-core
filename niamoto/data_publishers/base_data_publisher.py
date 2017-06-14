@@ -26,6 +26,8 @@ class BaseDataPublisher(metaclass=PublisherMeta):
 
     def __init__(self):
         self.last_data = None
+        self.last_publish_args = None
+        self.last_publish_kwargs = None
         self.last_args = None
         self.last_kwargs = None
 
@@ -36,12 +38,16 @@ class BaseDataPublisher(metaclass=PublisherMeta):
     def process(self, *args, **kwargs):
         """
         Process the data, memoize and return the result to be published.
-        :return: The data to be published after processing.
+        :return: The data to be published after processing, the publish args
+            and the publish kwargs.
         """
-        self.last_data = self._process(*args, **kwargs)
+        r = self._process(*args, **kwargs)
+        self.last_data = r[0]
+        self.last_publish_args = r[1]
+        self.last_publish_kwargs = r[2]
         self.last_args = args
         self.last_kwargs = kwargs
-        return self.last_data
+        return r[0], r[1], r[2]
 
     def _process(self, *args, **kwargs):
         """
@@ -59,7 +65,7 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         raise NotImplementedError()
 
     @classmethod
-    def publish(cls, data, publish_format, destination):
+    def publish(cls, data, publish_format, destination, *args, **kwargs):
         """
         Publish the processed data.
         :param data: The data to publish.
@@ -70,13 +76,18 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         format_to_method = {
             cls.CSV: cls._publish_csv
         }
-        return format_to_method[publish_format](data, destination)
+        return format_to_method[publish_format](
+            data,
+            destination,
+            *args,
+            **kwargs
+        )
 
     @staticmethod
-    def _publish_csv(data, destination_path):
+    def _publish_csv(data, destination_path, index_label=None):
         """
         Publish the data in a csv file.
         :param data: The data to publish, assume that it is a pandas DataFrame.
         :param destination_path: The destination file path.
         """
-        data.to_csv(destination_path)
+        data.to_csv(destination_path, index_label=index_label)

@@ -44,3 +44,21 @@ class MalformedDataSourceError(BaseDataProviderException):
     """
     Error to raise when a data source is malformed.
     """
+
+
+class BaseDataPublisherException(Exception):
+    """
+    Base class for errors specific to data publisher.
+    """
+
+
+class WrongPublisherKeyError(BaseDataPublisherException):
+    """
+    Error to raise when invoking a publisher with a wrong key/
+    """
+
+
+class UnavailablePublishFormat(BaseDataPublisherException):
+    """
+    Error to raise when invoking an unavailable publish format.
+    """

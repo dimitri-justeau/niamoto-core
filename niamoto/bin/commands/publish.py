@@ -3,6 +3,7 @@
 import click
 
 from niamoto.decorators import cli_catch_unknown_error
+from niamoto.exceptions import BaseDataPublisherException
 
 
 @click.command(
@@ -22,12 +23,16 @@ def publish_cli(publisher_key, publish_format, destination, *args, **kwargs):
     Process and publish data.
     """
     from niamoto.api import publish_api
-    publish_api.publish(
-        publisher_key,
-        publish_format,
-        destination,
-        *args,
-        **kwargs
-    )
+    try:
+        publish_api.publish(
+            publisher_key,
+            publish_format,
+            destination,
+            *args,
+            **kwargs
+        )
+    except BaseDataPublisherException as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
 
 
