@@ -10,7 +10,7 @@ from niamoto.exceptions import BaseDataPublisherException
     "publish",
     context_settings={
         'ignore_unknown_options': True,
-        'allow_extra_args': True,
+        # 'allow_extra_args': True,
     }
 )
 @click.argument("publisher_key")
@@ -24,12 +24,24 @@ def publish_cli(publisher_key, publish_format, destination, *args, **kwargs):
     """
     from niamoto.api import publish_api
     try:
+        extra_args = []
+        extra_kwargs = {}
+        pass_next = False
+        for i, v in enumerate(kwargs['args']):
+            if pass_next:
+                pass_next = False
+                continue
+            if v[:2] == '--':
+                extra_kwargs[v[2:]] = kwargs['args'][i + 1]
+                pass_next = True
+            else:
+                extra_args.append(v)
         publish_api.publish(
             publisher_key,
             publish_format,
             destination,
-            *args,
-            **kwargs
+            *extra_args,
+            **extra_kwargs
         )
     except BaseDataPublisherException as e:
         click.secho(str(e), fg='red')

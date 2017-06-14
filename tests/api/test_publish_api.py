@@ -48,6 +48,21 @@ class TestPublishApi(BaseTestNiamotoSchemaCreated):
             BaseDataPublisher.CSV,
             csv_temp
         )
+        publish_api.publish(
+            OccurrenceDataPublisher.get_key(),
+            BaseDataPublisher.CSV,
+            csv_temp,
+            *[],
+            **{'properties': 'dbh,height'}
+        )
+        publish_api.publish(
+            OccurrenceDataPublisher.get_key(),
+            BaseDataPublisher.CSV,
+            csv_temp,
+            *[],
+            **{'properties': ['dbh','height']}
+        )
+
         csv_temp.close()
 
 

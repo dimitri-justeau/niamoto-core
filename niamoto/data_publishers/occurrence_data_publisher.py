@@ -17,14 +17,23 @@ class OccurrenceDataPublisher(BaseDataPublisher):
     def get_key(cls):
         return 'occurrences'
 
-    def _process(self, *args, **kwargs):
+    def _process(self, *args, properties=None, **kwargs):
+        """
+        :param properties: List of properties to retain. Can be a python list
+            or a comma (',') separated string.
+        """
         with Connector.get_connection() as connection:
             sel_keys = select([
                 func.jsonb_object_keys(
                     meta.occurrence.c.properties
                 ).distinct(),
             ])
-            keys = [i[0] for i in connection.execute(sel_keys).fetchall()]
+            if properties is None:
+                keys = [i[0] for i in connection.execute(sel_keys).fetchall()]
+            else:
+                if isinstance(properties, str):
+                    properties = properties.split(',')
+                keys = properties
             props = [meta.occurrence.c.properties[k].label(k) for k in keys]
             sel = select([
                 meta.occurrence.c.id.label('id'),

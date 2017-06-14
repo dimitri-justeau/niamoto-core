@@ -16,12 +16,12 @@ def publish(publisher_key, publish_format, destination, *args, **kwargs):
     :return:
     """
     if publisher_key not in PUBLISHER_REGISTRY:
-        m = "The publisher key '' does not exist.".format(publisher_key)
+        m = "The publisher key '{}' does not exist.".format(publisher_key)
         raise WrongPublisherKeyError(m)
     publisher = PUBLISHER_REGISTRY[publisher_key]
     publisher_instance = publisher['class']()
     if publish_format not in publisher_instance.get_publish_formats():
-        m = "The publish format '' is unavailable with the '' publisher."
+        m = "The publish format '{}' is unavailable with the '{}' publisher."
         raise UnavailablePublishFormat(
             m.format(publish_format, publisher_key)
         )
