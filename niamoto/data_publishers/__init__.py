@@ -7,4 +7,8 @@ from niamoto.data_publishers.occurrence_data_publisher import \
     OccurrenceDataPublisher
 
 
-R_SCRIPTS_HOME = os.path.join()
+R_SCRIPTS_HOME = os.path.join(NIAMOTO_HOME, 'R')
+
+if not os.path.exists(R_SCRIPTS_HOME):
+    os.mkdir(R_SCRIPTS_HOME)
+
