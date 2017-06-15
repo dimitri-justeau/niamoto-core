@@ -25,7 +25,7 @@ class RDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_key(cls):
-        return 'R'
+        raise NotImplementedError()
 
     def _process(self, *args, **kwargs):
         with localconverter(default_converter + pandas2ri.converter):

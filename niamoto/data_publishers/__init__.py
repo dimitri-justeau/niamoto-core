@@ -12,3 +12,7 @@ R_SCRIPTS_HOME = os.path.join(NIAMOTO_HOME, 'R')
 if not os.path.exists(R_SCRIPTS_HOME):
     os.mkdir(R_SCRIPTS_HOME)
 
+
+for file in os.listdir(R_SCRIPTS_HOME):
+    if file.endswith(".R"):
+        print(file[:-2])
