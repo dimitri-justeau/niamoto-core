@@ -26,8 +26,8 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
             [1, 2, 3, 4],
             [5, 6, 7, 8]
         ])
-        dp._publish_csv(data, temp_csv)
-        dp.publish(data, 'csv', temp_csv)
+        dp._publish_csv(data, destination=temp_csv)
+        dp.publish(data, 'csv', destination=temp_csv)
         temp_csv.close()
 
 

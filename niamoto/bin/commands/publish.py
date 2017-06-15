@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import sys
+
 import click
 
 from niamoto.decorators import cli_catch_unknown_error
@@ -15,7 +17,7 @@ from niamoto.exceptions import BaseDataPublisherException
 )
 @click.argument("publisher_key")
 @click.argument("publish_format")
-@click.argument("destination")
+@click.option('--destination', '-d', default=sys.stdout)
 @click.argument('args', nargs=-1, type=click.UNPROCESSED)
 @cli_catch_unknown_error
 def publish_cli(publisher_key, publish_format, destination, *args, **kwargs):
@@ -39,8 +41,8 @@ def publish_cli(publisher_key, publish_format, destination, *args, **kwargs):
         publish_api.publish(
             publisher_key,
             publish_format,
-            destination,
             *extra_args,
+            destination=destination,
             **extra_kwargs
         )
     except BaseDataPublisherException as e:

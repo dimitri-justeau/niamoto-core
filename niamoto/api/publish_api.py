@@ -1,11 +1,14 @@
 # coding: utf-8
 
+import sys
+
 from niamoto.data_publishers.base_data_publisher import PUBLISHER_REGISTRY
 from niamoto.exceptions import WrongPublisherKeyError, \
     UnavailablePublishFormat
 
 
-def publish(publisher_key, publish_format, destination, *args, **kwargs):
+def publish(publisher_key, publish_format, *args, destination=sys.stdout,
+            **kwargs):
     """
     Api method for processing and publishing data.
     :param publisher_key:
@@ -29,7 +32,7 @@ def publish(publisher_key, publish_format, destination, *args, **kwargs):
     publisher_instance.publish(
         data,
         publish_format,
-        destination,
         *p_args,
+        destination=destination,
         **p_kwargs
     )

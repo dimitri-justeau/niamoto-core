@@ -2,6 +2,7 @@
 
 from sqlalchemy import select, func, cast, String
 import pandas as pd
+import numpy as np
 
 from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
 from niamoto.db import metadata as meta
@@ -48,8 +49,13 @@ class OccurrenceDataPublisher(BaseDataPublisher):
                     meta.taxon.c.id == meta.occurrence.c.taxon_id
                 )
             )
-            return pd.read_sql(sel, connection), [], {'index_label': 'id'}
+            df = pd.read_sql(sel, connection, index_col='id')
+            df['taxon_id'] = df['taxon_id'].apply(pd.to_numeric)
+            #  Replace None values with nan
+            df.fillna(value=pd.np.NAN, inplace=True)
+            return df, [], {'index_label': 'id'}
 
     @classmethod
     def get_publish_formats(cls):
-        return [cls.CSV, ]
+        return [cls.CSV, cls.STREAM]
+

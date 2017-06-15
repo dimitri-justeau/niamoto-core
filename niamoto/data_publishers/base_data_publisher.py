@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import sys
+
 
 PUBLISHER_REGISTRY = {}
 
@@ -21,8 +23,9 @@ class BaseDataPublisher(metaclass=PublisherMeta):
     Base class for data publisher.
     """
 
+    STREAM = 'stream'
     CSV = 'csv'
-    PUBLISH_FORMATS = [CSV, ]
+    PUBLISH_FORMATS = [CSV, STREAM]
 
     def __init__(self):
         self.last_data = None
@@ -65,7 +68,8 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         raise NotImplementedError()
 
     @classmethod
-    def publish(cls, data, publish_format, destination, *args, **kwargs):
+    def publish(cls, data, publish_format, *args, destination=sys.stdout,
+                **kwargs):
         """
         Publish the processed data.
         :param data: The data to publish.
@@ -74,20 +78,31 @@ class BaseDataPublisher(metaclass=PublisherMeta):
             destination database file)
         """
         format_to_method = {
-            cls.CSV: cls._publish_csv
+            cls.CSV: cls._publish_csv,
+            cls.STREAM: cls._publish_stream,
         }
         return format_to_method[publish_format](
             data,
-            destination,
             *args,
+            destination=destination,
             **kwargs
         )
 
     @staticmethod
-    def _publish_csv(data, destination_path, index_label=None):
+    def _publish_csv(data, *args, destination=sys.stdout, index_label=None,
+                     **kwargs):
         """
         Publish the data in a csv file.
         :param data: The data to publish, assume that it is a pandas DataFrame.
         :param destination_path: The destination file path.
         """
-        data.to_csv(destination_path, index_label=index_label)
+        data.to_csv(destination, index_label=index_label)
+
+    @staticmethod
+    def _publish_stream(data, *args, destination=sys.stdout, **kwargs):
+        """
+        Publish the data in a stream.
+        :param data: The data to publish, assume that it is a pandas DataFrame.
+        :param destination_path: The destination stream.
+        """
+        data.to_string(buf=destination)

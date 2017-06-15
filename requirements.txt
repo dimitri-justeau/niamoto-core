@@ -19,3 +19,6 @@ click
 
 # Logging
 colorlog
+
+# Interaction with R
+rpy2

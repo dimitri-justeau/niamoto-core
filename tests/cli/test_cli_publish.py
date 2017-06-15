@@ -31,7 +31,7 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
                 [
                     OccurrenceDataPublisher.get_key(),
                     BaseDataPublisher.CSV,
-                    csv_temp.name
+                    '-d', csv_temp.name
                 ]
             )
             self.assertEqual(result.exit_code, 0)
@@ -40,7 +40,7 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
                 [
                     OccurrenceDataPublisher.get_key(),
                     BaseDataPublisher.CSV,
-                    csv_temp.name,
+                    '-d', csv_temp.name,
                     "--properties", "dbh,height"
                 ]
             )
