@@ -34,7 +34,7 @@ class RDataPublisher(BaseDataPublisher):
             r.source(self.r_script_path)
             process_func = r['process']
             df = pandas2ri.ri2py(process_func())
-            return int32_to_int64(fill_str_empty_with_nan(df))
+            return int32_to_int64(fill_str_empty_with_nan(df)), [], {}
 
     @staticmethod
     @rternalize
@@ -42,7 +42,7 @@ class RDataPublisher(BaseDataPublisher):
         convert = default_converter + pandas2ri.converter
         with conversion.localconverter(convert):
             df = OccurrenceDataPublisher().process(properties=properties)[0]
-            return pandas2ri.py2ri(fill_str_nan_with_empty(df[:10]))
+            return pandas2ri.py2ri(fill_str_nan_with_empty(df))
 
     @classmethod
     def get_publish_formats(cls):

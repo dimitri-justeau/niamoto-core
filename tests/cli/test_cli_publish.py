@@ -45,6 +45,16 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
                 ]
             )
             self.assertEqual(result.exit_code, 0)
+            result = runner.invoke(
+                publish.publish_cli,
+                [
+                    "R_r_script",
+                    BaseDataPublisher.CSV,
+                    '-d', csv_temp.name,
+                    "--properties", "dbh,height"
+                ]
+            )
+            self.assertEqual(result.exit_code, 0)
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
