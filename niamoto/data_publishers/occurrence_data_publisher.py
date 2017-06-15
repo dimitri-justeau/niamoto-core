@@ -18,6 +18,10 @@ class OccurrenceDataPublisher(BaseDataPublisher):
     def get_key(cls):
         return 'occurrences'
 
+    @classmethod
+    def get_description(cls):
+        return "Return the list of occurrences."
+
     def _process(self, *args, properties=None, **kwargs):
         """
         :param properties: List of properties to retain. Can be a python list

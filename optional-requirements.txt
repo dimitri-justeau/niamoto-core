@@ -1,2 +1,3 @@
 # Needed by scripts/generate_db_schema.py
 sadisplay
+ipython

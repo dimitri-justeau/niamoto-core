@@ -2,6 +2,7 @@
 
 import sys
 
+import pandas as pd
 import click
 
 from niamoto.decorators import cli_catch_unknown_error
@@ -50,3 +51,19 @@ def publish_cli(publisher_key, publish_format, destination, *args, **kwargs):
         click.get_current_context().exit(code=1)
 
 
+@click.command("publishers")
+@cli_catch_unknown_error
+def list_publishers_cli():
+    """
+    Echo the list of available data publishers.
+    """
+    from niamoto.data_publishers.base_data_publisher import PUBLISHER_REGISTRY
+    publishers_keys = list(PUBLISHER_REGISTRY.keys())
+    max_length = max([len(i) for i in publishers_keys])
+    for k in publishers_keys:
+        click.echo(
+            "    {} :   {}".format(
+                k.ljust(max_length),
+                PUBLISHER_REGISTRY[k]['description']
+            )
+        )

@@ -12,6 +12,7 @@ class PublisherMeta(type):
         try:
             PUBLISHER_REGISTRY[cls.get_key()] = {
                 'class': cls,
+                'description': cls.get_description()
             }
         except NotImplementedError:
             pass
@@ -36,6 +37,10 @@ class BaseDataPublisher(metaclass=PublisherMeta):
 
     @classmethod
     def get_key(cls):
+        raise NotImplementedError()
+
+    @classmethod
+    def get_description(cls):
         raise NotImplementedError()
 
     def process(self, *args, **kwargs):
@@ -106,3 +111,4 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         :param destination_path: The destination stream.
         """
         data.to_string(buf=destination)
+        destination.write('\n')

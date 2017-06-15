@@ -23,6 +23,14 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
     Test case for publish cli methods.
     """
 
+    def test_list_publishers_cli(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            publish.list_publishers_cli,
+            []
+        )
+        self.assertEqual(result.exit_code, 0)
+
     def test_publish_cli(self):
         runner = CliRunner()
         with tempfile.NamedTemporaryFile(mode='w') as csv_temp:

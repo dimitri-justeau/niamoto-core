@@ -27,6 +27,10 @@ class RDataPublisher(BaseDataPublisher):
     def get_key(cls):
         raise NotImplementedError()
 
+    @classmethod
+    def get_description(cls):
+        return "R script."
+
     def _process(self, *args, **kwargs):
         with localconverter(default_converter + pandas2ri.converter):
             globalenv['get_occurrence_dataframe'] = \
