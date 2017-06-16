@@ -27,6 +27,10 @@ class BaseDataPublisher(metaclass=PublisherMeta):
     STREAM = 'stream'
     CSV = 'csv'
     PUBLISH_FORMATS = [CSV, STREAM]
+    PUBLISH_FORMATS_DESCRIPTION = {
+        CSV: "Publish the data using the csv format.",
+        STREAM: "Publish the data as a text stream.",
+    }
 
     def __init__(self):
         self.last_data = None

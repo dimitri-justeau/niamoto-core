@@ -497,4 +497,21 @@ Extracting vector values into occurrences properties
 Processing and publishing data
 ------------------------------
 
-(Available soon)
+The list of available data publishers can be displayed using the
+``niamoto publishers`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto publishers
+        occurrences   :   Retrieve the occurrence dataframe with properties as columns.
+        plots         :   Retrieve the plot dataframe with properties as columns.
+
+For a given publisher, the available publish formats can be displayed using
+the ``niamoto publish_formats`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto publish_formats occurrences
+        csv    :    Publish the data using the csv format.
+        stream :    Publish the data as a text stream.
+

@@ -2,7 +2,6 @@
 
 import sys
 
-import pandas as pd
 import click
 
 from niamoto.decorators import cli_catch_unknown_error
@@ -77,6 +76,14 @@ def list_publish_formats_cli(publisher_key):
     Display the list of available publish formats for a given publisher.
     """
     from niamoto.api.publish_api import list_publish_formats
-    for f in list_publish_formats(publisher_key):
-        click.secho('    {}'.format(f))
+    from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
+    keys = list_publish_formats(publisher_key)
+    max_length = max([len(i) for i in keys])
+    for k in keys:
+        click.secho(
+            '    {} :    {}'.format(
+                k.ljust(max_length),
+                BaseDataPublisher.PUBLISH_FORMATS_DESCRIPTION[k]
+            )
+        )
 
