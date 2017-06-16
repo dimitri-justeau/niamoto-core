@@ -130,3 +130,73 @@ def delete_raster_cli(name, y=False):
     except NoRecordFoundError as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
+
+
+@click.command('raster_to_occurrences')
+@click.argument('raster_name')
+@cli_catch_unknown_error
+def extract_raster_values_to_occurrences_cli(raster_name):
+    """
+    Extract raster values to occurrences properties.
+    """
+    from niamoto.api import raster_api
+    try:
+        click.secho("Extracting '{}' raster values to occurrences...".format(
+            raster_name
+        ))
+        raster_api.extract_raster_values_to_occurrences(raster_name)
+        click.echo("The raster values had been successfully extracted!")
+    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
+
+
+@click.command('raster_to_plots')
+@click.argument('raster_name')
+@cli_catch_unknown_error
+def extract_raster_values_to_plots_cli(raster_name):
+    """
+    Extract raster values to plots properties.
+    """
+    from niamoto.api import raster_api
+    try:
+        click.secho("Extracting '{}' raster values to plots...".format(
+            raster_name
+        ))
+        raster_api.extract_raster_values_to_plots(raster_name)
+        click.echo("The raster values had been successfully extracted!")
+    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
+
+
+@click.command('all_rasters_to_occurrences')
+@cli_catch_unknown_error
+def extract_all_rasters_values_to_occurrences_cli():
+    """
+    Extract raster values to occurrences properties for all registered rasters.
+    """
+    from niamoto.api import raster_api
+    try:
+        click.secho("Extracting all rasters values to occurrences...")
+        raster_api.extract_all_rasters_values_to_occurrences()
+        click.echo("The rasters values had been successfully extracted!")
+    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
+
+
+@click.command('all_rasters_to_plots')
+@cli_catch_unknown_error
+def extract_all_rasters_values_to_plots_cli():
+    """
+    Extract raster values to plots properties for all registered rasters.
+    """
+    from niamoto.api import raster_api
+    try:
+        click.secho("Extracting all rasters values to plots...")
+        raster_api.extract_all_rasters_values_to_plots()
+        click.echo("The rasters values had been successfully extracted!")
+    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)

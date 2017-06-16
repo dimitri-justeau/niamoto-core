@@ -2,6 +2,7 @@
 
 import os
 import unittest
+import logging
 
 from click.testing import CliRunner
 from sqlalchemy.engine.reflection import Inspector
@@ -9,6 +10,11 @@ from sqlalchemy.engine.reflection import Inspector
 from niamoto.testing import set_test_path
 
 set_test_path()
+
+from niamoto import log
+
+log.STREAM_LOGGING_LEVEL = logging.CRITICAL
+log.FILE_LOGGING_LEVEL = logging.DEBUG
 
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.api import raster_api
@@ -109,6 +115,49 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
             'yo',
         ])
         self.assertEqual(result.exit_code, 1)
+
+    def test_extract_raster(self):
+        runner = CliRunner()
+        runner.invoke(raster.add_raster_cli, [
+            'test_raster_1',
+            TEST_RASTER
+        ], catch_exceptions=False)
+        runner.invoke(raster.add_raster_cli, [
+            'test_raster_2',
+            TEST_RASTER
+        ], catch_exceptions=False)
+        result = runner.invoke(
+            raster.extract_raster_values_to_occurrences_cli,
+            ['test_raster_1']
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            raster.extract_raster_values_to_occurrences_cli,
+            ['test_raster_4']
+        )
+        self.assertEqual(result.exit_code, 1)
+        result = runner.invoke(
+            raster.extract_raster_values_to_plots_cli,
+            ['test_raster_1']
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            raster.extract_raster_values_to_plots_cli,
+            ['test_raster_4']
+        )
+        self.assertEqual(result.exit_code, 1)
+        result = runner.invoke(
+            raster.extract_all_rasters_values_to_occurrences_cli,
+            []
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            raster.extract_all_rasters_values_to_plots_cli,
+            []
+        )
+        self.assertEqual(result.exit_code, 0)
+
+
 
 
 if __name__ == '__main__':

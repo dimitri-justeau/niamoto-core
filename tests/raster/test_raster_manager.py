@@ -3,12 +3,18 @@
 import unittest
 import os
 from datetime import datetime
+import logging
 
 from sqlalchemy.engine.reflection import Inspector
 
 from niamoto.testing import set_test_path
 
 set_test_path()
+
+from niamoto import log
+
+log.STREAM_LOGGING_LEVEL = logging.CRITICAL
+log.FILE_LOGGING_LEVEL = logging.DEBUG
 
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.testing.test_database_manager import TestDatabaseManager
@@ -88,7 +94,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         )
         df = RasterManager.get_raster_list()
         self.assertEqual(len(df), 1)
-        self.assertEqual(df.index[0], 'rainfall')
+        self.assertEqual(df['name'].iloc[0], 'rainfall')
         self.assertEqual(df.iloc[0]['srid'], 4326)
         engine = Connector.get_engine()
         inspector = Inspector.from_engine(engine)

@@ -5,7 +5,11 @@ import os
 import click
 
 from niamoto.bin.commands.raster import list_rasters_cli, add_raster_cli, \
-    update_raster_cli, delete_raster_cli
+    update_raster_cli, delete_raster_cli, \
+    extract_raster_values_to_occurrences_cli, \
+    extract_raster_values_to_plots_cli, \
+    extract_all_rasters_values_to_occurrences_cli, \
+    extract_all_rasters_values_to_plots_cli
 from niamoto.bin.commands.manage_db import init_db_cli
 from niamoto.bin.commands.init_niamoto_home import init_niamoto_home_cli
 from niamoto.bin.commands.data_provider import list_data_provider_types, \
@@ -34,21 +38,36 @@ def niamoto_cli(context, niamoto_home=conf.DEFAULT_NIAMOTO_HOME):
     conf.set_settings()
 
 
+# Init commands
 niamoto_cli.add_command(init_niamoto_home_cli)
 niamoto_cli.add_command(init_db_cli)
+
+# Raster commands
 niamoto_cli.add_command(list_rasters_cli)
 niamoto_cli.add_command(add_raster_cli)
 niamoto_cli.add_command(update_raster_cli)
 niamoto_cli.add_command(delete_raster_cli)
+niamoto_cli.add_command(extract_raster_values_to_occurrences_cli)
+niamoto_cli.add_command(extract_raster_values_to_plots_cli)
+niamoto_cli.add_command(extract_all_rasters_values_to_occurrences_cli)
+niamoto_cli.add_command(extract_all_rasters_values_to_plots_cli)
+
+# Data provider commands
 niamoto_cli.add_command(list_data_provider_types)
 niamoto_cli.add_command(list_data_providers)
 niamoto_cli.add_command(add_data_provider)
 niamoto_cli.add_command(delete_data_provider)
 niamoto_cli.add_command(sync)
+
+# Taxonomy commands
 niamoto_cli.add_command(set_taxonomy_cli)
 niamoto_cli.add_command(map_all_synonyms_cli)
 niamoto_cli.add_command(get_synonym_keys_cli)
+
+# Status commands
 niamoto_cli.add_command(get_general_status_cli)
+
+# Data publisher commands
 niamoto_cli.add_command(publish_cli)
 niamoto_cli.add_command(list_publishers_cli)
 

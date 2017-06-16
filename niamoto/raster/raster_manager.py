@@ -30,7 +30,7 @@ class RasterManager:
             return pd.read_sql(
                 sel,
                 connection,
-                index_col=niamoto_db_meta.raster_registry.c.name.name
+                index_col=niamoto_db_meta.raster_registry.c.id.name
             )
 
     @classmethod

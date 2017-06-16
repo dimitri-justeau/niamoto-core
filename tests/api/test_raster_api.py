@@ -2,12 +2,18 @@
 
 import unittest
 import os
+import logging
 
 from sqlalchemy.engine.reflection import Inspector
 
 from niamoto.testing import set_test_path
 
 set_test_path()
+
+from niamoto import log
+
+log.STREAM_LOGGING_LEVEL = logging.CRITICAL
+log.FILE_LOGGING_LEVEL = logging.DEBUG
 
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.testing.test_database_manager import TestDatabaseManager
@@ -83,6 +89,25 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
             'test_raster',
         )
 
+    def test_extract_raster_values(self):
+        raster_api.add_raster(
+            self.TEST_RASTER_PATH,
+            'test_raster',
+        )
+        raster_api.extract_raster_values_to_occurrences('test_raster')
+        raster_api.extract_raster_values_to_plots('test_raster')
+
+    def test_extract_all_rasters_values(self):
+        raster_api.add_raster(
+            self.TEST_RASTER_PATH,
+            'test_raster',
+        )
+        raster_api.add_raster(
+            self.TEST_RASTER_PATH,
+            'test_raster_2',
+        )
+        raster_api.extract_all_rasters_values_to_occurrences()
+        raster_api.extract_all_rasters_values_to_plots()
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
