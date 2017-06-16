@@ -70,6 +70,18 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 1)
 
+    def test_update_data_provider(self):
+        runner = CliRunner()
+        PlantnoteDataProvider.register_data_provider_type()
+        PlantnoteDataProvider.register_data_provider(
+            'test_data_provider_1'
+        )
+        result = runner.invoke(
+            data_provider.update_data_provider_cli,
+            ['test_data_provider_1', '--new_name', 'YO'],
+        )
+        self.assertEqual(result.exit_code, 0)
+
     def test_delete_data_provider(self):
         runner = CliRunner()
         TestDataProvider.register_data_provider_type()

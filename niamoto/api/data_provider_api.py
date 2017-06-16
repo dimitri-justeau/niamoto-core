@@ -91,12 +91,44 @@ def delete_data_provider(name):
     fix_db_sequences()
 
 
+def update_data_provider(current_name, new_name=None, properties={},
+                         synonym_key=None):
+    """
+    Update an existing data provider.
+    :param current_name:
+    :param new_name:
+    :param properties:
+    :param synonym_key:
+    :return:
+    """
+    provider = load_data_provider(current_name)
+    provider.update_data_provider(
+        current_name,
+        new_name=new_name,
+        properties=properties,
+        synonym_key=synonym_key
+    )
+
+
 def sync_with_data_provider(name, *args, **kwargs):
     """
     Sync the Niamoto database with a data provider.
     :param name: The name of the data provider.
     :return: The sync report.
     """
+    with Connector.get_connection() as connection:
+        provider = load_data_provider(
+            name,
+            *args,
+            connection=connection,
+            **kwargs
+        )
+        sync_report = provider.sync()
+    fix_db_sequences()
+    return sync_report
+
+
+def load_data_provider(name, *args, connection=None, **kwargs):
     BaseDataProvider.assert_data_provider_exists(name)
     sel = select([
         data_provider.c.id,
@@ -111,14 +143,17 @@ def sync_with_data_provider(name, *args, **kwargs):
         data_provider.c.name == name
     )
     # Look for args that must be set None
-    none_values = [None, 'none', 'None', '0', 'n', 'N',]
+    none_values = [None, 'none', 'None', '0', 'n', 'N', ]
     nargs = [None if i in none_values else i for i in args]
-    with Connector.get_connection() as connection:
-        r = connection.execute(sel)
-        record = r.fetchone()
-        name = record.name
-        type_key = record.provider_type
-        provider = PROVIDER_TYPES[type_key](name, *nargs, **kwargs)
-        sync_report = provider.sync()
-    fix_db_sequences()
-    return sync_report
+    close_after = False
+    if connection is None:
+        close_after = True
+        connection = Connector.get_engine().connect()
+    r = connection.execute(sel)
+    record = r.fetchone()
+    name = record.name
+    type_key = record.provider_type
+    provider = PROVIDER_TYPES[type_key](name, *nargs, **kwargs)
+    if close_after:
+        connection.close()
+    return provider

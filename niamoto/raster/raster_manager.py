@@ -159,7 +159,9 @@ class RasterManager:
         :param connection: If provided, use an existing connection.
         """
         cls.assert_raster_exists(name)
+        close_after = False
         if connection is None:
+            close_after = True
             connection = Connector.get_engine().connect()
         with connection.begin():
             connection.execute("DROP TABLE IF EXISTS {};".format(
@@ -169,7 +171,8 @@ class RasterManager:
                 niamoto_db_meta.raster_registry.c.name == name
             )
             connection.execute(del_stmt)
-        connection.close()
+        if close_after:
+            connection.close()
 
     @classmethod
     def get_raster_srid(cls, raster_file_path):

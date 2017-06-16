@@ -3,7 +3,7 @@
 import click
 
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
-    BaseDataProviderException
+    BaseDataProviderException, NiamotoException
 from niamoto.decorators import cli_catch_unknown_error
 
 
@@ -93,6 +93,30 @@ def delete_data_provider(name, y=False):
         m = "The data provider had been successfully unregistered!"
         click.echo(m)
     except NoRecordFoundError as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
+
+
+@click.command("update_provider")
+@click.argument("current_name")
+@click.option('--new_name', default=None)
+@click.option('--synonym_key', default=None)
+@cli_catch_unknown_error
+def update_data_provider_cli(current_name, new_name=None, synonym_key=None):
+    """
+    Update a data provider.
+    """
+    from niamoto.api.data_provider_api import update_data_provider
+    click.echo("Updating the data provider '{}'...".format(current_name))
+    try:
+        update_data_provider(
+            current_name,
+            new_name=new_name,
+            synonym_key=synonym_key,
+        )
+        m = "The data provider had been successfully updated!"
+        click.echo(m)
+    except NiamotoException as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
 

@@ -1,34 +1,41 @@
 # coding: utf-8
 
 
-class ImproperlyConfiguredError(Exception):
+class NiamotoException(Exception):
+    """
+    Base class for Niamoto exceptions.
+    """
+    pass
+
+
+class ImproperlyConfiguredError(NiamotoException):
     """
     Error to raise when Niamoto is not properly configured.
     """
     pass
 
 
-class IncoherentDatabaseStateError(Exception):
+class IncoherentDatabaseStateError(NiamotoException):
     """
     Error to raise when a incoherent database state is detected.
     """
     pass
 
 
-class NoRecordFoundError(Exception):
+class NoRecordFoundError(NiamotoException):
     """
     Error to raise when a record had not been found in database.
     """
     pass
 
 
-class RecordAlreadyExistsError(Exception):
+class RecordAlreadyExistsError(NiamotoException):
     """
     Error to raise when trying to insert a record that already exists.
     """
 
 
-class BaseDataProviderException(Exception):
+class BaseDataProviderException(NiamotoException):
     """
     Base class for errors specific to data providers implementations.
     """
@@ -46,7 +53,7 @@ class MalformedDataSourceError(BaseDataProviderException):
     """
 
 
-class BaseDataPublisherException(Exception):
+class BaseDataPublisherException(NiamotoException):
     """
     Base class for errors specific to data publisher.
     """

@@ -13,7 +13,8 @@ from niamoto.bin.commands.raster import list_rasters_cli, add_raster_cli, \
 from niamoto.bin.commands.manage_db import init_db_cli
 from niamoto.bin.commands.init_niamoto_home import init_niamoto_home_cli
 from niamoto.bin.commands.data_provider import list_data_provider_types, \
-    list_data_providers, add_data_provider, delete_data_provider, sync
+    list_data_providers, add_data_provider, delete_data_provider, sync, \
+    update_data_provider_cli
 from niamoto.bin.commands.taxonomy import set_taxonomy_cli, \
     map_all_synonyms_cli, get_synonym_keys_cli
 from niamoto.bin.commands.status import get_general_status_cli
@@ -57,6 +58,7 @@ niamoto_cli.add_command(list_data_provider_types)
 niamoto_cli.add_command(list_data_providers)
 niamoto_cli.add_command(add_data_provider)
 niamoto_cli.add_command(delete_data_provider)
+niamoto_cli.add_command(update_data_provider_cli)
 niamoto_cli.add_command(sync)
 
 # Taxonomy commands

@@ -9,6 +9,7 @@ set_test_path()
 from niamoto.conf import NIAMOTO_HOME
 from niamoto.conf import settings
 from niamoto.api.data_provider_api import *
+from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_database_manager import TestDatabaseManager
@@ -82,6 +83,23 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         )
         l2 = get_data_provider_list()
         self.assertEqual(len(l2), 1)
+
+    def test_update_data_provider(self):
+        TestDataProvider.register_data_provider_type()
+        PlantnoteDataProvider.register_data_provider_type()
+        add_data_provider(
+            "pl@ntnote_provider_1",
+            "PLANTNOTE",
+        )
+        TaxonomyManager.register_synonym_key("YO")
+        update_data_provider(
+            "pl@ntnote_provider_1",
+            new_name="pl@ntnote",
+            synonym_key="YO"
+        )
+        l2 = get_data_provider_list()
+        self.assertIn("pl@ntnote", list(l2['name']))
+        self.assertIn("YO", list(l2['synonym_key']))
 
     def test_delete_data_provider(self):
         TestDataProvider.register_data_provider_type()
