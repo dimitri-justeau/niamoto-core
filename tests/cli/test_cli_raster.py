@@ -86,6 +86,7 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
         result = runner.invoke(raster.update_raster_cli, [
             'test_raster',
             TEST_RASTER,
+            '-t', '100x100',
             '--new_name', 'test_raster_updated',
         ], catch_exceptions=False)
         self.assertEqual(result.exit_code, 0)
@@ -156,8 +157,6 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
             []
         )
         self.assertEqual(result.exit_code, 0)
-
-
 
 
 if __name__ == '__main__':

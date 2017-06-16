@@ -106,6 +106,11 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(
             data_provider.sync,
+            ['plantnote_provider', self.TEST_DB_PATH]
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            data_provider.sync,
             ['plantnote', self.TEST_DB_PATH]
         )
         self.assertEqual(result.exit_code, 1)

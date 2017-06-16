@@ -11,7 +11,7 @@ set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.bin.commands.taxonomy import set_taxonomy_cli, \
-    map_all_synonyms_cli
+    map_all_synonyms_cli, get_synonym_keys_cli
 from niamoto.bin.commands.status import get_general_status_cli
 from niamoto.data_providers.provider_types import PROVIDER_TYPES
 from niamoto.testing.test_database_manager import TestDatabaseManager
@@ -69,6 +69,14 @@ class TestCLITaxonomy(BaseTestNiamotoSchemaCreated):
         runner = CliRunner()
         result = runner.invoke(
             get_general_status_cli,
+            [],
+        )
+        self.assertEqual(result.exit_code, 0)
+
+    def test_get_synonym_keys(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            get_synonym_keys_cli,
             [],
         )
         self.assertEqual(result.exit_code, 0)

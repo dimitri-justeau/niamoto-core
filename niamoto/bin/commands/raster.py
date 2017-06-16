@@ -177,13 +177,9 @@ def extract_all_rasters_values_to_occurrences_cli():
     Extract raster values to occurrences properties for all registered rasters.
     """
     from niamoto.api import raster_api
-    try:
-        click.secho("Extracting all rasters values to occurrences...")
-        raster_api.extract_all_rasters_values_to_occurrences()
-        click.echo("The rasters values had been successfully extracted!")
-    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    click.secho("Extracting all rasters values to occurrences...")
+    raster_api.extract_all_rasters_values_to_occurrences()
+    click.echo("The rasters values had been successfully extracted!")
 
 
 @click.command('all_rasters_to_plots')
@@ -193,10 +189,6 @@ def extract_all_rasters_values_to_plots_cli():
     Extract raster values to plots properties for all registered rasters.
     """
     from niamoto.api import raster_api
-    try:
-        click.secho("Extracting all rasters values to plots...")
-        raster_api.extract_all_rasters_values_to_plots()
-        click.echo("The rasters values had been successfully extracted!")
-    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    click.secho("Extracting all rasters values to plots...")
+    raster_api.extract_all_rasters_values_to_plots()
+    click.echo("The rasters values had been successfully extracted!")
