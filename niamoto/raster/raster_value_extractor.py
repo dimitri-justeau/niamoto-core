@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from sqlalchemy import Table, func
-
 from niamoto.conf import settings
 from niamoto.db import metadata as meta
 from niamoto.db.connector import Connector
@@ -22,41 +20,79 @@ class RasterValueExtractor:
     @classmethod
     def extract_raster_values_to_occurrences(cls, raster_name):
         with Connector.get_connection() as connection:
-            RasterManager.assert_raster_exists(
-                raster_name,
-                connection=connection
-            )
-            LOGGER.debug(
-                "Extracting '{}' raster values in occurrences.".format(
-                    raster_name
+            with connection.begin():
+                RasterManager.assert_raster_exists(
+                    raster_name,
+                    connection=connection
                 )
-            )
-            raster_table = Table(
-                raster_name,
-                meta.metadata,
-                schema=settings.NIAMOTO_RASTER_SCHEMA,
-                autoload=True,
-                autoload_with=connection,
-            )
-            upd = meta.occurrence.update().where(
-                func.st_intersects(
-                    raster_table.c.rast,
-                    meta.occurrence.c.location
-                )
-            ).values({
-                'properties': meta.occurrence.c.properties.concat(
-                    func.jsonb_build_object(
-                        raster_name,
-                        func.st_value(
-                            raster_table.c.rast,
-                            meta.occurrence.c.location
-                        )
+                m = "Extracting '{}' raster values to occurrences properties."
+                LOGGER.debug(m.format(raster_name))
+                sql = \
+                    """
+                    WITH {raster_name} AS (
+                      SELECT occ.id AS id,
+                        ST_Value(raster.rast, occ.location) AS rast_value
+                      FROM {occurrence_table} AS occ
+                      LEFT JOIN {raster_table} AS raster
+                      ON ST_Intersects(raster.rast, occ.location)
                     )
+                    UPDATE {occurrence_table}
+                    SET properties = (
+                      {occurrence_table}.properties || jsonb_build_object(
+                        '{prefix}{raster_name}', {raster_name}.rast_value
+                      )
+                    ) FROM {raster_name}
+                    WHERE {raster_name}.id = {occurrence_table}.id
+                    """.format(**{
+                        'raster_name': raster_name,
+                        'raster_table': '{}.{}'.format(
+                            settings.NIAMOTO_RASTER_SCHEMA,
+                            raster_name
+                        ),
+                        'occurrence_table': '{}.{}'.format(
+                            settings.NIAMOTO_SCHEMA,
+                            meta.occurrence.name
+                        ),
+                        'prefix': RASTER_PROPERTY_PREFIX,
+                    })
+                connection.execute(sql)
+
+    @classmethod
+    def extract_raster_values_to_plots(cls, raster_name):
+        with Connector.get_connection() as connection:
+            with connection.begin():
+                RasterManager.assert_raster_exists(
+                    raster_name,
+                    connection=connection
                 )
-            })
-            import time
-            t = time.time()
-            connection.execute(upd)
-            print(time.time() - t)
-
-
+                m = "Extracting '{}' raster values to plots properties."
+                LOGGER.debug(m.format(raster_name))
+                sql = \
+                    """
+                    WITH {raster_name} AS (
+                      SELECT plot.id AS id,
+                        ST_Value(raster.rast, plot.location) AS rast_value
+                      FROM {plot_table} AS plot
+                      LEFT JOIN {raster_table} AS raster
+                      ON ST_Intersects(raster.rast, plot.location)
+                    )
+                    UPDATE {plot_table}
+                    SET properties = (
+                      {plot_table}.properties || jsonb_build_object(
+                        '{prefix}{raster_name}', {raster_name}.rast_value
+                      )
+                    ) FROM {raster_name}
+                    WHERE {raster_name}.id = {plot_table}.id
+                    """.format(**{
+                        'raster_name': raster_name,
+                        'raster_table': '{}.{}'.format(
+                            settings.NIAMOTO_RASTER_SCHEMA,
+                            raster_name
+                        ),
+                        'plot_table': '{}.{}'.format(
+                            settings.NIAMOTO_SCHEMA,
+                            meta.plot.name
+                        ),
+                        'prefix': RASTER_PROPERTY_PREFIX,
+                    })
+                connection.execute(sql)
