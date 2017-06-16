@@ -80,7 +80,7 @@ def extract_raster_values_to_occurrences(raster_name):
     Extract raster values to occurrences properties.
     :param raster_name: The name of the raster to extract the values from.
     """
-    LOGGER.info("Extracting '{}' raster values to occurrences...".format(
+    LOGGER.debug("Extracting '{}' raster values to occurrences...".format(
         raster_name
     ))
     RasterValueExtractor.extract_raster_values_to_occurrences(raster_name)
@@ -91,7 +91,7 @@ def extract_raster_values_to_plots(raster_name):
     Extract raster values to plots properties.
     :param raster_name: The name of the raster to extract the values from.
     """
-    LOGGER.info("Extracting '{}' raster values to plots...".format(
+    LOGGER.debug("Extracting '{}' raster values to plots...".format(
         raster_name
     ))
     RasterValueExtractor.extract_raster_values_to_plots(raster_name)

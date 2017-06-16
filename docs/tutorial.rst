@@ -392,21 +392,22 @@ Importing a raster in Niamoto is straightforward using the
 .. code-block:: shell-session
 
     $ niamoto add_raster --help
-    Usage: niamoto add_raster [OPTIONS] NAME TILE_WIDTH TILE_HEIGHT
-                              RASTER_FILE_PATH
+    Usage: niamoto add_raster [OPTIONS] NAME RASTER_FILE_PATH
 
       Add a raster in Niamoto's raster database.
 
     Options:
-      --srid TEXT  SRID of the raster. If not specified, it will be detected
-                   automatically.
-      --help       Show this message and exit.
+      --srid TEXT                SRID of the raster. If not specified, it will be
+                                 detected automatically.
+      -t, --tile_dimension TEXT  Tile dimension <width>x<height>
+      --help                     Show this message and exit.
+
 
 Now let's import a rainfall raster in our Niamoto database:
 
 .. code-block:: shell-session
 
-    $ niamoto add_raster rainfall 100 100 rainfall.tif
+    $ niamoto add_raster rainfall rainfall.tif
     Registering the raster in database...
     The raster had been successfully registered to the Niamoto raster database!
 
@@ -427,10 +428,64 @@ Importing vectors
 (Available soon)
 
 
-Extracting raster values into occurrences properties
-----------------------------------------------------
+Extracting raster values to occurrences and plot properties
+-----------------------------------------------------------
 
-(Available soon)
+Niamoto provides utilities for extracting raster values directly into
+occurrences or plots properties.
+
+.. code-block:: shell-session
+
+    $ niamoto raster_to_occurrences --help
+    Usage: niamoto raster_to_occurrences [OPTIONS] RASTER_NAME
+
+      Extract raster values to occurrences properties.
+
+    Options:
+      --help  Show this message and exit
+
+
+.. code-block:: shell-session
+
+    $ niamoto raster_to_plots --help
+    Usage: niamoto raster_to_plots [OPTIONS] RASTER_NAME
+
+      Extract raster values to plots properties.
+
+    Options:
+      --help  Show this message and exit.
+
+
+.. code-block:: shell-session
+
+    $ niamoto all_rasters_to_occurrences --help
+    Usage: niamoto all_rasters_to_occurrences [OPTIONS]
+
+      Extract raster values to occurrences properties for all registered
+      rasters.
+
+    Options:
+      --help  Show this message and exit.
+
+
+.. code-block:: shell-session
+
+    $ niamoto all_rasters_to_plots --help
+    Usage: niamoto all_rasters_to_plots [OPTIONS]
+
+      Extract raster values to plots properties for all registered rasters.
+
+    Options:
+      --help  Show this message and exit.
+
+For instance, let's extract the values of the previously registered raster,
+``rainfall`` to the occurrences properties:
+
+.. code-block:: shell-session
+
+    $ niamoto raster_to_occurrences rainfall
+    Extracting 'rainfall' raster values to occurrences...
+    The raster values had been successfully extracted!
 
 
 Extracting vector values into occurrences properties
