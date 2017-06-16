@@ -33,23 +33,28 @@ def list_rasters_cli():
     help='SRID of the raster. If not specified, it will be detected '
          'automatically.'
 )
+@click.option(
+    '--tile_dimension',
+    '-t',
+    help='Tile dimension <width>x<height>',
+    required=False
+)
 @click.argument('name')
-@click.argument('tile_width')
-@click.argument('tile_height')
 @click.argument('raster_file_path')
 @cli_catch_unknown_error
-def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None):
+def add_raster_cli(name, raster_file_path, tile_dimension=None, srid=None):
     """
     Add a raster in Niamoto's raster database.
     """
     from niamoto.api import raster_api
     click.echo("Registering the raster in database...")
+    if tile_dimension is not None:
+        tile_dimension = [int(i) for i in tile_dimension.split('x')]
     try:
         raster_api.add_raster(
             raster_file_path,
             name,
-            tile_width,
-            tile_height,
+            tile_dimension=tile_dimension,
             srid=srid,
         )
         click.echo("The raster had been successfully registered to the Niamoto"
@@ -66,24 +71,28 @@ def add_raster_cli(name, tile_width, tile_height, raster_file_path, srid=None):
     help='SRID of the raster. If not specified, it will be detected '
          'automatically.'
 )
+@click.option(
+    '--tile_dimension',
+    '-t',
+    help='Tile dimension <width>x<height>',
+    required=False
+)
 @click.argument('name')
-@click.argument('tile_width')
-@click.argument('tile_height')
 @click.argument('raster_file_path')
 @cli_catch_unknown_error
-def update_raster_cli(name, tile_width, tile_height, raster_file_path,
-                      srid=None):
+def update_raster_cli(name, raster_file_path, tile_dimension=None, srid=None):
     """
     Update an existing raster in Niamoto's raster database.
     """
     from niamoto.api import raster_api
     click.echo("Updating {} raster...".format(name))
+    if tile_dimension is not None:
+        tile_dimension = [int(i) for i in tile_dimension.split('x')]
     try:
         raster_api.update_raster(
             raster_file_path,
             name,
-            tile_width,
-            tile_height,
+            tile_dimension=tile_dimension,
             srid=srid,
         )
         click.echo("The raster had been successfully updated!")

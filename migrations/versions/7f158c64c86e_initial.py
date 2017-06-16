@@ -96,19 +96,9 @@ def upgrade():
     op.create_table(
         'raster_registry',
         sa.Column('name', sa.String(length=100), nullable=False),
-        sa.Column('tile_width', sa.Integer(), nullable=False),
-        sa.Column('tile_height', sa.Integer(), nullable=False),
         sa.Column('srid', sa.Integer(), nullable=False),
         sa.Column('date_create', sa.DateTime(), nullable=False),
         sa.Column('date_update', sa.DateTime(), nullable=False),
-        sa.CheckConstraint(
-            'tile_height > 0',
-            name=op.f('ck_raster_registry_tile_height_gt_0')
-        ),
-        sa.CheckConstraint(
-            'tile_width > 0',
-            name=op.f('ck_raster_registry_tile_width_gt_0')
-        ),
         sa.PrimaryKeyConstraint('name'),
         schema='niamoto_raster'
     )

@@ -56,26 +56,25 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
         raster_api.add_raster(
             self.TEST_RASTER_PATH,
             'test_raster',
-            200, 200,
+            (200, 200),
         )
 
     def test_update_raster(self):
         raster_api.add_raster(
             self.TEST_RASTER_PATH,
             'test_raster',
-            200, 200,
+            (200, 200),
         )
         raster_api.update_raster(
             self.TEST_RASTER_PATH,
             'test_raster',
-            150, 150,
+            (150, 150),
         )
 
     def test_delete_raster(self):
         raster_api.add_raster(
             self.TEST_RASTER_PATH,
             'test_raster',
-            200, 200,
         )
         raster_api.delete_raster('test_raster')
         self.assertRaises(

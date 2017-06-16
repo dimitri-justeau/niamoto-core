@@ -43,24 +43,18 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         data = [
             {
                 'name': 'raster_1',
-                'tile_width': 200,
-                'tile_height': 200,
                 'srid': 4326,
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
             },
             {
                 'name': 'raster_2',
-                'tile_width': 250,
-                'tile_height': 250,
                 'srid': 4326,
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
             },
             {
                 'name': 'raster_3',
-                'tile_width': 400,
-                'tile_height': 400,
                 'srid': 4326,
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
@@ -78,7 +72,8 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         self.assertRaises(
             FileNotFoundError,
             RasterManager.add_raster,
-            null_path, "null_raster", 200, 200, 4326
+            null_path, "null_raster",
+            tile_dimension=(200, 200), srid=4326
         )
         # Test existing raster
         test_raster = os.path.join(
@@ -90,13 +85,10 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         RasterManager.add_raster(
             test_raster,
             "rainfall",
-            200, 200,
         )
         df = RasterManager.get_raster_list()
         self.assertEqual(len(df), 1)
         self.assertEqual(df.index[0], 'rainfall')
-        self.assertEqual(df.iloc[0]['tile_width'], 200)
-        self.assertEqual(df.iloc[0]['tile_height'], 200)
         self.assertEqual(df.iloc[0]['srid'], 4326)
         engine = Connector.get_engine()
         inspector = Inspector.from_engine(engine)
@@ -116,17 +108,15 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         RasterManager.add_raster(
             test_raster,
             "rainfall",
-            200, 200,
+            tile_dimension=(200, 200),
         )
         # Update raster
         RasterManager.update_raster(
             test_raster,
             "rainfall",
-            100, 100,
+            tile_dimension=(100, 100),
         )
         df = RasterManager.get_raster_list()
-        self.assertEqual(df.iloc[0]['tile_width'], 100)
-        self.assertEqual(df.iloc[0]['tile_height'], 100)
         engine = Connector.get_engine()
         inspector = Inspector.from_engine(engine)
         self.assertIn(
@@ -144,7 +134,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         RasterManager.add_raster(
             test_raster,
             "rainfall",
-            200, 200,
+            tile_dimension=(200, 200),
         )
         RasterManager.delete_raster("rainfall")
 

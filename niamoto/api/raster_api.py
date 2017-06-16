@@ -16,24 +16,27 @@ def get_raster_list():
     return RasterManager.get_raster_list()
 
 
-def add_raster(raster_file_path, name, tile_width, tile_height, srid=None):
+def add_raster(raster_file_path, name, tile_dimension=None, srid=None):
     """
     Add a raster in database and register it the Niamoto raster registry.
     Uses raster2pgsql command. The raster is cut in tiles, using the
     dimension tile_width x tile_width. All rasters are stored
     :param raster_file_path: The path to the raster file.
     :param name: The name of the raster.
-    :param tile_width: The tile width.
-    :param tile_height: The tile height.
+    :param tile_dimension: The tile dimension (width, height), if None,
+        tile dimension will be chosen automatically by PostGIS.
     :param srid: SRID to assign to stored raster. If None, use raster's
     metadata to determine which SRID to store.
     """
-    return RasterManager.add_raster(raster_file_path, name, tile_width,
-                                    tile_height, srid=srid)
+    return RasterManager.add_raster(
+        raster_file_path,
+        name,
+        tile_dimension=tile_dimension,
+        srid=srid
+    )
 
 
-def update_raster(raster_file_path, name, tile_width, tile_height,
-                  srid=None):
+def update_raster(raster_file_path, name, tile_dimension=None, srid=None):
     """
     Update an existing raster in database and register it the Niamoto
     raster registry. Uses raster2pgsql command. The raster is cut in
@@ -41,16 +44,15 @@ def update_raster(raster_file_path, name, tile_width, tile_height,
     are stored
     :param raster_file_path: The path to the raster file.
     :param name: The name of the raster.
-    :param tile_width: The tile width.
-    :param tile_height: The tile height.
+    :param tile_dimension: The tile dimension (width, height), if None,
+        tile dimension will be chosen automatically by PostGIS.
     :param srid: SRID to assign to stored raster. If None, use raster's
     metadata to determine which SRID to store.
     """
     return RasterManager.update_raster(
         raster_file_path,
         name,
-        tile_width,
-        tile_height,
+        tile_dimension=tile_dimension,
         srid=srid
     )
 

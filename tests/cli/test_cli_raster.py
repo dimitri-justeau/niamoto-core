@@ -53,7 +53,6 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
         raster_api.add_raster(
             TEST_RASTER,
             'test_raster',
-            '200', '200',
         )
         result = runner.invoke(raster.list_rasters_cli)
         self.assertEqual(result.exit_code, 0)
@@ -62,13 +61,12 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
         runner = CliRunner()
         result = runner.invoke(raster.add_raster_cli, [
             'test_raster',
-            '200', '200',
+            '-t', '200x200',
             TEST_RASTER,
         ], catch_exceptions=False)
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(raster.add_raster_cli, [
             'test_raster',
-            '200', '200',
             TEST_RASTER,
         ])
         self.assertEqual(result.exit_code, 1)
@@ -77,18 +75,15 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
         runner = CliRunner()
         runner.invoke(raster.add_raster_cli, [
             'test_raster',
-            '200', '200',
             TEST_RASTER
         ], catch_exceptions=False)
         result = runner.invoke(raster.update_raster_cli, [
             'test_raster',
-            '100', '100',
             TEST_RASTER
         ], catch_exceptions=False)
         self.assertEqual(result.exit_code, 0)
         result = runner.invoke(raster.update_raster_cli, [
             'yo',
-            '100', '100',
             TEST_RASTER
         ])
         self.assertEqual(result.exit_code, 1)
@@ -97,7 +92,6 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
         runner = CliRunner()
         runner.invoke(raster.add_raster_cli, [
             'test_raster',
-            '200', '200',
             TEST_RASTER
         ], catch_exceptions=False)
         result = runner.invoke(raster.delete_raster_cli, [

@@ -34,7 +34,7 @@ class RasterManager:
             )
 
     @classmethod
-    def add_raster(cls, raster_file_path, name, tile_width, tile_height,
+    def add_raster(cls, raster_file_path, name, tile_dimension=None,
                    srid=None):
         """
         Add a raster in database and register it the Niamoto raster registry.
@@ -42,8 +42,8 @@ class RasterManager:
         dimension tile_width x tile_width. All rasters are stored
         :param raster_file_path: The path to the raster file.
         :param name: The name of the raster.
-        :param tile_width: The tile width.
-        :param tile_height: The tile height.
+        :param tile_dimension: The tile dimension (width, height), if None,
+            tile dimension will be chosen automatically by PostGIS.
         :param srid: SRID to assign to stored raster. If None, use raster's
         metadata to determine which SRID to store.
         """
@@ -54,7 +54,10 @@ class RasterManager:
         cls.assert_raster_does_not_exist(name)
         if srid is None:
             srid = cls.get_raster_srid(raster_file_path)
-        dim = "{}x{}".format(tile_width, tile_height)
+        if tile_dimension is not None:
+            dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
+        else:
+            dim = 'auto'
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
         os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
         dev_null = open(os.devnull, 'w')  # Force quiet
@@ -77,8 +80,6 @@ class RasterManager:
             raise RuntimeError("raster import failed.")
         ins = niamoto_db_meta.raster_registry.insert().values({
             'name': name,
-            'tile_width': tile_width,
-            'tile_height': tile_height,
             'srid': srid,
             'date_create': datetime.now(),
             'date_update': datetime.now(),
@@ -87,7 +88,7 @@ class RasterManager:
             connection.execute(ins)
 
     @classmethod
-    def update_raster(cls, raster_file_path, name, tile_width, tile_height,
+    def update_raster(cls, raster_file_path, name, tile_dimension=None,
                       srid=None):
         """
         Update an existing raster in database and register it the Niamoto
@@ -96,8 +97,8 @@ class RasterManager:
         are stored
         :param raster_file_path: The path to the raster file.
         :param name: The name of the raster.
-        :param tile_width: The tile width.
-        :param tile_height: The tile height.
+        :param tile_dimension: The tile dimension (width, height), if None,
+            tile dimension will be chosen automatically by PostGIS.
         :param srid: SRID to assign to stored raster. If None, use raster's
         metadata to determine which SRID to store.
         """
@@ -108,7 +109,10 @@ class RasterManager:
         cls.assert_raster_exists(name)
         if srid is None:
             srid = cls.get_raster_srid(raster_file_path)
-        dim = "{}x{}".format(tile_width, tile_height)
+        if tile_dimension is not None:
+            dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
+        else:
+            dim = 'auto'
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
         os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
         dev_null = open(os.devnull, 'w')  # Force quiet
@@ -130,10 +134,7 @@ class RasterManager:
         if p2 != 0:
             raise RuntimeError("raster import failed.")
         upd = niamoto_db_meta.raster_registry.update().values({
-            'tile_width': tile_width,
-            'tile_height': tile_height,
             'srid': srid,
-            'date_create': datetime.now(),
             'date_update': datetime.now(),
         }).where(niamoto_db_meta.raster_registry.c.name == name)
         with Connector.get_connection() as connection:
@@ -179,12 +180,15 @@ class RasterManager:
                 raise RecordAlreadyExistsError(m.format(name))
 
     @staticmethod
-    def assert_raster_exists(name):
+    def assert_raster_exists(name, connection=None):
         sel = niamoto_db_meta.raster_registry.select().where(
             niamoto_db_meta.raster_registry.c.name == name
         )
-        with Connector.get_connection() as connection:
+        if connection is not None:
             r = connection.execute(sel).rowcount
-            if r == 0:
-                m = "The raster '{}' does not exist in database."
-                raise NoRecordFoundError(m.format(name))
+        else:
+            with Connector.get_connection() as connection:
+                r = connection.execute(sel).rowcount
+        if r == 0:
+            m = "The raster '{}' does not exist in database."
+            raise NoRecordFoundError(m.format(name))
