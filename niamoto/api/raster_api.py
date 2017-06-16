@@ -36,7 +36,8 @@ def add_raster(raster_file_path, name, tile_dimension=None, srid=None):
     )
 
 
-def update_raster(raster_file_path, name, tile_dimension=None, srid=None):
+def update_raster(raster_file_path, name, new_name=None, tile_dimension=None,
+                  srid=None):
     """
     Update an existing raster in database and register it the Niamoto
     raster registry. Uses raster2pgsql command. The raster is cut in
@@ -44,6 +45,7 @@ def update_raster(raster_file_path, name, tile_dimension=None, srid=None):
     are stored
     :param raster_file_path: The path to the raster file.
     :param name: The name of the raster.
+    :param new_name: The new name of the raster (not changed if None).
     :param tile_dimension: The tile dimension (width, height), if None,
         tile dimension will be chosen automatically by PostGIS.
     :param srid: SRID to assign to stored raster. If None, use raster's
@@ -52,6 +54,7 @@ def update_raster(raster_file_path, name, tile_dimension=None, srid=None):
     return RasterManager.update_raster(
         raster_file_path,
         name,
+        new_name=new_name,
         tile_dimension=tile_dimension,
         srid=srid
     )

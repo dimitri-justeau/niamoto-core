@@ -258,9 +258,11 @@ data_provider = Table(
 raster_registry = Table(
     'raster_registry',
     metadata,
-    Column('name', String(100), primary_key=True),
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), nullable=False),
     Column('srid', Integer, nullable=False),
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=False),
+    UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_RASTER_SCHEMA,
 )

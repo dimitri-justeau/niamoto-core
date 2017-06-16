@@ -95,11 +95,13 @@ def upgrade():
     )
     op.create_table(
         'raster_registry',
+        sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column('srid', sa.Integer(), nullable=False),
         sa.Column('date_create', sa.DateTime(), nullable=False),
         sa.Column('date_update', sa.DateTime(), nullable=False),
-        sa.PrimaryKeyConstraint('name'),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('name', name=op.f('uq_raster_registry_name')),
         schema='niamoto_raster'
     )
     op.create_table(

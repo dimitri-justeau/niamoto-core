@@ -114,12 +114,17 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         RasterManager.update_raster(
             test_raster,
             "rainfall",
+            new_name="rainfall_new",
             tile_dimension=(100, 100),
         )
         df = RasterManager.get_raster_list()
         engine = Connector.get_engine()
         inspector = Inspector.from_engine(engine)
         self.assertIn(
+            'rainfall_new',
+            inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
+        )
+        self.assertNotIn(
             'rainfall',
             inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
         )

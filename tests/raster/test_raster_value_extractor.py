@@ -2,6 +2,7 @@
 
 import unittest
 import os
+import logging
 
 from sqlalchemy.engine.reflection import Inspector
 
@@ -9,30 +10,41 @@ from niamoto.testing import set_test_path
 
 set_test_path()
 
+from niamoto import log
+
+log.STREAM_LOGGING_LEVEL = logging.CRITICAL
+log.FILE_LOGGING_LEVEL = logging.DEBUG
+
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
+from niamoto.raster.raster_manager import RasterManager
+from niamoto.raster.raster_value_extractor import RasterValueExtractor
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
-from niamoto.api import raster_api
-from niamoto.exceptions import NoRecordFoundError
+from niamoto.data_providers.csv_provider import CsvDataProvider
 
 
-class TestRasterApi(BaseTestNiamotoSchemaCreated):
+TEST_OCCURRENCE_CSV = os.path.join(
+    NIAMOTO_HOME, 'data', 'csv', 'occurrences.csv',
+)
+
+
+class TestRasterValueExtractor(BaseTestNiamotoSchemaCreated):
     """
-    Test case for raster api.
+    Test case for RasterValueExtractor class.
     """
-
-    TEST_RASTER_PATH = os.path.join(
-            NIAMOTO_HOME,
-            "data",
-            "raster",
-            "rainfall_wgs84.tif"
-        )
 
     @classmethod
     def setUpClass(cls):
-        super(TestRasterApi, cls).setUpClass()
+        super(TestRasterValueExtractor, cls).setUpClass()
+        CsvDataProvider.register_data_provider_type()
+        CsvDataProvider.register_data_provider('csv_provider')
+        csv_provider = CsvDataProvider(
+            'csv_provider',
+            occurrence_csv_path=TEST_OCCURRENCE_CSV,
+        )
+        csv_provider.sync()
 
     def tearDown(self):
         delete_stmt = niamoto_db_meta.raster_registry.delete()
@@ -48,40 +60,19 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
                     ))
             connection.execute(delete_stmt)
 
-    def test_get_raster_list(self):
-        df1 = raster_api.get_raster_list()
-        self.assertEqual(len(df1), 0)
-
-    def test_add_raster(self):
-        raster_api.add_raster(
-            self.TEST_RASTER_PATH,
-            'test_raster',
-            tile_dimension=(200, 200),
+    def test_extract_raster_values_to_occurrences(self):
+        # Test existing raster
+        test_raster = os.path.join(
+            NIAMOTO_HOME,
+            "data",
+            "raster",
+            "rainfall_wgs84.tif"
         )
-
-    def test_update_raster(self):
-        raster_api.add_raster(
-            self.TEST_RASTER_PATH,
-            'test_raster',
-            tile_dimension=(200, 200),
+        RasterManager.add_raster(
+            test_raster,
+            "rainfall",
         )
-        raster_api.update_raster(
-            self.TEST_RASTER_PATH,
-            'test_raster',
-            tile_dimension=(150, 150),
-        )
-
-    def test_delete_raster(self):
-        raster_api.add_raster(
-            self.TEST_RASTER_PATH,
-            'test_raster',
-        )
-        raster_api.delete_raster('test_raster')
-        self.assertRaises(
-            NoRecordFoundError,
-            raster_api.delete_raster,
-            'test_raster',
-        )
+        RasterValueExtractor.extract_raster_values_to_occurrences('rainfall')
 
 
 if __name__ == '__main__':
