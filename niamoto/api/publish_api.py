@@ -36,3 +36,17 @@ def publish(publisher_key, publish_format, *args, destination=sys.stdout,
         destination=destination,
         **p_kwargs
     )
+
+
+def list_publish_formats(publisher_key):
+    """
+    Return the publish formats accepted by a publisher.
+    :param publisher_key:
+    :return:
+    """
+    if publisher_key not in PUBLISHER_REGISTRY:
+        m = "The publisher key '{}' does not exist.".format(publisher_key)
+        raise WrongPublisherKeyError(m)
+    publisher = PUBLISHER_REGISTRY[publisher_key]
+    publisher_class = publisher['class']
+    return publisher_class.get_publish_formats()

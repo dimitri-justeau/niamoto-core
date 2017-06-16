@@ -31,6 +31,14 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
 
+    def test_list_publish_formats_cli(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            publish.list_publish_formats_cli,
+            [OccurrenceDataPublisher.get_key()]
+        )
+        self.assertEqual(result.exit_code, 0)
+
     def test_publish_cli(self):
         runner = CliRunner()
         with tempfile.NamedTemporaryFile(mode='w') as csv_temp:

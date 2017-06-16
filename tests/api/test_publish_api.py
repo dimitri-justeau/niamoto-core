@@ -27,6 +27,12 @@ class TestPublishApi(BaseTestNiamotoSchemaCreated):
     def setUpClass(cls):
         super(TestPublishApi, cls).setUpClass()
 
+    def list_publish_formats(self):
+        l = publish_api.list_publish_formats(
+            OccurrenceDataPublisher.get_key()
+        )
+        self.assertEqual(l, OccurrenceDataPublisher.get_publish_formats())
+
     def test_publish(self):
         self.assertRaises(
             WrongPublisherKeyError,

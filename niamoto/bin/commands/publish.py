@@ -55,7 +55,7 @@ def publish_cli(publisher_key, publish_format, destination, *args, **kwargs):
 @cli_catch_unknown_error
 def list_publishers_cli():
     """
-    Echo the list of available data publishers.
+    Display the list of available data publishers.
     """
     from niamoto.data_publishers.base_data_publisher import PUBLISHER_REGISTRY
     publishers_keys = list(PUBLISHER_REGISTRY.keys())
@@ -67,3 +67,16 @@ def list_publishers_cli():
                 PUBLISHER_REGISTRY[k]['description']
             )
         )
+
+
+@click.command("publish_formats")
+@click.argument("publisher_key")
+@cli_catch_unknown_error
+def list_publish_formats_cli(publisher_key):
+    """
+    Display the list of available publish formats for a given publisher.
+    """
+    from niamoto.api.publish_api import list_publish_formats
+    for f in list_publish_formats(publisher_key):
+        click.secho('    {}'.format(f))
+
