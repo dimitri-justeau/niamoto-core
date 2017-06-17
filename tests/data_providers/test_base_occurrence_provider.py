@@ -9,7 +9,7 @@ from shapely.geometry import Point
 from niamoto.testing import set_test_path
 set_test_path()
 
-from niamoto.conf import settings, NIAMOTO_HOME
+from niamoto.conf import NIAMOTO_HOME
 from niamoto.data_providers.base_occurrence_provider import *
 from niamoto.api import taxonomy_api
 from niamoto.db import metadata as niamoto_db_meta

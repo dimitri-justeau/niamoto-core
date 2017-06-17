@@ -157,6 +157,7 @@ def upgrade():
             ['niamoto.taxon.id'],
             onupdate="CASCADE",
             ondelete="SET NULL",
+            deferrable=True,
         ),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint(

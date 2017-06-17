@@ -36,6 +36,7 @@ occurrence = Table(
             '{}.data_provider.id'.format(settings.NIAMOTO_SCHEMA),
             onupdate="CASCADE",
             ondelete="CASCADE",
+            deferrable=True,
         ),
         nullable=False,
         index=True,

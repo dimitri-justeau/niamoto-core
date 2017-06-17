@@ -2,11 +2,13 @@
 
 import time
 import json
+import io
 
 from sqlalchemy.sql import select, bindparam, and_, cast, func
 from sqlalchemy.dialects.postgresql import JSONB
 import pandas as pd
 
+from niamoto.conf import settings
 from niamoto.db.connector import Connector
 from niamoto.db.metadata import occurrence
 from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
@@ -67,35 +69,67 @@ class BaseOccurrenceProvider:
         )
         close_after = False
         if connection is None:
-            close_after = True
             connection = Connector.get_engine().connect()
-        with connection.begin():
-            # Start
-            df = self.get_niamoto_occurrence_dataframe(connection)
-            synonyms = TaxonomyManager.get_synonyms_for_key(
-                self.data_provider.synonym_key
-            )
-            mapping = df["provider_taxon_id"].map(synonyms)
-            if len(df) > 0:
-                df["taxon_id"] = mapping
-                upd_stmt = occurrence.update().where(
-                    and_(
-                        occurrence.c.provider_id == bindparam('prov_id'),
-                        occurrence.c.provider_pk == bindparam('prov_pk')
-                    )
-                ).values({
-                    'taxon_id': bindparam('taxon_id'),
-                })
-                upd_data = df.where((pd.notnull(df)), None).rename(columns={
-                    'provider_id': 'prov_id',
-                    'provider_pk': 'prov_pk',
-                }).to_dict(orient='records')
-                connection.execute(
-                    upd_stmt,
-                    upd_data
-                )
+            close_after = True
+        # Start
+        df = self.get_niamoto_occurrence_dataframe(connection)
         if close_after:
             connection.close()
+        synonyms = TaxonomyManager.get_synonyms_for_key(
+            self.data_provider.synonym_key
+        )
+        mapping = df["provider_taxon_id"].map(synonyms)
+        if len(df) > 0:
+            df["taxon_id"] = mapping
+            df = df[['provider_id', 'provider_pk', 'taxon_id']]
+            s = io.StringIO()
+            df.where((pd.notnull(df)), None).rename(columns={
+                'provider_id': 'prov_id',
+                'provider_pk': 'prov_pk',
+            }).to_csv(s, columns=['taxon_id', 'prov_id', 'prov_pk'])
+            s.seek(0)
+            sql_create_temp = \
+                """
+                DROP TABLE IF EXISTS {tmp};
+                CREATE TABLE {tmp} (
+                    id float,
+                    taxon_id float,
+                    prov_id float,
+                    prov_pk float
+                );
+                """.format(**{
+                    'tmp': 'tmp_niamoto'
+                })
+            sql_copy_from = \
+                """
+                COPY {tmp} FROM STDIN CSV HEADER DELIMITER ',';
+                """.format(**{
+                    'tmp': 'tmp_niamoto'
+                })
+            sql_update = \
+                """
+                UPDATE {occurrence_table}
+                SET taxon_id = {tmp}.taxon_id::integer
+                FROM {tmp}
+                WHERE {occurrence_table}.provider_id = {tmp}.prov_id::integer
+                    AND {occurrence_table}.provider_pk = {tmp}.prov_pk::integer;
+                DROP TABLE {tmp};
+                """.format(**{
+                    'tmp': 'tmp_niamoto',
+                    'occurrence_table': '{}.{}'.format(
+                        settings.NIAMOTO_SCHEMA, occurrence.name
+                    )
+                })
+            raw_connection = Connector.get_engine().raw_connection()
+            cur = raw_connection.cursor()
+            cur.execute(sql_create_temp)
+            cur.copy_expert(sql_copy_from, s)
+            cur.execute(
+                sql_update
+            )
+            cur.close()
+            raw_connection.commit()
+            raw_connection.close()
         # Log end
         m = "(provider_id='{}', synonym_key='{}'): {} synonym mapping had " \
             "been updated."
