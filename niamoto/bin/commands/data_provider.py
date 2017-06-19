@@ -2,6 +2,8 @@
 
 import click
 
+from niamoto.bin.utils import format_datetime_to_date, \
+    format_datetime_to_date_hour
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
     BaseDataProviderException, NiamotoException
 from niamoto.decorators import cli_catch_unknown_error
@@ -36,7 +38,13 @@ def list_data_providers():
             "There are no registered data providers in the database."
         )
         return
-    click.echo(providers_df.to_string())
+    click.echo(providers_df.to_string(
+        formatters={
+            'date_create': format_datetime_to_date,
+            'date_update': format_datetime_to_date,
+            'last_sync': format_datetime_to_date,
+        }
+    ))
 
 
 @click.command("add_provider")

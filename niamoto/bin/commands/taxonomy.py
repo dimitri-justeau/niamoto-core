@@ -2,9 +2,9 @@
 
 import click
 
-from niamoto.bin.utils import format_datetime_to_date
 from niamoto.exceptions import DataSourceNotFoundError
 from niamoto.decorators import cli_catch_unknown_error
+from niamoto.bin.utils import format_datetime_to_date
 
 
 @click.command('set_taxonomy')
@@ -36,7 +36,7 @@ def set_taxonomy_cli(csv_file_path, no_mapping=False):
         click.get_current_context().exit(code=1)
 
 
-@click.command('map_all_synonym')
+@click.command('map_all_synonyms')
 @cli_catch_unknown_error
 def map_all_synonyms_cli():
     """

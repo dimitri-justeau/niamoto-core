@@ -214,7 +214,6 @@ class TaxonomyManager:
         ins = meta.synonym_key_registry.insert({
             'name': synonym_key,
             'date_create': now,
-            'date_update': now,
         })
         if bind is not None:
             cls.assert_synonym_key_does_not_exists(synonym_key, bind=bind)

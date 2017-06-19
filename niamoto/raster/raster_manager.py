@@ -82,7 +82,6 @@ class RasterManager:
             'name': name,
             'srid': srid,
             'date_create': datetime.now(),
-            'date_update': datetime.now(),
         })
         with Connector.get_connection() as connection:
             connection.execute(ins)

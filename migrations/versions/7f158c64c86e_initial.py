@@ -99,7 +99,7 @@ def upgrade():
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column('srid', sa.Integer(), nullable=False),
         sa.Column('date_create', sa.DateTime(), nullable=False),
-        sa.Column('date_update', sa.DateTime(), nullable=False),
+        sa.Column('date_update', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name', name=op.f('uq_raster_registry_name')),
         schema='niamoto_raster'
@@ -121,6 +121,9 @@ def upgrade():
             index=True
         ),
         sa.Column('properties', postgresql.JSONB(), nullable=False),
+        sa.Column('date_create', sa.DateTime(), nullable=False),
+        sa.Column('date_update', sa.DateTime(), nullable=True),
+        sa.Column('last_sync', sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(
             ['provider_type_id'],
             ['niamoto.data_provider_type.id'],

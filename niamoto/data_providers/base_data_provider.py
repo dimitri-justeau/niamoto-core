@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import time
+from datetime import datetime
 
 from sqlalchemy import select, and_
 
@@ -117,6 +118,10 @@ class BaseDataProvider:
                     update=update,
                     delete=delete,
                 ) if sync_plot_occurrence else ([], [], [])
+            upd = niamoto_db_meta.data_provider.update().values({
+                'last_sync': datetime.now(),
+            }).where(niamoto_db_meta.data_provider.c.name == self.name)
+            connection.execute(upd)
             m = "*** Data sync with '{}' done (total time: {:.2f} s)!"
             LOGGER.info(m.format(
                 self.name, time.time() - t
@@ -189,6 +194,7 @@ class BaseDataProvider:
                 'provider_type_id': cls.get_data_provider_type_db_id(),
                 'properties': properties,
                 'synonym_key_id': synonym_key_id,
+                'date_create': datetime.now(),
             })
             connection.execute(ins)
         m = "DataProvider(name='{}', type_name='{}', properties='{}', " \
@@ -226,6 +232,7 @@ class BaseDataProvider:
                 'name': new_name,
                 'properties': properties,
                 'synonym_key_id': synonym_key_id,
+                'date_update': datetime.now(),
             }).where(niamoto_db_meta.data_provider.c.name == current_name)
             connection.execute(upd)
         m = "DataProvider(current_name='{}', new_name='{}', type_name='{}'," \

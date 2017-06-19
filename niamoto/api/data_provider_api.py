@@ -33,7 +33,10 @@ def get_data_provider_list():
         data_provider.c.id,
         data_provider.c.name,
         data_provider_type.c.name.label('provider_type'),
-        synonym_key_registry.c.name.label('synonym_key')
+        synonym_key_registry.c.name.label('synonym_key'),
+        data_provider.c.date_create.label('date_create'),
+        data_provider.c.date_update.label('date_update'),
+        data_provider.c.last_sync.label('last_sync'),
     ]).select_from(
         data_provider.join(
             data_provider_type,

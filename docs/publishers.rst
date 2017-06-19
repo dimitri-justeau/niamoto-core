@@ -61,4 +61,3 @@ Publish the taxa dataframe.
 :options:
     :``--include_mptt``: Flag indicating that the MPTT (Modified Pre-ordered
                          Traversal Tree) columns must be included
-

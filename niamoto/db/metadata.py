@@ -125,7 +125,7 @@ synonym_key_registry = Table(
     Column('id', Integer, primary_key=True),
     Column('name', String(100)),
     Column('date_create', DateTime, nullable=False),
-    Column('date_update', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=True),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
@@ -247,6 +247,9 @@ data_provider = Table(
         index=True,
     ),
     Column('properties', JSONB, nullable=False),
+    Column('date_create', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=True),
+    Column('last_sync', DateTime, nullable=True),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
@@ -263,7 +266,7 @@ raster_registry = Table(
     Column('name', String(100), nullable=False),
     Column('srid', Integer, nullable=False),
     Column('date_create', DateTime, nullable=False),
-    Column('date_update', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=True),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_RASTER_SCHEMA,
 )
