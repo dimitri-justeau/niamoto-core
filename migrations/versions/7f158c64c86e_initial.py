@@ -102,7 +102,17 @@ def upgrade():
         sa.Column('date_update', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name', name=op.f('uq_raster_registry_name')),
-        schema='niamoto_raster'
+        schema='niamoto'
+    )
+    op.create_table(
+        'vector_registry',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
+        sa.Column('date_create', sa.DateTime(), nullable=False),
+        sa.Column('date_update', sa.DateTime(), nullable=True),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('name', name=op.f('uq_vector_registry_name')),
+        schema='niamoto'
     )
     op.create_table(
         'data_provider',
@@ -258,7 +268,8 @@ def downgrade():
     op.drop_table('plot', schema='niamoto')
     op.drop_table('occurrence', schema='niamoto')
     op.drop_table('data_provider', schema='niamoto')
-    op.drop_table('raster_registry', schema='niamoto_raster')
+    op.drop_table('raster_registry', schema='niamoto')
+    op.drop_table('vector_registry', schema='niamoto')
     op.drop_table('taxon', schema='niamoto')
     op.drop_table('data_provider_type', schema='niamoto')
     op.drop_table('synonym_key_registry', schema='niamoto')

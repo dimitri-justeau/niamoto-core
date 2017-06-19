@@ -397,8 +397,6 @@ Importing a raster in Niamoto is straightforward using the
       Add a raster in Niamoto's raster database.
 
     Options:
-      --srid TEXT                SRID of the raster. If not specified, it will be
-                                 detected automatically.
       -t, --tile_dimension TEXT  Tile dimension <width>x<height>
       --help                     Show this message and exit.
 
@@ -416,9 +414,9 @@ We can see the registered rasters with the ``niamoto rasters`` command:
 .. code-block:: shell-session
 
     $ niamoto rasters
-              tile_width  tile_height  srid date_create date_update
+              tile_width  tile_height  date_create date_update
     name
-    rainfall         100          100  4326  2017/06/08  2017/06/08
+    rainfall         100          100   2017/06/08  2017/06/08
 
 
 

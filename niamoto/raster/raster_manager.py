@@ -34,26 +34,22 @@ class RasterManager:
             )
 
     @classmethod
-    def add_raster(cls, raster_file_path, name, tile_dimension=None,
-                   srid=None):
+    def add_raster(cls, raster_file_path, name, tile_dimension=None):
         """
         Add a raster in database and register it the Niamoto raster registry.
         Uses raster2pgsql command. The raster is cut in tiles, using the
-        dimension tile_width x tile_width. All rasters are stored
+        dimension tile_width x tile_width. All rasters
+        are stored in the settings.NIAMOTO_RASTER_SCHEMA schema.
         :param raster_file_path: The path to the raster file.
         :param name: The name of the raster.
         :param tile_dimension: The tile dimension (width, height), if None,
             tile dimension will be chosen automatically by PostGIS.
-        :param srid: SRID to assign to stored raster. If None, use raster's
-        metadata to determine which SRID to store.
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
                 "The raster {} does not exist".format(raster_file_path)
             )
         cls.assert_raster_does_not_exist(name)
-        if srid is None:
-            srid = cls.get_raster_srid(raster_file_path)
         if tile_dimension is not None:
             dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
         else:
@@ -80,7 +76,6 @@ class RasterManager:
             raise RuntimeError("raster import failed.")
         ins = niamoto_db_meta.raster_registry.insert().values({
             'name': name,
-            'srid': srid,
             'date_create': datetime.now(),
         })
         with Connector.get_connection() as connection:
@@ -88,27 +83,23 @@ class RasterManager:
 
     @classmethod
     def update_raster(cls, raster_file_path, name, new_name=None,
-                      tile_dimension=None, srid=None):
+                      tile_dimension=None):
         """
-        Update an existing raster in database and register it the Niamoto
+        Update an existing raster in database and update it the Niamoto
         raster registry. Uses raster2pgsql command. The raster is cut in
         tiles, using the dimension tile_width x tile_width. All rasters
-        are stored
+        are stored in the settings.NIAMOTO_RASTER_SCHEMA schema.
         :param raster_file_path: The path to the raster file.
         :param name: The name of the raster.
         :param new_name: The new name of the raster (not changed if None).
         :param tile_dimension: The tile dimension (width, height), if None,
             tile dimension will be chosen automatically by PostGIS.
-        :param srid: SRID to assign to stored raster. If None, use raster's
-        metadata to determine which SRID to store.
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
                 "The raster {} does not exist".format(raster_file_path)
             )
         cls.assert_raster_exists(name)
-        if srid is None:
-            srid = cls.get_raster_srid(raster_file_path)
         if tile_dimension is not None:
             dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
         else:
@@ -119,6 +110,7 @@ class RasterManager:
         if new_name is None:
             new_name = name
         else:
+            cls.assert_raster_does_not_exist(new_name)
             d = "-c"
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, new_name)
         p1 = subprocess.Popen([
@@ -140,7 +132,6 @@ class RasterManager:
             raise RuntimeError("raster import failed.")
         upd = niamoto_db_meta.raster_registry.update().values({
             'name': new_name,
-            'srid': srid,
             'date_update': datetime.now(),
         }).where(niamoto_db_meta.raster_registry.c.name == name)
         with Connector.get_connection() as connection:

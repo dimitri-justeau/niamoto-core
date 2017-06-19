@@ -49,19 +49,16 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         data = [
             {
                 'name': 'raster_1',
-                'srid': 4326,
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
             },
             {
                 'name': 'raster_2',
-                'srid': 4326,
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
             },
             {
                 'name': 'raster_3',
-                'srid': 4326,
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
             },
@@ -79,7 +76,7 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             FileNotFoundError,
             RasterManager.add_raster,
             null_path, "null_raster",
-            tile_dimension=(200, 200), srid=4326
+            tile_dimension=(200, 200)
         )
         # Test existing raster
         test_raster = os.path.join(
@@ -95,7 +92,6 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         df = RasterManager.get_raster_list()
         self.assertEqual(len(df), 1)
         self.assertEqual(df['name'].iloc[0], 'rainfall')
-        self.assertEqual(df.iloc[0]['srid'], 4326)
         engine = Connector.get_engine()
         inspector = Inspector.from_engine(engine)
         self.assertIn(

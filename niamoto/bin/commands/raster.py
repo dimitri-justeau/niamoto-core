@@ -28,12 +28,6 @@ def list_rasters_cli():
 
 @click.command('add_raster')
 @click.option(
-    '--srid',
-    default=None,
-    help='SRID of the raster. If not specified, it will be detected '
-         'automatically.'
-)
-@click.option(
     '--tile_dimension',
     '-t',
     help='Tile dimension <width>x<height>',
@@ -42,7 +36,7 @@ def list_rasters_cli():
 @click.argument('name')
 @click.argument('raster_file_path')
 @cli_catch_unknown_error
-def add_raster_cli(name, raster_file_path, tile_dimension=None, srid=None):
+def add_raster_cli(name, raster_file_path, tile_dimension=None):
     """
     Add a raster in Niamoto's raster database.
     """
@@ -55,7 +49,6 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None, srid=None):
             raster_file_path,
             name,
             tile_dimension=tile_dimension,
-            srid=srid,
         )
         click.echo("The raster had been successfully registered to the Niamoto"
                    " raster database!")
@@ -65,12 +58,6 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None, srid=None):
 
 
 @click.command('update_raster')
-@click.option(
-    '--srid',
-    default=None,
-    help='SRID of the raster. If not specified, it will be detected '
-         'automatically.'
-)
 @click.option(
     '--tile_dimension',
     '-t',
@@ -86,7 +73,7 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None, srid=None):
 @click.argument('raster_file_path')
 @cli_catch_unknown_error
 def update_raster_cli(name, raster_file_path, new_name=None,
-                      tile_dimension=None, srid=None):
+                      tile_dimension=None):
     """
     Update an existing raster in Niamoto's raster database.
     """
@@ -100,7 +87,6 @@ def update_raster_cli(name, raster_file_path, new_name=None,
             name,
             new_name=new_name,
             tile_dimension=tile_dimension,
-            srid=srid,
         )
         click.echo("The raster had been successfully updated!")
     except NoRecordFoundError as e:

@@ -192,8 +192,6 @@ add_raster
       Add a raster in Niamoto's raster database.
 
     Options:
-      --srid TEXT                SRID of the raster. If not specified, it will be
-                                 detected automatically.
       -t, --tile_dimension TEXT  Tile dimension <width>x<height>
       --help                     Show this message and exit.
 
@@ -207,8 +205,6 @@ update_raster
       Update an existing raster in Niamoto's raster database.
 
     Options:
-      --srid TEXT                SRID of the raster. If not specified, it will be
-                                 detected automatically.
       -t, --tile_dimension TEXT  Tile dimension <width>x<height>
       --new_name TEXT            The new name of the raster
       --help                     Show this message and exit.

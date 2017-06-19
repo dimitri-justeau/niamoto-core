@@ -264,9 +264,24 @@ raster_registry = Table(
     metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False),
-    Column('srid', Integer, nullable=False),
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=True),
     UniqueConstraint('name', name='name'),
-    schema=settings.NIAMOTO_RASTER_SCHEMA,
+    schema=settings.NIAMOTO_SCHEMA,
+)
+
+
+# ---------------------- #
+#  Vector registry table #
+# ---------------------- #
+
+vector_registry = Table(
+    'vector_registry',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), nullable=False),
+    Column('date_create', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=True),
+    UniqueConstraint('name', name='name'),
+    schema=settings.NIAMOTO_SCHEMA,
 )
