@@ -109,10 +109,10 @@ class BaseOccurrenceProvider:
             sql_update = \
                 """
                 UPDATE {occurrence_table}
-                SET taxon_id = {tmp}.taxon_id::integer
+                SET taxon_id = {tmp}.taxon_id::int
                 FROM {tmp}
-                WHERE {occurrence_table}.provider_id = {tmp}.prov_id::integer
-                    AND {occurrence_table}.provider_pk = {tmp}.prov_pk::integer;
+                WHERE {occurrence_table}.provider_id = {tmp}.prov_id::int
+                    AND {occurrence_table}.provider_pk = {tmp}.prov_pk::int;
                 DROP TABLE {tmp};
                 """.format(**{
                     'tmp': 'tmp_niamoto',
@@ -338,4 +338,5 @@ class BaseOccurrenceProvider:
         idx = niamoto_dataframe.reset_index().set_index(
             'provider_pk',
         ).loc[diff]['id']
-        return niamoto_dataframe.loc[pd.Index(idx)]
+        delete_df = niamoto_dataframe.loc[pd.Index(idx)]
+        return delete_df

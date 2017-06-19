@@ -298,8 +298,14 @@ class BasePlotOccurrenceProvider:
         inter = provider_dataframe.index.intersection(niamoto_dataframe.index)
         if len(inter) == 0:
             return provider_dataframe.loc[inter]
-        niamoto_ids = niamoto_dataframe.loc[inter]['occurrence_identifier']
-        provider_ids = provider_dataframe.loc[inter]['occurrence_identifier']
+        niamoto_df = niamoto_dataframe.loc[inter]
+        provider_df = provider_dataframe.loc[inter]
+        # Fill na with negative, comparable value
+        niamoto_df.fillna(value=-9999, inplace=True)
+        provider_df.fillna(value=-9999, inplace=True)
+        # Compare
+        niamoto_ids = niamoto_df['occurrence_identifier']
+        provider_ids = provider_df['occurrence_identifier']
         changed = (provider_ids != niamoto_ids)
         changed = changed[changed]
         return provider_dataframe.loc[changed.index]

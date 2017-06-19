@@ -138,7 +138,7 @@ def upgrade():
         'occurrence',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('provider_id', sa.Integer(), nullable=False, index=True),
-        sa.Column('provider_pk', sa.Integer(), nullable=False),
+        sa.Column('provider_pk', sa.Integer(), nullable=False, index=True),
         sa.Column(
             'location',
             geoalchemy2.types.Geometry(geometry_type='POINT', srid=4326),

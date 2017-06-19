@@ -41,7 +41,7 @@ occurrence = Table(
         nullable=False,
         index=True,
     ),
-    Column('provider_pk', Integer, nullable=False),
+    Column('provider_pk', Integer, nullable=False, index=True),
     Column('location', Geometry('POINT', srid=4326), nullable=False),
     Column(
         'taxon_id',
