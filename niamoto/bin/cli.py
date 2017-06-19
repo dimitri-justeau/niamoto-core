@@ -40,9 +40,10 @@ def niamoto_cli(context, niamoto_home=conf.DEFAULT_NIAMOTO_HOME):
     conf.set_settings()
 
 
-# Init commands
+# General commands
 niamoto_cli.add_command(init_niamoto_home_cli)
 niamoto_cli.add_command(init_db_cli)
+niamoto_cli.add_command(get_general_status_cli)
 
 # Raster commands
 niamoto_cli.add_command(list_rasters_cli)
@@ -66,9 +67,6 @@ niamoto_cli.add_command(sync)
 niamoto_cli.add_command(set_taxonomy_cli)
 niamoto_cli.add_command(map_all_synonyms_cli)
 niamoto_cli.add_command(get_synonym_keys_cli)
-
-# Status commands
-niamoto_cli.add_command(get_general_status_cli)
 
 # Data publisher commands
 niamoto_cli.add_command(publish_cli)

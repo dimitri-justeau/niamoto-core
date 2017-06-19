@@ -42,6 +42,7 @@ IRD are also implied in the project.
     installation
     quickstart
     tutorial
+    cli
     publishers
     configuration
     contributing
