@@ -21,11 +21,7 @@ class PlotOccurrenceDataPublisher(BaseDataPublisher):
     def get_description(cls):
         return "Retrieve the plots/occurrences dataframe."
 
-    def _process(self, *args, properties=None, **kwargs):
-        """
-        :param properties: List of properties to retain. Can be a python list
-            or a comma (',') separated string.
-        """
+    def _process(self, *args, **kwargs):
         with Connector.get_connection() as connection:
             sel = select([
                 meta.plot_occurrence.c.plot_id.label('plot_id'),

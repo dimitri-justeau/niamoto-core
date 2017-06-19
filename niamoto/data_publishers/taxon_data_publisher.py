@@ -24,8 +24,7 @@ class TaxonDataPublisher(BaseDataPublisher):
 
     def _process(self, *args, include_mptt=False, **kwargs):
         """
-        :param properties: List of properties to retain. Can be a python list
-            or a comma (',') separated string.
+        :param include_mptt: If True, include the mptt columns.
         """
         with Connector.get_connection() as connection:
             keys = TaxonomyManager.get_synonym_keys()['name']
