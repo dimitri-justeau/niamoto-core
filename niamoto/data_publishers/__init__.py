@@ -6,6 +6,9 @@ from niamoto.conf import NIAMOTO_HOME
 from niamoto.data_publishers.occurrence_data_publisher import \
     OccurrenceDataPublisher
 from niamoto.data_publishers.plot_data_publisher import PlotDataPublisher
+from niamoto.data_publishers.taxon_data_publisher import TaxonDataPublisher
+from niamoto.data_publishers.plot_occurrence_data_publisher import \
+    PlotOccurrenceDataPublisher
 from niamoto.data_publishers.r_data_publisher import RDataPublisher
 
 R_SCRIPTS_HOME = os.path.join(NIAMOTO_HOME, 'R')

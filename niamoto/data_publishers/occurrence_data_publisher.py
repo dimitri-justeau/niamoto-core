@@ -21,7 +21,8 @@ class OccurrenceDataPublisher(BaseDataPublisher):
     def get_description(cls):
         return "Retrieve the occurrence dataframe with properties as columns."
 
-    def _process(self, *args, properties=None, **kwargs):
+    def _process(self, *args, properties=None, drop_null_properties=False,
+                 **kwargs):
         """
         :param properties: List of properties to retain. Can be a python list
             or a comma (',') separated string.
@@ -56,6 +57,9 @@ class OccurrenceDataPublisher(BaseDataPublisher):
             df['taxon_id'] = df['taxon_id'].apply(pd.to_numeric)
             #  Replace None values with nan
             df.fillna(value=pd.np.NAN, inplace=True)
+            if drop_null_properties:
+                for k in keys:
+                    df = df[df[k].notnull()]
             return df, [], {'index_label': 'id'}
 
     @classmethod

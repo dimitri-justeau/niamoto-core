@@ -13,15 +13,17 @@ log.STREAM_LOGGING_LEVEL = logging.CRITICAL
 log.FILE_LOGGING_LEVEL = logging.DEBUG
 
 from niamoto.conf import settings, NIAMOTO_HOME
-from niamoto.data_publishers.occurrence_data_publisher import \
-    OccurrenceDataPublisher
+from niamoto.api.taxonomy_api import set_taxonomy
 from niamoto.testing.test_database_manager import TestDatabaseManager
-from niamoto.data_providers.csv_provider import CsvDataProvider
+from niamoto.data_publishers.taxon_data_publisher import TaxonDataPublisher
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
 
-TEST_OCCURRENCE_CSV = os.path.join(
-    NIAMOTO_HOME, 'data', 'csv', 'occurrences.csv',
+TAXONOMY_CSV_PATH = os.path.join(
+    NIAMOTO_HOME,
+    'data',
+    'taxonomy',
+    'taxonomy_1.csv',
 )
 
 
@@ -33,21 +35,14 @@ class TestOccurrencesPublisher(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestOccurrencesPublisher, cls).setUpClass()
-        CsvDataProvider.register_data_provider_type()
-        CsvDataProvider.register_data_provider('csv_provider')
-        csv_provider = CsvDataProvider(
-            'csv_provider',
-            occurrence_csv_path=TEST_OCCURRENCE_CSV,
-        )
-        csv_provider.sync()
+        set_taxonomy(TAXONOMY_CSV_PATH)
 
     def test_occurrences_publisher(self):
-        op = OccurrenceDataPublisher()
-        op.process()
-        result = op.process(drop_null_properties=True)
+        publisher = TaxonDataPublisher()
+        result = publisher.process(include_mptt=True)
         self.assertEqual(len(result), 3)
-        self.assertIsNotNone(op.get_key())
-        self.assertIsNotNone(op.get_publish_formats())
+        self.assertIsNotNone(publisher.get_key())
+        self.assertIsNotNone(publisher.get_publish_formats())
 
 
 if __name__ == '__main__':

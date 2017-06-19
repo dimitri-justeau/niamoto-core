@@ -13,8 +13,8 @@ log.STREAM_LOGGING_LEVEL = logging.CRITICAL
 log.FILE_LOGGING_LEVEL = logging.DEBUG
 
 from niamoto.conf import settings, NIAMOTO_HOME
-from niamoto.data_publishers.occurrence_data_publisher import \
-    OccurrenceDataPublisher
+from niamoto.data_publishers.plot_occurrence_data_publisher import \
+    PlotOccurrenceDataPublisher
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.data_providers.csv_provider import CsvDataProvider
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -23,31 +23,38 @@ from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 TEST_OCCURRENCE_CSV = os.path.join(
     NIAMOTO_HOME, 'data', 'csv', 'occurrences.csv',
 )
+TEST_PLOT_CSV = os.path.join(
+    NIAMOTO_HOME, 'data', 'csv', 'plots.csv',
+)
+TEST_PLOT_OCCURRENCE_CSV = os.path.join(
+    NIAMOTO_HOME, 'data', 'csv', 'plots_occurrences.csv',
+)
 
 
-class TestOccurrencesPublisher(BaseTestNiamotoSchemaCreated):
+class TestPlotOccurrencePublisher(BaseTestNiamotoSchemaCreated):
     """
-    Test for occurrences publisher.
+    Test for plot occurrence publisher.
     """
 
     @classmethod
     def setUpClass(cls):
-        super(TestOccurrencesPublisher, cls).setUpClass()
+        super(TestPlotOccurrencePublisher, cls).setUpClass()
         CsvDataProvider.register_data_provider_type()
         CsvDataProvider.register_data_provider('csv_provider')
         csv_provider = CsvDataProvider(
             'csv_provider',
             occurrence_csv_path=TEST_OCCURRENCE_CSV,
+            plot_csv_path=TEST_PLOT_CSV,
+            plot_occurrence_csv_path=TEST_PLOT_OCCURRENCE_CSV
         )
         csv_provider.sync()
 
-    def test_occurrences_publisher(self):
-        op = OccurrenceDataPublisher()
-        op.process()
-        result = op.process(drop_null_properties=True)
+    def test_plot_occurrence_publisher(self):
+        publisher = PlotOccurrenceDataPublisher()
+        result = publisher.process()
         self.assertEqual(len(result), 3)
-        self.assertIsNotNone(op.get_key())
-        self.assertIsNotNone(op.get_publish_formats())
+        self.assertIsNotNone(publisher.get_key())
+        self.assertIsNotNone(publisher.get_publish_formats())
 
 
 if __name__ == '__main__':

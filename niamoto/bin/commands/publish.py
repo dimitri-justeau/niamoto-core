@@ -28,16 +28,35 @@ def publish_cli(publisher_key, publish_format, destination, *args, **kwargs):
     try:
         extra_args = []
         extra_kwargs = {}
-        pass_next = False
+        first_key = False
+        previous_is_key = False
+        last_key = None
         for i, v in enumerate(kwargs['args']):
-            if pass_next:
-                pass_next = False
-                continue
             if v[:2] == '--':
-                extra_kwargs[v[2:]] = kwargs['args'][i + 1]
-                pass_next = True
+                if i + 1 == len(kwargs['args']):
+                    extra_kwargs[v[2:]] = True
+                if not first_key:
+                    first_key = True
+                    last_key = v[2:]
+                else:
+                    if previous_is_key:
+                        extra_kwargs[last_key] = True
+                    last_key = v[2:]
+                previous_is_key = True
             else:
-                extra_args.append(v)
+                if not first_key:
+                    extra_args.append(v)
+                else:
+                    if previous_is_key:
+                        extra_kwargs[last_key] = v
+                    else:
+                        value = extra_kwargs[last_key]
+                        if isinstance(value, list):
+                            value.append(v)
+                        else:
+                            value = [value, v]
+                        extra_kwargs[last_key] = value
+                    previous_is_key = False
         publish_api.publish(
             publisher_key,
             publish_format,
