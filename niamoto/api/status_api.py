@@ -47,6 +47,9 @@ def get_general_status():
             select([
                 func.count(meta.raster_registry.c.name)
             ]).label('nb_rasters'),
+            select([
+                func.count(meta.vector_registry.c.name)
+            ]).label('nb_vectors'),
         ])
         df = pd.read_sql(sel, connection)
     return {
@@ -57,5 +60,5 @@ def get_general_status():
         'nb_taxa': df.iloc[0]['nb_taxa'],
         'nb_synonym_keys': df.iloc[0]['nb_synonym_keys'],
         'nb_rasters': df.iloc[0]['nb_rasters'],
-        'nb_vectors': 0,
+        'nb_vectors': df.iloc[0]['nb_vectors'],
     }

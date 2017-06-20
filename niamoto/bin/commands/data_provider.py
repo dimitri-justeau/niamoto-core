@@ -2,8 +2,7 @@
 
 import click
 
-from niamoto.bin.utils import format_datetime_to_date, \
-    format_datetime_to_date_hour
+from niamoto.bin.utils import format_datetime_to_date
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
     BaseDataProviderException, NiamotoException
 from niamoto.decorators import cli_catch_unknown_error

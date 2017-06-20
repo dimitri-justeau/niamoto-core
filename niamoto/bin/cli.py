@@ -10,6 +10,8 @@ from niamoto.bin.commands.raster import list_rasters_cli, add_raster_cli, \
     extract_raster_values_to_plots_cli, \
     extract_all_rasters_values_to_occurrences_cli, \
     extract_all_rasters_values_to_plots_cli
+from niamoto.bin.commands.vector import list_vectors_cli, add_vector_cli, \
+    update_vector_cli, delete_vector_cli
 from niamoto.bin.commands.manage_db import init_db_cli
 from niamoto.bin.commands.init_niamoto_home import init_niamoto_home_cli
 from niamoto.bin.commands.data_provider import list_data_provider_types, \
@@ -54,6 +56,12 @@ niamoto_cli.add_command(extract_raster_values_to_occurrences_cli)
 niamoto_cli.add_command(extract_raster_values_to_plots_cli)
 niamoto_cli.add_command(extract_all_rasters_values_to_occurrences_cli)
 niamoto_cli.add_command(extract_all_rasters_values_to_plots_cli)
+
+# Vector commands
+niamoto_cli.add_command(list_vectors_cli)
+niamoto_cli.add_command(add_vector_cli)
+niamoto_cli.add_command(update_vector_cli)
+niamoto_cli.add_command(delete_vector_cli)
 
 # Data provider commands
 niamoto_cli.add_command(list_data_provider_types)

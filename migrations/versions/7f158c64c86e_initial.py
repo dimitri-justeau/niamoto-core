@@ -88,7 +88,7 @@ def upgrade():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column('date_create', sa.DateTime(), nullable=False),
-        sa.Column('date_update', sa.DateTime(), nullable=False),
+        sa.Column('date_update', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name', name=op.f('uq_synonym_key_registry_name')),
         schema='niamoto'
@@ -97,7 +97,6 @@ def upgrade():
         'raster_registry',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),
-        sa.Column('srid', sa.Integer(), nullable=False),
         sa.Column('date_create', sa.DateTime(), nullable=False),
         sa.Column('date_update', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id'),

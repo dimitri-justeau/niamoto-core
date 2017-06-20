@@ -55,7 +55,6 @@ def delete_vector(name):
     """
     Delete an existing vector.
     :param name: The name of the vector.
-    :param connection: If provided, use an existing connection.
     """
     result = VectorManager.delete_vector(name)
     fix_db_sequences()
