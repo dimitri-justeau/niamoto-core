@@ -46,6 +46,10 @@ class VectorManager:
         :param name: The name of the vector. The created table will have this
         name.
         """
+        LOGGER.debug("VectorManager.add_vector({}, {})".format(
+            vector_file_path,
+            name
+        ))
         if not os.path.exists(vector_file_path):
             raise FileNotFoundError(
                 "The vector {} does not exist".format(vector_file_path)
@@ -91,6 +95,13 @@ class VectorManager:
         :param name: The name of the vector.
         :param new_name: The new name of the vector (not changed if None).
         """
+        LOGGER.debug(
+            "VectorManager.update_vector({}, {}, new_name={})".format(
+                vector_file_path,
+                name,
+                new_name
+            )
+        )
         if not os.path.exists(vector_file_path):
             raise FileNotFoundError(
                 "The vector {} does not exist".format(vector_file_path)
@@ -145,6 +156,9 @@ class VectorManager:
         :param name: The name of the vector.
         :param connection: If provided, use an existing connection.
         """
+        LOGGER.debug("VectorManager.delete_vector(connection={})".format(
+            str(connection)
+        ))
         cls.assert_vector_exists(name)
         close_after = False
         if connection is None:

@@ -48,7 +48,7 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
                 ))
             connection.execute(delete_stmt)
 
-    def test_get_raster_list(self):
+    def test_get_vector_list(self):
         df1 = VectorManager.get_vector_list()
         self.assertEqual(len(df1), 0)
 
@@ -108,7 +108,7 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
             inspector.get_table_names(schema=settings.NIAMOTO_VECTOR_SCHEMA),
         )
 
-    def test_delete_raster(self):
+    def test_delete_vector(self):
         VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
         VectorManager.delete_vector('ncl_adm1')
         df = VectorManager.get_vector_list()

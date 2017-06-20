@@ -15,8 +15,8 @@ LOGGER = get_logger(__name__)
 
 def get_raster_list():
     """
-    :return: A pandas DataFrame containing all the raster entries
-    available within the given database.
+    :return: A pandas DataFrame containing all the rasters available in
+    the database.
     """
     return RasterManager.get_raster_list()
 
@@ -25,7 +25,8 @@ def add_raster(raster_file_path, name, tile_dimension=None):
     """
     Add a raster in database and register it the Niamoto raster registry.
     Uses raster2pgsql command. The raster is cut in tiles, using the
-    dimension tile_width x tile_width. All rasters are stored
+    dimension tile_width x tile_width. All rasters
+    are stored in the settings.NIAMOTO_RASTER_SCHEMA schema.
     :param raster_file_path: The path to the raster file.
     :param name: The name of the raster.
     :param tile_dimension: The tile dimension (width, height), if None,
