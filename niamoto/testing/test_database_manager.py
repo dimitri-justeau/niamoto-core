@@ -164,5 +164,13 @@ class TestDatabaseManager:
 
     @classmethod
     def teardown_test_database(cls):
+        connection = cls._get_superuser_connection()
+        connection.cursor().execute("""
+            SELECT pg_terminate_backend(pid)
+            FROM pg_stat_activity
+            WHERE pid <> pg_backend_pid()
+            AND datname = '{}'
+        """.format(cls.TEST_DATABASE))
+        connection.close()
         cls.drop_test_database()
         cls.drop_test_user()

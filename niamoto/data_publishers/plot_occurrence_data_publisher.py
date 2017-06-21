@@ -19,7 +19,7 @@ class PlotOccurrenceDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_description(cls):
-        return "Retrieve the plots/occurrences dataframe."
+        return "Publish the plots/occurrences dataframe."
 
     def _process(self, *args, **kwargs):
         with Connector.get_connection() as connection:

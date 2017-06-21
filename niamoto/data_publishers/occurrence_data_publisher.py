@@ -19,7 +19,7 @@ class OccurrenceDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_description(cls):
-        return "Retrieve the occurrence dataframe with properties as columns."
+        return "Publish the occurrence dataframe with properties as columns."
 
     def _process(self, *args, properties=None, drop_null_properties=False,
                  **kwargs):

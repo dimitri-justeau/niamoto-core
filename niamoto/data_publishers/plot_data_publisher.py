@@ -19,7 +19,7 @@ class PlotDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_description(cls):
-        return "Retrieve the plot dataframe with properties as columns."
+        return "Publish the plot dataframe with properties as columns."
 
     def _process(self, *args, properties=None, **kwargs):
         """

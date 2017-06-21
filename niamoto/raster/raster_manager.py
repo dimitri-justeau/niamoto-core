@@ -12,7 +12,7 @@ from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
-from niamoto.log import get_logger
+from niamoto.log import get_logger, LOG_FILE
 
 
 LOGGER = get_logger(__name__)
@@ -61,20 +61,23 @@ class RasterManager:
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
         os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
         p1 = subprocess.Popen([
-            "raster2pgsql", "-c", '-t', dim, '-I', raster_file_path, tb,
+            "raster2pgsql", "-c", '-C', '-t', dim, '-I', raster_file_path, tb,
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        p2 = subprocess.call([
-            "psql",
-            "-q",
-            "-U", settings.NIAMOTO_DATABASE["USER"],
-            "-h", settings.NIAMOTO_DATABASE["HOST"],
-            "-p", settings.NIAMOTO_DATABASE["PORT"],
-            "-d", settings.NIAMOTO_DATABASE["NAME"],
-            "-w",
-        ], stdin=p1.stdout)
-        stdout, stderr = p1.communicate()
+        with open(LOG_FILE, mode='a') as log_file:
+            p2 = subprocess.call([
+                "psql",
+                "-q",
+                "-U", settings.NIAMOTO_DATABASE["USER"],
+                "-h", settings.NIAMOTO_DATABASE["HOST"],
+                "-p", settings.NIAMOTO_DATABASE["PORT"],
+                "-d", settings.NIAMOTO_DATABASE["NAME"],
+                "-w",
+            ], stdin=p1.stdout, stdout=log_file, stderr=log_file)
+            stdout, stderr = p1.communicate()
         if stderr:
             LOGGER.debug(stderr)
+        if stdout:
+            LOGGER.debug(stdout)
         os.environ["PGPASSWORD"] = ""
         if p2 != 0 or p1.returncode != 0:
             raise RuntimeError(
@@ -111,7 +114,6 @@ class RasterManager:
         else:
             dim = 'auto'
         os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
-        dev_null = open(os.devnull, 'w')  # Force quiet
         d = "-d"
         if new_name is None:
             new_name = name
@@ -120,21 +122,23 @@ class RasterManager:
             d = "-c"
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, new_name)
         p1 = subprocess.Popen([
-            "raster2pgsql", d, '-t', dim, '-I', raster_file_path, tb,
-        ], stdout=subprocess.PIPE, stderr=dev_null)
-        dev_null.close()
-        p2 = subprocess.call([
-            "psql",
-            "-q",
-            "-U", settings.NIAMOTO_DATABASE["USER"],
-            "-h", settings.NIAMOTO_DATABASE["HOST"],
-            "-p", settings.NIAMOTO_DATABASE["PORT"],
-            "-d", settings.NIAMOTO_DATABASE["NAME"],
-            "-w",
-        ], stdin=p1.stdout)
-        p1.communicate()
+            "raster2pgsql", d, "-C", '-t', dim, '-I', raster_file_path, tb,
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        with open(LOG_FILE, mode='a') as log_file:
+            p2 = subprocess.call([
+                "psql",
+                "-q",
+                "-U", settings.NIAMOTO_DATABASE["USER"],
+                "-h", settings.NIAMOTO_DATABASE["HOST"],
+                "-p", settings.NIAMOTO_DATABASE["PORT"],
+                "-d", settings.NIAMOTO_DATABASE["NAME"],
+                "-w",
+            ], stdin=p1.stdout, stdout=log_file, stderr=log_file)
+            stdout, stderr = p1.communicate()
+        if stderr:
+            LOGGER.debug(stderr)
         os.environ["PGPASSWORD"] = ""
-        if p2 != 0:
+        if p2 != 0 or p1.returncode != 0:
             raise RuntimeError("raster import failed.")
         upd = niamoto_db_meta.raster_registry.update().values({
             'name': new_name,

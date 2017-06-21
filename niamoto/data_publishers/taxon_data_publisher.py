@@ -20,7 +20,7 @@ class TaxonDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_description(cls):
-        return "Retrieve the taxa dataframe."
+        return "Publish the taxa dataframe."
 
     def _process(self, *args, include_mptt=False, **kwargs):
         """
