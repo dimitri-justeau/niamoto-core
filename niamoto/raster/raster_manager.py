@@ -12,6 +12,10 @@ from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 class RasterManager:
@@ -56,11 +60,9 @@ class RasterManager:
             dim = 'auto'
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
         os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
-        dev_null = open(os.devnull, 'w')  # Force quiet
         p1 = subprocess.Popen([
             "raster2pgsql", "-c", '-t', dim, '-I', raster_file_path, tb,
-        ], stdout=subprocess.PIPE, stderr=dev_null)
-        dev_null.close()
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         p2 = subprocess.call([
             "psql",
             "-q",
@@ -70,10 +72,14 @@ class RasterManager:
             "-d", settings.NIAMOTO_DATABASE["NAME"],
             "-w",
         ], stdin=p1.stdout)
-        p1.communicate()
+        stdout, stderr = p1.communicate()
+        if stderr:
+            LOGGER.debug(stderr)
         os.environ["PGPASSWORD"] = ""
-        if p2 != 0:
-            raise RuntimeError("raster import failed.")
+        if p2 != 0 or p1.returncode != 0:
+            raise RuntimeError(
+                "raster import failed, check the logs for more details."
+            )
         ins = niamoto_db_meta.raster_registry.insert().values({
             'name': name,
             'date_create': datetime.now(),

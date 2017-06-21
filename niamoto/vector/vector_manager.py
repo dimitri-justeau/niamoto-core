@@ -61,7 +61,7 @@ class VectorManager:
             settings.NIAMOTO_DATABASE["HOST"],
             settings.NIAMOTO_DATABASE["PORT"],
             settings.NIAMOTO_DATABASE["USER"],
-            settings.NIAMOTO_DATABASE["NAME"],
+            settings.NIAMOTO_DATABASE["PASSWORD"],
         )
         p = subprocess.Popen([
             "ogr2ogr",
@@ -122,7 +122,7 @@ class VectorManager:
             settings.NIAMOTO_DATABASE["HOST"],
             settings.NIAMOTO_DATABASE["PORT"],
             settings.NIAMOTO_DATABASE["USER"],
-            settings.NIAMOTO_DATABASE["NAME"],
+            settings.NIAMOTO_DATABASE["PASSWORD"],
         )
         p = subprocess.Popen([
             "ogr2ogr",
