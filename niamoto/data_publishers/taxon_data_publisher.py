@@ -53,5 +53,5 @@ class TaxonDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_publish_formats(cls):
-        return [cls.CSV, cls.STREAM]
+        return [cls.CSV, ]
 

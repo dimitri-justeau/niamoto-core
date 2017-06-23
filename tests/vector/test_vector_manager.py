@@ -81,11 +81,18 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
         VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
         # Update raster
         VectorManager.update_vector(SHP_TEST, 'ncl_adm1', new_name='ncl')
+        VectorManager.update_vector(SHP_TEST, 'ncl')
         self.assertRaises(
             NoRecordFoundError,
             VectorManager.update_vector,
             SHP_TEST,
             'ncl_adm1'
+        )
+        null_path = os.path.join(NIAMOTO_HOME, "NULL.shp")
+        self.assertRaises(
+            FileNotFoundError,
+            VectorManager.add_vector,
+            null_path, "ncl",
         )
         VectorManager.add_vector(SHP_TEST, 'ncl_adm')
         self.assertRaises(

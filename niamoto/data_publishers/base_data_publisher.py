@@ -24,13 +24,11 @@ class BaseDataPublisher(metaclass=PublisherMeta):
     Base class for data publisher.
     """
 
-    STREAM = 'stream'
     CSV = 'csv'
     TIFF = 'tiff'
-    PUBLISH_FORMATS = [CSV, STREAM, TIFF]
+    PUBLISH_FORMATS = [CSV, TIFF]
     PUBLISH_FORMATS_DESCRIPTION = {
         CSV: "Publish the data using the csv format.",
-        STREAM: "Publish the data as a text stream.",
         TIFF: "Publish the data as a tiff raster file.",
     }
 
@@ -107,17 +105,6 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         """
         data.to_csv(destination, index_label=index_label)
 
-    @staticmethod
-    def _publish_stream(data, *args, destination=sys.stdout, **kwargs):
-        """
-        Publish the data in a stream.
-        :param data: The data to publish, assume that it is a pandas DataFrame.
-        :param destination_path: The destination stream.
-        """
-        data.to_string(buf=destination)
-        destination.write('\n')
-
     FORMAT_TO_METHOD = {
         CSV: _publish_csv.__func__,
-        STREAM: _publish_stream.__func__,
     }
