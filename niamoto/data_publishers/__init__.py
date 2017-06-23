@@ -10,6 +10,7 @@ from niamoto.data_publishers.taxon_data_publisher import TaxonDataPublisher
 from niamoto.data_publishers.plot_occurrence_data_publisher import \
     PlotOccurrenceDataPublisher
 from niamoto.data_publishers.r_data_publisher import RDataPublisher
+from niamoto.data_publishers.raster_data_publisher import RasterDataPublisher
 
 R_SCRIPTS_HOME = os.path.join(NIAMOTO_HOME, 'R')
 

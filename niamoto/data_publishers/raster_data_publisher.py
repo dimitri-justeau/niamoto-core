@@ -1,9 +1,13 @@
 # coding: utf-8
 
-import pandas as pd
+import subprocess
 
 from niamoto.conf import settings
 from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 class RasterDataPublisher(BaseDataPublisher):
@@ -21,10 +25,9 @@ class RasterDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_publish_formats(cls):
-        pass
+        return [cls.TIFF]
 
     def _process(self, raster_name, *args, **kwargs):
-        import rasterio
         pg_str = "dbname='{dbname}' " \
                  "host='{host}' " \
                  "port='{port}' " \
@@ -42,6 +45,22 @@ class RasterDataPublisher(BaseDataPublisher):
             'schema': settings.NIAMOTO_RASTER_SCHEMA,
             'table': raster_name
         })
-        pg_str = "PG:{}".format(pg_str)
-        with rasterio.open(pg_str, driver="PostGISRaster") as dataset:
-            return dataset.read(), [], []
+        return "PG:{}".format(pg_str)
+
+    @staticmethod
+    def _publish_tiff(raster_uri, destination, *args, **kwargs):
+        LOGGER.debug("RasterDataPublisher._publish_tiff({}, {})".format(
+            raster_uri, destination
+        ))
+        p = subprocess.Popen([
+            'gdal_translate', '-of', 'GTiff', raster_uri, destination
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        if stdout:
+            LOGGER.debug(stdout)
+        if stderr:
+            LOGGER.debug(stderr)
+
+    format_to_methods = BaseDataPublisher.FORMAT_TO_METHOD
+    FORMAT_TO_METHOD = format_to_methods
+    FORMAT_TO_METHOD[BaseDataPublisher.TIFF] = _publish_tiff.__func__

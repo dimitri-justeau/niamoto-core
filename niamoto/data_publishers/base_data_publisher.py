@@ -26,10 +26,12 @@ class BaseDataPublisher(metaclass=PublisherMeta):
 
     STREAM = 'stream'
     CSV = 'csv'
-    PUBLISH_FORMATS = [CSV, STREAM]
+    TIFF = 'tiff'
+    PUBLISH_FORMATS = [CSV, STREAM, TIFF]
     PUBLISH_FORMATS_DESCRIPTION = {
         CSV: "Publish the data using the csv format.",
         STREAM: "Publish the data as a text stream.",
+        TIFF: "Publish the data as a tiff raster file.",
     }
 
     def __init__(self):
@@ -54,6 +56,8 @@ class BaseDataPublisher(metaclass=PublisherMeta):
             and the publish kwargs.
         """
         r = self._process(*args, **kwargs)
+        if not isinstance(r, (list, tuple)):
+            r = [r, [], {}]
         self.last_data = r[0]
         self.last_publish_args = r[1]
         self.last_publish_kwargs = r[2]
@@ -86,11 +90,7 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         :param destination: The destination (e.g. path to destination file,
             destination database file)
         """
-        format_to_method = {
-            cls.CSV: cls._publish_csv,
-            cls.STREAM: cls._publish_stream,
-        }
-        return format_to_method[publish_format](
+        return cls.FORMAT_TO_METHOD[publish_format](
             data,
             *args,
             destination=destination,
@@ -116,3 +116,8 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         """
         data.to_string(buf=destination)
         destination.write('\n')
+
+    FORMAT_TO_METHOD = {
+        CSV: _publish_csv.__func__,
+        STREAM: _publish_stream.__func__,
+    }

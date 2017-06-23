@@ -398,6 +398,8 @@ Importing a raster in Niamoto is straightforward using the
 
     Options:
       -t, --tile_dimension TEXT  Tile dimension <width>x<height>
+      -R, --register             Register the raster as a filesystem (out-db)
+                                 raster. (-R option of raster2pgsql).
       --help                     Show this message and exit.
 
 
@@ -423,7 +425,24 @@ We can see the registered rasters with the ``niamoto rasters`` command:
 Importing vectors
 -----------------
 
-(Available soon)
+Niamoto rely on the `ogr2ogr` utility to import vector layers in the Niamoto
+vector database. To import a vector layer, we use the `niamoto add_vector`
+command:
+
+.. code-block:: shell-session
+
+    $ niamoto add_vector boundaries boundaries.shp
+    Registering the vector in database...
+    The vector had been successfully registered to the Niamoto vector database!
+
+We can see the registered rasters with the ``niamoto vectors`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto vectors
+              name date_create date_update
+    id
+    2   boundaries  2017/06/23        None
 
 
 Extracting raster values to occurrences and plot properties
@@ -486,12 +505,6 @@ For instance, let's extract the values of the previously registered raster,
     The raster values had been successfully extracted!
 
 
-Extracting vector values into occurrences properties
-----------------------------------------------------
-
-(Available soon)
-
-
 Processing and publishing data
 ------------------------------
 
@@ -501,8 +514,11 @@ The list of available data publishers can be displayed using the
 .. code-block:: shell-session
 
     $ niamoto publishers
-        occurrences   :   Retrieve the occurrence dataframe with properties as columns.
-        plots         :   Retrieve the plot dataframe with properties as columns.
+        occurrences       :   Publish the occurrence dataframe with properties as columns.
+        plots             :   Publish the plot dataframe with properties as columns.
+        taxa              :   Publish the taxa dataframe.
+        plots_occurrences :   Publish the plots/occurrences dataframe.
+        raster            :   Publish a raster from the niamoto raster database.
 
 For a given publisher, the available publish formats can be displayed using
 the ``niamoto publish_formats`` command:
@@ -512,4 +528,3 @@ the ``niamoto publish_formats`` command:
     $ niamoto publish_formats occurrences
         csv    :    Publish the data using the csv format.
         stream :    Publish the data as a text stream.
-

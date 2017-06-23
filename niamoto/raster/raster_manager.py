@@ -38,16 +38,21 @@ class RasterManager:
             )
 
     @classmethod
-    def add_raster(cls, raster_file_path, name, tile_dimension=None):
+    def add_raster(cls, raster_file_path, name, tile_dimension=None,
+                   register=False):
         """
         Add a raster in database and register it the Niamoto raster registry.
         Uses raster2pgsql command. The raster is cut in tiles, using the
         dimension tile_width x tile_width. All rasters
-        are stored in the settings.NIAMOTO_RASTER_SCHEMA schema.
+        are stored in the settings.NIAMOTO_RASTER_SCHEMA schema. c.f.
+        https://postgis.net/docs/using_raster_dataman.html#RT_Raster_Loader
+        for more details on raster2pgsql.
         :param raster_file_path: The path to the raster file.
         :param name: The name of the raster.
         :param tile_dimension: The tile dimension (width, height), if None,
             tile dimension will be chosen automatically by PostGIS.
+        :param register: Register the raster as a filesystem (out-db) raster.
+            (-R option of raster2pgsql).
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
@@ -60,9 +65,17 @@ class RasterManager:
             dim = 'auto'
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
         os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
-        p1 = subprocess.Popen([
-            "raster2pgsql", "-c", '-C', '-t', dim, '-I', raster_file_path, tb,
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        raster2pgsql_args = [
+            "raster2pgsql", "-c", "-Y", '-C', '-t', dim,
+            '-I', '-M', raster_file_path, tb,
+        ]
+        if register:
+            raster2pgsql_args.append('-R')
+        p1 = subprocess.Popen(
+            raster2pgsql_args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
         with open(LOG_FILE, mode='a') as log_file:
             p2 = subprocess.call([
                 "psql",
@@ -92,17 +105,21 @@ class RasterManager:
 
     @classmethod
     def update_raster(cls, raster_file_path, name, new_name=None,
-                      tile_dimension=None):
+                      tile_dimension=None, register=False):
         """
         Update an existing raster in database and update it the Niamoto
         raster registry. Uses raster2pgsql command. The raster is cut in
         tiles, using the dimension tile_width x tile_width. All rasters
-        are stored in the settings.NIAMOTO_RASTER_SCHEMA schema.
+        are stored in the settings.NIAMOTO_RASTER_SCHEMA schema. c.f.
+        https://postgis.net/docs/using_raster_dataman.html#RT_Raster_Loader
+        for more details on raster2pgsql.
         :param raster_file_path: The path to the raster file.
         :param name: The name of the raster.
         :param new_name: The new name of the raster (not changed if None).
         :param tile_dimension: The tile dimension (width, height), if None,
             tile dimension will be chosen automatically by PostGIS.
+        :param register: Register the raster as a filesystem (out-db) raster.
+            (-R option of raster2pgsql).
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
@@ -121,9 +138,17 @@ class RasterManager:
             cls.assert_raster_does_not_exist(new_name)
             d = "-c"
         tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, new_name)
-        p1 = subprocess.Popen([
-            "raster2pgsql", d, "-C", '-t', dim, '-I', raster_file_path, tb,
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        raster2pgsql_args = [
+            "raster2pgsql", d, "-C", "-Y", '-t', dim,
+            '-I', '-M', raster_file_path, tb,
+        ]
+        if register:
+            raster2pgsql_args.append('-R')
+        p1 = subprocess.Popen(
+            raster2pgsql_args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
         with open(LOG_FILE, mode='a') as log_file:
             p2 = subprocess.call([
                 "psql",

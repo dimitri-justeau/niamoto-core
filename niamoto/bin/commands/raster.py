@@ -33,10 +33,19 @@ def list_rasters_cli():
     help='Tile dimension <width>x<height>',
     required=False
 )
+@click.option(
+    '--register',
+    '-R',
+    help='Register the raster as a filesystem (out-db) raster. '
+         '(-R option of raster2pgsql).',
+    is_flag=True,
+    default=False
+)
 @click.argument('name')
 @click.argument('raster_file_path')
 @cli_catch_unknown_error
-def add_raster_cli(name, raster_file_path, tile_dimension=None):
+def add_raster_cli(name, raster_file_path, tile_dimension=None,
+                   register=False):
     """
     Add a raster in Niamoto's raster database.
     """
@@ -49,6 +58,7 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None):
             raster_file_path,
             name,
             tile_dimension=tile_dimension,
+            register=register
         )
         click.echo("The raster had been successfully registered to the Niamoto"
                    " raster database!")
@@ -69,11 +79,19 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None):
     help='The new name of the raster',
     required=False
 )
+@click.option(
+    '--register',
+    '-R',
+    help='Register the raster as a filesystem (out-db) raster. '
+         '(-R option of raster2pgsql).',
+    is_flag=True,
+    default=False
+)
 @click.argument('name')
 @click.argument('raster_file_path')
 @cli_catch_unknown_error
 def update_raster_cli(name, raster_file_path, new_name=None,
-                      tile_dimension=None):
+                      tile_dimension=None, register=False):
     """
     Update an existing raster in Niamoto's raster database.
     """
@@ -87,6 +105,7 @@ def update_raster_cli(name, raster_file_path, new_name=None,
             name,
             new_name=new_name,
             tile_dimension=tile_dimension,
+            register=register,
         )
         click.echo("The raster had been successfully updated!")
     except NoRecordFoundError as e:

@@ -40,7 +40,7 @@ class TestRasterDataPublisher(BaseTestNiamotoSchemaCreated):
 
     def test_raster_publisher(self):
         publisher = RasterDataPublisher()
-        result = publisher.process('test_raster')
+        dataset = publisher._process('test_raster')
 
 
 if __name__ == '__main__':

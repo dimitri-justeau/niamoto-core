@@ -21,7 +21,7 @@ def get_raster_list():
     return RasterManager.get_raster_list()
 
 
-def add_raster(raster_file_path, name, tile_dimension=None):
+def add_raster(raster_file_path, name, tile_dimension=None, register=False):
     """
     Add a raster in database and register it the Niamoto raster registry.
     Uses raster2pgsql command. The raster is cut in tiles, using the
@@ -31,15 +31,19 @@ def add_raster(raster_file_path, name, tile_dimension=None):
     :param name: The name of the raster.
     :param tile_dimension: The tile dimension (width, height), if None,
         tile dimension will be chosen automatically by PostGIS.
+    :param register: Register the raster as a filesystem (out-db) raster.
+        (-R option of raster2pgsql).
     """
     return RasterManager.add_raster(
         raster_file_path,
         name,
         tile_dimension=tile_dimension,
+        register=register
     )
 
 
-def update_raster(raster_file_path, name, new_name=None, tile_dimension=None):
+def update_raster(raster_file_path, name, new_name=None, tile_dimension=None,
+                  register=False):
     """
     Update an existing raster in database and register it the Niamoto
     raster registry. Uses raster2pgsql command. The raster is cut in
@@ -50,12 +54,15 @@ def update_raster(raster_file_path, name, new_name=None, tile_dimension=None):
     :param new_name: The new name of the raster (not changed if None).
     :param tile_dimension: The tile dimension (width, height), if None,
         tile dimension will be chosen automatically by PostGIS.
+    :param register: Register the raster as a filesystem (out-db) raster.
+        (-R option of raster2pgsql).
     """
     return RasterManager.update_raster(
         raster_file_path,
         name,
         new_name=new_name,
         tile_dimension=tile_dimension,
+        register=register
     )
 
 
