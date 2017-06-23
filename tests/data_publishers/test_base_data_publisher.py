@@ -4,11 +4,13 @@ import unittest
 import tempfile
 
 import pandas as pd
+from sqlalchemy.engine.reflection import Inspector
 
 from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings
+from niamoto.db.connector import Connector
 from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -28,6 +30,18 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
         ])
         dp._publish_csv(data, destination=temp_csv)
         dp.publish(data, 'csv', destination=temp_csv)
+        engine = Connector.get_engine()
+        db_url = Connector.get_database_url()
+        dp.publish(data, 'sql', destination='test_publish_table',
+                   schema=settings.NIAMOTO_SCHEMA)
+        dp.publish(data, 'sql', destination='test_publish_table',
+                   db_url=db_url, if_exists='replace',
+                   schema=settings.NIAMOTO_SCHEMA)
+        inspector = Inspector.from_engine(engine)
+        self.assertIn(
+            'test_publish_table',
+            inspector.get_table_names(schema=settings.NIAMOTO_SCHEMA),
+        )
         temp_csv.close()
 
 

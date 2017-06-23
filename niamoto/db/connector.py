@@ -38,6 +38,14 @@ class Connector:
         :return: Return a sqlalchemy engine, use internal cache to avoid
         engine duplicates.
         """
+        db_url = cls.get_database_url()
+        if db_url not in cls.ENGINES:
+            engine = create_engine(db_url)
+            cls.ENGINES[db_url] = engine
+        return cls.ENGINES[db_url]
+
+    @classmethod
+    def get_database_url(cls):
         database = settings.NIAMOTO_DATABASE
         user = database['USER']
         password = database['PASSWORD']
@@ -50,7 +58,4 @@ class Connector:
             'host': host,
             'database': database,
         })
-        if db_url not in cls.ENGINES:
-            engine = create_engine(db_url)
-            cls.ENGINES[db_url] = engine
-        return cls.ENGINES[db_url]
+        return db_url

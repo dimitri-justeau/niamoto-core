@@ -29,12 +29,13 @@ def publish(publisher_key, publish_format, *args, destination=sys.stdout,
             m.format(publish_format, publisher_key)
         )
     data, p_args, p_kwargs = publisher_instance.process(*args, **kwargs)
+    kwargs.update(p_kwargs)
     publisher_instance.publish(
         data,
         publish_format,
         *p_args,
         destination=destination,
-        **p_kwargs
+        **kwargs
     )
 
 

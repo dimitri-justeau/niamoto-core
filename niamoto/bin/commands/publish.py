@@ -96,13 +96,17 @@ def list_publish_formats_cli(publisher_key):
     """
     from niamoto.api.publish_api import list_publish_formats
     from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
-    keys = list_publish_formats(publisher_key)
-    max_length = max([len(i) for i in keys])
-    for k in keys:
-        click.secho(
-            '    {} :    {}'.format(
-                k.ljust(max_length),
-                BaseDataPublisher.PUBLISH_FORMATS_DESCRIPTION[k]
+    try:
+        keys = list_publish_formats(publisher_key)
+        max_length = max([len(i) for i in keys])
+        for k in keys:
+            click.secho(
+                '    {} :    {}'.format(
+                    k.ljust(max_length),
+                    BaseDataPublisher.PUBLISH_FORMATS_DESCRIPTION[k]
+                )
             )
-        )
+    except BaseDataPublisherException as e:
+        click.secho(str(e), fg='red')
+        click.get_current_context().exit(code=1)
 

@@ -52,5 +52,5 @@ class PlotDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_publish_formats(cls):
-        return [cls.CSV, ]
+        return [cls.CSV, cls.SQL]
 

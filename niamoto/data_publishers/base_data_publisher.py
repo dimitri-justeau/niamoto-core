@@ -2,6 +2,10 @@
 
 import sys
 
+from sqlalchemy import create_engine
+
+from niamoto.db.connector import Connector
+
 
 PUBLISHER_REGISTRY = {}
 
@@ -25,10 +29,12 @@ class BaseDataPublisher(metaclass=PublisherMeta):
     """
 
     CSV = 'csv'
+    SQL = 'sql'
     TIFF = 'tiff'
-    PUBLISH_FORMATS = [CSV, TIFF]
+    PUBLISH_FORMATS = [CSV, SQL, TIFF]
     PUBLISH_FORMATS_DESCRIPTION = {
         CSV: "Publish the data using the csv format.",
+        SQL: "Publish the data as a table to a SQL database",
         TIFF: "Publish the data as a tiff raster file.",
     }
 
@@ -105,6 +111,32 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         """
         data.to_csv(destination, index_label=index_label)
 
+    @staticmethod
+    def _publish_sql(data, destination, *args, db_url=None, schema='public',
+                     if_exists='fail', **kwargs):
+        """
+        Publish a DataFrame as a table to a SQL database. Rely on pandas
+        'to_sql' method. c.f. :
+        https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html
+        :param data: A pandas DataFrame.
+        :param destination: The name of the destination table.
+        :param db_url: A sqlalchemy database url.
+        :param schema: The name of the schema where to write the table. If
+            None, use the default schema.
+        :param if_exists:  {‘fail’, ‘replace’, ‘append’}, default ‘fail’
+        """
+        if db_url is None:
+            connection = Connector.get_engine()
+        else:
+            connection = create_engine(db_url)
+        data.to_sql(
+            destination,
+            con=connection,
+            schema=schema,
+            if_exists=if_exists
+        )
+
     FORMAT_TO_METHOD = {
         CSV: _publish_csv.__func__,
+        SQL: _publish_sql.__func__,
     }

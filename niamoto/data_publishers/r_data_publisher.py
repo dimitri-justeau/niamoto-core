@@ -50,6 +50,8 @@ class RDataPublisher(BaseDataPublisher):
             df = pandas2ri.ri2py(process_func())
             if isinstance(df, pd.DataFrame):
                 return int32_to_int64(fill_str_empty_with_nan(df)), [], {}
+            if len(df) == 1:
+                return df[0], [], {}
             return df, [], {}
 
     @staticmethod
@@ -94,7 +96,7 @@ class RDataPublisher(BaseDataPublisher):
 
     @classmethod
     def get_publish_formats(cls):
-        return [cls.CSV]
+        return [cls.CSV, cls.SQL]
 
 
 def fill_str_nan_with_empty(df):
