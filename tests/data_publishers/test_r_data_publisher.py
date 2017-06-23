@@ -18,6 +18,7 @@ from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.data_publishers.r_data_publisher import RDataPublisher
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.data_providers.csv_provider import CsvDataProvider
+from niamoto.raster.raster_manager import RasterManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
 
@@ -25,8 +26,23 @@ TEST_OCCURRENCE_CSV = os.path.join(
     NIAMOTO_HOME, 'data', 'csv', 'occurrences.csv',
 )
 
+TEST_PLOT_CSV = os.path.join(
+    NIAMOTO_HOME, 'data', 'csv', 'plots.csv',
+)
+
+TEST_PLOTS_OCCURRENCES_CSV = os.path.join(
+    NIAMOTO_HOME, 'data', 'csv', 'plots_occurrences.csv',
+)
+
 TEST_R_SCRIPT = os.path.join(
     NIAMOTO_HOME, 'R', 'r_script.R',
+)
+
+TEST_RASTER = os.path.join(
+    NIAMOTO_HOME,
+    "data",
+    "raster",
+    "rainfall_wgs84.tif"
 )
 
 
@@ -43,8 +59,11 @@ class TestRDataPublisher(BaseTestNiamotoSchemaCreated):
         csv_provider = CsvDataProvider(
             'csv_provider',
             occurrence_csv_path=TEST_OCCURRENCE_CSV,
+            plot_csv_path=TEST_PLOT_CSV,
+            plot_occurrence_csv_path=TEST_PLOTS_OCCURRENCES_CSV
         )
         csv_provider.sync()
+        RasterManager.add_raster(TEST_RASTER, 'test_raster')
 
     def test_r_data_publisher(self):
         r_data_publisher = RDataPublisher(TEST_R_SCRIPT)
