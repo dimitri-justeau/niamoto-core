@@ -68,7 +68,6 @@ class TestRDataPublisher(BaseTestNiamotoSchemaCreated):
     def test_r_data_publisher(self):
         r_data_publisher = RDataPublisher(TEST_R_SCRIPT)
         result = r_data_publisher._process()[0]
-        print(result)
         self.assertIsInstance(result, pd.DataFrame)
 
 

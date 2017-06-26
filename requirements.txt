@@ -10,6 +10,7 @@ pandas
 # Geo libraries
 shapely
 rasterio
+geopandas
 
 # Tasks and workflows
 # airflow[postgres]
