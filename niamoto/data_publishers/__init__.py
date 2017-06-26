@@ -61,5 +61,5 @@ for file in os.listdir(PYTHON_SCRIPTS_HOME):
             from importlib.machinery import SourceFileLoader
             settings_module = SourceFileLoader(
                 file[:-3],
-                PYTHON_SCRIPTS_HOME
+                os.path.join(PYTHON_SCRIPTS_HOME, file)
             ).load_module()

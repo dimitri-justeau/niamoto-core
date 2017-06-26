@@ -3,7 +3,9 @@
 import sys
 
 from sqlalchemy import create_engine
+from geopandas import GeoDataFrame
 
+from niamoto.db.geo_pandas_sql import to_postgis
 from niamoto.db.connector import Connector
 
 
@@ -129,7 +131,15 @@ class BaseDataPublisher(metaclass=PublisherMeta):
             connection = Connector.get_engine()
         else:
             connection = create_engine(db_url)
-        data.to_sql(
+        if isinstance(data, GeoDataFrame):
+            return to_postgis(
+                data,
+                destination,
+                con=connection,
+                schema=schema,
+                if_exists=if_exists
+            )
+        return data.to_sql(
             destination,
             con=connection,
             schema=schema,
