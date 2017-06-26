@@ -5,7 +5,7 @@ import sys
 from sqlalchemy import create_engine
 from geopandas import GeoDataFrame
 
-from niamoto.db.geo_pandas_sql import to_postgis
+from niamoto.data_publishers.utils.geo_pandas_sql import to_postgis
 from niamoto.db.connector import Connector
 
 

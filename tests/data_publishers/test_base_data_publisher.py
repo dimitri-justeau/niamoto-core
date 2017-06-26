@@ -2,18 +2,29 @@
 
 import unittest
 import tempfile
+import os
 
 import pandas as pd
+import geopandas as gpd
 from sqlalchemy.engine.reflection import Inspector
+from sqlalchemy import select, cast, String
 
 from niamoto.testing import set_test_path
 set_test_path()
 
-from niamoto.conf import settings
+from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.db.connector import Connector
+from niamoto.db import metadata as meta
+from niamoto.data_providers.csv_provider.csv_data_provider import \
+    CsvDataProvider
 from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
+
+
+TEST_OCCURRENCE_CSV = os.path.join(
+    NIAMOTO_HOME, 'data', 'csv', 'occurrences.csv',
+)
 
 
 class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
@@ -43,6 +54,49 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
             inspector.get_table_names(schema=settings.NIAMOTO_SCHEMA),
         )
         temp_csv.close()
+
+    def test_publish_to_postgis(self):
+        CsvDataProvider.register_data_provider_type()
+        CsvDataProvider.register_data_provider('csv_provider')
+        csv_provider = CsvDataProvider(
+            'csv_provider',
+            occurrence_csv_path=TEST_OCCURRENCE_CSV,
+        )
+        csv_provider.sync()
+        with Connector.get_connection() as connection:
+            sel = select([
+                 meta.occurrence.c.id.label('id'),
+                 meta.occurrence.c.taxon_id.label('taxon_id'),
+                 cast(meta.taxon.c.rank.label('rank'), String).label(
+                     'rank'),
+                 meta.taxon.c.full_name.label('full_name'),
+                 cast(meta.occurrence.c.location, String).label(
+                     'location'),
+             ]).select_from(
+                meta.occurrence.outerjoin(
+                    meta.taxon,
+                    meta.taxon.c.id == meta.occurrence.c.taxon_id
+                )
+            )
+            df = gpd.read_postgis(
+                sel,
+                connection,
+                index_col='id',
+                geom_col='location',
+                crs='+init=epsg:4326'
+            )
+            BaseDataPublisher._publish_sql(
+                df,
+                'test_export_postgis',
+                schema='niamoto'
+            )
+            engine = Connector.get_engine()
+            inspector = Inspector.from_engine(engine)
+            self.assertIn(
+                'test_export_postgis',
+                inspector.get_table_names(
+                    schema=settings.NIAMOTO_SCHEMA),
+            )
 
 
 if __name__ == '__main__':
