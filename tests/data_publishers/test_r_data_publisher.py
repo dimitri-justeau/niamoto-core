@@ -51,9 +51,12 @@ class TestRDataPublisher(BaseTestNiamotoSchemaCreated):
     Test for occurrences publisher.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestRDataPublisher, cls).setUpClass()
+    def test_r_data_publisher(self):
+        #  Test with empty dataframes
+        r_data_publisher = RDataPublisher(TEST_R_SCRIPT)
+        result = r_data_publisher._process()[0]
+        self.assertIsInstance(result, pd.DataFrame)
+        #  Add data
         CsvDataProvider.register_data_provider_type()
         CsvDataProvider.register_data_provider('csv_provider')
         csv_provider = CsvDataProvider(
@@ -64,9 +67,6 @@ class TestRDataPublisher(BaseTestNiamotoSchemaCreated):
         )
         csv_provider.sync()
         RasterManager.add_raster(TEST_RASTER, 'test_raster')
-
-    def test_r_data_publisher(self):
-        r_data_publisher = RDataPublisher(TEST_R_SCRIPT)
         result = r_data_publisher._process()[0]
         self.assertIsInstance(result, pd.DataFrame)
 

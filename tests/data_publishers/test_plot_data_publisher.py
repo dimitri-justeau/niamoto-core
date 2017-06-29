@@ -46,6 +46,7 @@ class TestPlotPublisher(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(result), 3)
         self.assertIsNotNone(op.get_key())
         self.assertIsNotNone(op.get_publish_formats())
+        op.process(properties="width,height")
 
 
 if __name__ == '__main__':

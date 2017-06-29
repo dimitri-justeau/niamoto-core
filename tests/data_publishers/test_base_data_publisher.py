@@ -93,13 +93,6 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
                 geom_col='location',
                 crs='+init=epsg:4326'
             )
-            gpd.read_postgis(
-                sel,
-                connection,
-                index_col='id',
-                geom_col='location',
-                crs={'init': 'epsg:4326'}
-            )
             BaseDataPublisher._publish_sql(
                 df,
                 'test_export_postgis',
@@ -111,6 +104,20 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
                 'test_export_postgis',
                 inspector.get_table_names(
                     schema=settings.NIAMOTO_SCHEMA),
+            )
+            df2 = gpd.read_postgis(
+                sel,
+                connection,
+                index_col='id',
+                geom_col='location',
+                crs={'init': 'epsg:4326'}
+            )
+            BaseDataPublisher._publish_sql(
+                df2,
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='truncate',
+                truncate_cascade=True,
             )
             # Test geometry types
             polygon = Polygon([(0, 0), (1, 0), (1, 1)])

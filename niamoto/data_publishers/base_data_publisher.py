@@ -136,7 +136,9 @@ class BaseDataPublisher(metaclass=PublisherMeta):
             connection = create_engine(db_url).connect()
         with connection.begin():
             if if_exists == 'truncate':
-                sql = "TRUNCATE {}".format(destination)
+                sql = "TRUNCATE {}".format(
+                    "{}.{}".format(schema, destination)
+                )
                 if truncate_cascade:
                     sql += " CASCADE"
                 connection.execute(sql)
