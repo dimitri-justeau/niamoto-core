@@ -52,12 +52,17 @@ class RasterDataPublisher(BaseDataPublisher):
         return "PG:{}".format(pg_str)
 
     @staticmethod
-    def _publish_tiff(raster_uri, destination, *args, **kwargs):
+    def _publish_tiff(data, destination, *args, **kwargs):
+        """
+        Publish the raster in a tiff file.
+        The data argument must be a valid GDAL url.
+        :param destination:
+        """
         LOGGER.debug("RasterDataPublisher._publish_tiff({}, {})".format(
-            raster_uri, destination
+            data, destination
         ))
         p = subprocess.Popen([
-            'gdal_translate', '-of', 'GTiff', raster_uri, destination
+            'gdal_translate', '-of', 'GTiff', data, destination
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = p.communicate()
         if stdout:

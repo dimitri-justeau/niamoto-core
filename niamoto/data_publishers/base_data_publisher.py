@@ -117,8 +117,8 @@ class BaseDataPublisher(metaclass=PublisherMeta):
     def _publish_sql(data, destination, *args, db_url=None, schema='public',
                      if_exists='fail', truncate_cascade=False, **kwargs):
         """
-        Publish a DataFrame as a table to a SQL database. Rely on pandas
-        'to_sql' method. c.f. :
+        Publish a DataFrame as a table to a SQL database.
+        Rely on pandas 'to_sql' method. c.f. :
         https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html
         :param data: A pandas DataFrame.
         :param destination: The name of the destination table.

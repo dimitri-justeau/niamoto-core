@@ -17,20 +17,11 @@ PUBLISHERS_KEYS = list(PUBLISHER_REGISTRY.keys())
 PUBLISH_COMMANDS = {}
 
 
-@click.group("publish")
-def publish_cli():
-    pass
-
-
-for pub_key in PUBLISHERS_KEYS:
-
-    publisher = PUBLISHER_REGISTRY[pub_key]['class']
-
-    @click.argument('publish_format')
+def make_publish_format_func(publish_key, publish_format):
     @click.option('--destination', '-d', default=sys.stdout)
     @click.argument('args', nargs=-1, type=click.UNPROCESSED)
     @cli_catch_unknown_error
-    def f(publish_format, *args, destination=sys.stdout, **kwargs):
+    def func(*args, destination=sys.stdout, **kwargs):
         try:
             extra_args = []
             extra_kwargs = {}
@@ -64,7 +55,7 @@ for pub_key in PUBLISHERS_KEYS:
                             extra_kwargs[last_key] = value
                         previous_is_key = False
             publish_api.publish(
-                pub_key,
+                publish_key,
                 publish_format,
                 *extra_args,
                 destination=destination,
@@ -73,6 +64,21 @@ for pub_key in PUBLISHERS_KEYS:
         except BaseDataPublisherException as e:
             click.secho(str(e), fg='red')
             click.get_current_context().exit(code=1)
+    return func
+
+
+@click.group("publish")
+def publish_cli():
+    pass
+
+
+for pub_key in PUBLISHERS_KEYS:
+
+    publisher = PUBLISHER_REGISTRY[pub_key]['class']
+
+    @cli_catch_unknown_error
+    def group(**kwargs):
+        pass
 
     signature = inspect.signature(publisher._process)
     doc = parse_docstring(publisher._process.__doc__)
@@ -81,7 +87,7 @@ for pub_key in PUBLISHERS_KEYS:
         if p_key == 'self':
             continue
         if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
-            f = click.argument(p_key)(f)
+            group = click.argument(p_key)(group)
         elif p.kind == inspect.Parameter.KEYWORD_ONLY:
             h = ""
             if p_key in doc['params']:
@@ -90,20 +96,52 @@ for pub_key in PUBLISHERS_KEYS:
             arg_type = str
             if default is not None:
                 arg_type = type(default)
-            f = click.option(
+            group = click.option(
                 "--" + p_key,
                 type=arg_type,
                 default=default,
                 help=h,
-            )(f)
+            )(group)
 
-    f = publish_cli.command(
+    group = publish_cli.group(
         pub_key,
         context_settings={'ignore_unknown_options': True},
         help=publisher.get_description(),
-    )(f)
+    )(group)
 
-    PUBLISH_COMMANDS[pub_key] = f
+    publish_formats = publisher.get_publish_formats()
+    for pub_format in publish_formats:
+        format_method = BaseDataPublisher.FORMAT_TO_METHOD[pub_format]
+        signature = inspect.signature(format_method)
+        format_doc = parse_docstring(format_method.__doc__)
+        f = make_publish_format_func(pub_key, pub_format)
+        for p_key, p in signature.parameters.items():
+            if p_key in ['data', 'destination']:
+                continue
+            if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+                f = click.argument(p_key)(f)
+            elif p.kind == inspect.Parameter.KEYWORD_ONLY:
+                h = ""
+                if p_key in format_doc['params']:
+                    h = format_doc['params'][p_key].replace("\n", " ")
+                default = p.default
+                arg_type = str
+                if default is not None:
+                    arg_type = type(default)
+                f = click.option(
+                    "--" + p_key,
+                    type=arg_type,
+                    default=default,
+                    help=h,
+                )(f)
+
+        group.command(
+            pub_format,
+            context_settings={'ignore_unknown_options': True},
+            help=format_doc['short_description'],
+        )(f)
+
+    PUBLISH_COMMANDS[pub_key] = group
 
 
 @click.command("publishers")
