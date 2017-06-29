@@ -109,7 +109,7 @@ def to_postgis(frame, name, con, schema=None, if_exists='fail',
         raise ValueError("'{0}' is not valid for if_exists".format(if_exists))
     pandas_sql = GeoSQLDatabase(con, schema=schema)
     if isinstance(frame, GeoSeries):
-        frame = frame.to_frame()
+        frame = GeoDataFrame({'geometry': frame}, geometry='geometry')
     elif not isinstance(frame, GeoDataFrame):
         raise NotImplementedError("'frame' argument should be either a "
                                   "GeoSeries or a GeoDataFrame")

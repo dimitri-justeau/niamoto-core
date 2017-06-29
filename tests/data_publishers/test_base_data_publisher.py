@@ -8,6 +8,14 @@ import pandas as pd
 import geopandas as gpd
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy import select, cast, String
+from shapely.geometry import (
+    Polygon,
+    GeometryCollection,
+    LineString,
+    MultiPoint,
+    MultiLineString,
+    MultiPolygon
+)
 
 from niamoto.testing import set_test_path
 set_test_path()
@@ -85,6 +93,13 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
                 geom_col='location',
                 crs='+init=epsg:4326'
             )
+            gpd.read_postgis(
+                sel,
+                connection,
+                index_col='id',
+                geom_col='location',
+                crs={'init': 'epsg:4326'}
+            )
             BaseDataPublisher._publish_sql(
                 df,
                 'test_export_postgis',
@@ -97,6 +112,97 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
                 inspector.get_table_names(
                     schema=settings.NIAMOTO_SCHEMA),
             )
+            # Test geometry types
+            polygon = Polygon([(0, 0), (1, 0), (1, 1)])
+            linestring = LineString([(0, 0), (0, 1), (1, 1)])
+            multipoint = MultiPoint([(1, 2), (3, 4), (5, 6)])
+            multilinestring = MultiLineString(
+                [[(1, 2), (3, 4), (5, 6)], [(7, 8), (9, 10)]]
+            )
+            polygon_2 = Polygon(
+                [(1, 1), (1, -1), (-1, -1), (-1, 1)],
+                [[(.5, .5), (.5, -.5), (-.5, -.5), (-.5, .5)]]
+            )
+            multipolygon = MultiPolygon([polygon, polygon_2])
+            geometry = GeometryCollection([polygon, polygon_2])
+            BaseDataPublisher._publish_sql(
+                gpd.GeoDataFrame(
+                    [{'A': 1, 'geom': polygon}],
+                    geometry='geom'
+                ),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            BaseDataPublisher._publish_sql(
+                gpd.GeoDataFrame(
+                    [{'A': 1, 'geom': linestring}],
+                    geometry='geom'
+                ),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            BaseDataPublisher._publish_sql(
+                gpd.GeoDataFrame(
+                    [{'A': 1, 'geom': multilinestring}],
+                    geometry='geom'
+                ),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            BaseDataPublisher._publish_sql(
+                gpd.GeoDataFrame(
+                    [{'A': 1, 'geom': multipoint}],
+                    geometry='geom'
+                ),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            BaseDataPublisher._publish_sql(
+                gpd.GeoDataFrame(
+                    [{'A': 1, 'geom': multipolygon}],
+                    geometry='geom'
+                ),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            BaseDataPublisher._publish_sql(
+                gpd.GeoDataFrame(
+                    [{'A': 1, 'geom': geometry}],
+                    geometry='geom'
+                ),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            BaseDataPublisher._publish_sql(
+                gpd.GeoDataFrame(
+                    [{'A': 1, 'geom': geometry}],
+                    geometry='geom'
+                ),
+                'TEST123',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            BaseDataPublisher._publish_sql(
+                gpd.GeoSeries([polygon]),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='replace',
+            )
+            self.assertRaises(
+                ValueError,
+                BaseDataPublisher._publish_sql,
+                gpd.GeoSeries([polygon]),
+                'test_export_postgis',
+                schema='niamoto',
+                if_exists='thisisnotallowed',
+            )
+
 
 
 if __name__ == '__main__':

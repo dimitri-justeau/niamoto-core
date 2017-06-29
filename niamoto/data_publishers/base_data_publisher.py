@@ -3,7 +3,7 @@
 import sys
 
 from sqlalchemy import create_engine
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, GeoSeries
 
 from niamoto.data_publishers.utils.geo_pandas_sql import to_postgis
 from niamoto.db.connector import Connector
@@ -141,7 +141,7 @@ class BaseDataPublisher(metaclass=PublisherMeta):
                     sql += " CASCADE"
                 connection.execute(sql)
                 if_exists = 'append'
-            if isinstance(data, GeoDataFrame):
+            if isinstance(data, (GeoDataFrame, GeoSeries)):
                 return to_postgis(
                     data,
                     destination,
