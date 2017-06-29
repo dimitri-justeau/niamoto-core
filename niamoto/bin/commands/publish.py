@@ -19,7 +19,6 @@ PUBLISH_COMMANDS = {}
 
 def make_publish_format_func(publish_key, publish_format):
     @click.option('--destination', '-d', default=sys.stdout)
-    @click.argument('args', nargs=-1, type=click.UNPROCESSED)
     @cli_catch_unknown_error
     def func(*args, destination=sys.stdout, **kwargs):
         try:
@@ -137,7 +136,6 @@ for pub_key in PUBLISHERS_KEYS:
 
         group.command(
             pub_format,
-            context_settings={'ignore_unknown_options': True},
             help=format_doc['short_description'],
         )(f)
 
