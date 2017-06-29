@@ -55,9 +55,9 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
                 publish.publish_cli,
                 [
                     OccurrenceDataPublisher.get_key(),
+                    "--properties", "dbh,height",
                     BaseDataPublisher.CSV,
                     '-d', csv_temp.name,
-                    "--properties", "dbh,height"
                 ]
             )
             self.assertEqual(result.exit_code, 0)
@@ -65,9 +65,9 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
                 publish.publish_cli,
                 [
                     "R_r_script",
+                    "--properties", "dbh,height",
                     BaseDataPublisher.CSV,
                     '-d', csv_temp.name,
-                    "--properties", "dbh,height"
                 ]
             )
             self.assertEqual(result.exit_code, 0)
@@ -75,9 +75,9 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
                 publish.publish_cli,
                 [
                     "yo",
+                    "--properties", "dbh,height",
                     BaseDataPublisher.CSV,
                     '-d', csv_temp.name,
-                    "--properties", "dbh,height"
                 ],
             )
             self.assertNotEqual(result.exit_code, 0)

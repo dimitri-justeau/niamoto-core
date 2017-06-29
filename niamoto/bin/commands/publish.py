@@ -22,43 +22,12 @@ def make_publish_format_func(publish_key, publish_format):
     @cli_catch_unknown_error
     def func(*args, destination=sys.stdout, **kwargs):
         try:
-            extra_args = []
-            extra_kwargs = {}
-            first_key = False
-            previous_is_key = False
-            last_key = None
-            for i, v in enumerate(kwargs['args']):
-                if v[:2] == '--':
-                    if i + 1 == len(kwargs['args']):
-                        extra_kwargs[v[2:]] = True
-                    if not first_key:
-                        first_key = True
-                        last_key = v[2:]
-                    else:
-                        if previous_is_key:
-                            extra_kwargs[last_key] = True
-                        last_key = v[2:]
-                    previous_is_key = True
-                else:
-                    if not first_key:
-                        extra_args.append(v)
-                    else:
-                        if previous_is_key:
-                            extra_kwargs[last_key] = v
-                        else:
-                            value = extra_kwargs[last_key]
-                            if isinstance(value, list):
-                                value.append(v)
-                            else:
-                                value = [value, v]
-                            extra_kwargs[last_key] = value
-                        previous_is_key = False
             publish_api.publish(
                 publish_key,
                 publish_format,
-                *extra_args,
+                *args,
                 destination=destination,
-                **extra_kwargs
+                **kwargs
             )
         except BaseDataPublisherException as e:
             click.secho(str(e), fg='red')
