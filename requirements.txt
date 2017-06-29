@@ -23,3 +23,6 @@ colorlog
 
 # Interaction with R
 rpy2
+
+# Doc
+sphinx

@@ -12,6 +12,9 @@ from psycopg2.extensions import register_adapter, AsIs, adapt
 
 from niamoto import conf
 
+conf.set_niamoto_home()
+conf.set_settings()
+
 
 __version__ = "0.1"
 

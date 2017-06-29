@@ -115,7 +115,7 @@ class BaseDataPublisher(metaclass=PublisherMeta):
 
     @staticmethod
     def _publish_sql(data, destination, *args, db_url=None, schema='public',
-                     if_exists='fail', **kwargs):
+                     if_exists='fail', truncate_cascade=False, **kwargs):
         """
         Publish a DataFrame as a table to a SQL database. Rely on pandas
         'to_sql' method. c.f. :
@@ -125,26 +125,36 @@ class BaseDataPublisher(metaclass=PublisherMeta):
         :param db_url: A sqlalchemy database url.
         :param schema: The name of the schema where to write the table. If
             None, use the default schema.
-        :param if_exists:  {‘fail’, ‘replace’, ‘append’}, default ‘fail’
+        :param if_exists:  {‘fail’, ‘replace’, ‘append’, 'truncate'},
+            default ‘fail’.
+        :param truncate_cascade: Truncate in cascade, default is False. Only
+            active if if_exists is 'truncate'
         """
         if db_url is None:
-            connection = Connector.get_engine()
+            connection = Connector.get_engine().connect()
         else:
-            connection = create_engine(db_url)
-        if isinstance(data, GeoDataFrame):
-            return to_postgis(
-                data,
+            connection = create_engine(db_url).connect()
+        with connection.begin():
+            if if_exists == 'truncate':
+                sql = "TRUNCATE {}".format(destination)
+                if truncate_cascade:
+                    sql += " CASCADE"
+                connection.execute(sql)
+                if_exists = 'append'
+            if isinstance(data, GeoDataFrame):
+                return to_postgis(
+                    data,
+                    destination,
+                    con=connection,
+                    schema=schema,
+                    if_exists=if_exists
+                )
+            return data.to_sql(
                 destination,
                 con=connection,
                 schema=schema,
                 if_exists=if_exists
             )
-        return data.to_sql(
-            destination,
-            con=connection,
-            schema=schema,
-            if_exists=if_exists
-        )
 
     FORMAT_TO_METHOD = {
         CSV: _publish_csv.__func__,

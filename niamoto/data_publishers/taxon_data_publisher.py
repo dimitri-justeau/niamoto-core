@@ -24,6 +24,7 @@ class TaxonDataPublisher(BaseDataPublisher):
 
     def _process(self, *args, include_mptt=False, **kwargs):
         """
+        Return the taxon dataframe.
         :param include_mptt: If True, include the mptt columns.
         """
         with Connector.get_connection() as connection:

@@ -23,6 +23,7 @@ class PlotDataPublisher(BaseDataPublisher):
 
     def _process(self, *args, properties=None, **kwargs):
         """
+        Return the plot dataframe.
         :param properties: List of properties to retain. Can be a python list
             or a comma (',') separated string.
         """

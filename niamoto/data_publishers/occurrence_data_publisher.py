@@ -24,6 +24,7 @@ class OccurrenceDataPublisher(BaseDataPublisher):
     def _process(self, *args, properties=None, drop_null_properties=False,
                  **kwargs):
         """
+        Return the occurrence dataframe.
         :param properties: List of properties to retain. Can be a python list
             or a comma (',') separated string.
         """

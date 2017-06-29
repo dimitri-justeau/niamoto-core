@@ -28,6 +28,10 @@ class RasterDataPublisher(BaseDataPublisher):
         return [cls.TIFF]
 
     def _process(self, raster_name, *args, **kwargs):
+        """
+        Return the raster PG string, usable from the GDAL PG Driver.
+        :param raster_name:
+        """
         pg_str = "dbname='{dbname}' " \
                  "host='{host}' " \
                  "port='{port}' " \
