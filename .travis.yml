@@ -21,6 +21,7 @@ before_script:
   - psql -U postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
   - psql -U postgres -c "CREATE EXTENSION postgis;"
   - sh tests/download_test_data.sh
+  - mkdir /home/travis/niamoto
   - cp -r tests/test_data/test_niamoto_home/* /home/travis/niamoto
 
 addons:
