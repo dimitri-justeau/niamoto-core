@@ -19,8 +19,10 @@ PUBLISH_COMMANDS = {}
 
 def make_publish_format_func(publish_key, publish_format):
     @click.option('--destination', '-d', default=sys.stdout)
+    @click.pass_context
     @cli_catch_unknown_error
-    def func(*args, destination=sys.stdout, **kwargs):
+    def func(ctx, *args, destination=sys.stdout, **kwargs):
+        kwargs.update(ctx.obj)
         try:
             publish_api.publish(
                 publish_key,
@@ -44,9 +46,10 @@ for pub_key in PUBLISHERS_KEYS:
 
     publisher = PUBLISHER_REGISTRY[pub_key]['class']
 
+    @click.pass_context
     @cli_catch_unknown_error
-    def group(**kwargs):
-        pass
+    def group(ctx, **kwargs):
+        ctx.obj = kwargs
 
     signature = inspect.signature(publisher._process)
     doc = parse_docstring(publisher._process.__doc__)
@@ -64,16 +67,20 @@ for pub_key in PUBLISHERS_KEYS:
             arg_type = str
             if default is not None:
                 arg_type = type(default)
+            flag = False
+            if arg_type == bool:
+                flag = True
             group = click.option(
                 "--" + p_key,
                 type=arg_type,
                 default=default,
                 help=h,
+                is_flag=flag,
             )(group)
 
     group = publish_cli.group(
         pub_key,
-        context_settings={'ignore_unknown_options': True},
+        context_settings={'ignore_unknown_options': True, },
         help=publisher.get_description(),
     )(group)
 
