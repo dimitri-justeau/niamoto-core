@@ -22,6 +22,10 @@ class TestBaseFactTable(BaseTestNiamotoSchemaCreated):
     Test case for BaseFactTable class.
     """
 
+    def setUp(self):
+        super(TestBaseFactTable, self).setUp()
+        self.tearDown()
+
     def tearDown(self):
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
@@ -29,17 +33,26 @@ class TestBaseFactTable(BaseTestNiamotoSchemaCreated):
                 schema=settings.NIAMOTO_FACT_TABLES_SCHEMA
             )
             for tb in tables:
-                connection.execute("DROP TABLE IF EXISTS {};".format(
+                connection.execute("DROP TABLE {};".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
+                ))
+        with Connector.get_connection() as connection:
+            inspector = Inspector.from_engine(connection)
+            tables = inspector.get_table_names(
+                schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
+            )
+            for tb in tables:
+                connection.execute("DROP TABLE {};".format(
+                    "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
                 ))
 
     def test_base_fact_table(self):
         dim_1 = BaseDimension(
-            "test_dimension_1",
+            "test_dim_1",
             columns=[sa.Column('value', sa.Integer)]
         )
         dim_2 = BaseDimension(
-            "test_dimension_2",
+            "test_dim_2",
             columns=[sa.Column('value', sa.Integer)]
         )
         ft = BaseFactTable(

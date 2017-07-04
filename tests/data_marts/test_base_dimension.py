@@ -36,15 +36,28 @@ class TestBaseDimension(BaseTestNiamotoSchemaCreated):
     Test case for BaseDimension class.
     """
 
+    def setUp(self):
+        super(TestBaseDimension, self).setUp()
+        self.tearDown()
+
     def tearDown(self):
+        with Connector.get_connection() as connection:
+            inspector = Inspector.from_engine(connection)
+            tables = inspector.get_table_names(
+                schema=settings.NIAMOTO_FACT_TABLES_SCHEMA
+            )
+            for tb in tables:
+                connection.execute("DROP TABLE {};".format(
+                    "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
+                ))
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
                 schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
             )
             for tb in tables:
-                connection.execute("DROP TABLE IF EXISTS {};".format(
-                    "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
+                connection.execute("DROP TABLE {}.{}".format(
+                    settings.NIAMOTO_DIMENSIONS_SCHEMA, tb
                 ))
 
     def test_base_dimension(self):
@@ -111,5 +124,6 @@ if __name__ == '__main__':
     TestDatabaseManager.create_schema(settings.NIAMOTO_RASTER_SCHEMA)
     TestDatabaseManager.create_schema(settings.NIAMOTO_VECTOR_SCHEMA)
     TestDatabaseManager.create_schema(settings.NIAMOTO_DIMENSIONS_SCHEMA)
+    TestDatabaseManager.create_schema(settings.NIAMOTO_FACT_TABLES_SCHEMA)
     unittest.main(exit=False)
     TestDatabaseManager.teardown_test_database()
