@@ -27,23 +27,26 @@ TAXONOMY_CSV_PATH = os.path.join(
 )
 
 
-class TestOccurrencesPublisher(BaseTestNiamotoSchemaCreated):
+class TestTaxaPublisher(BaseTestNiamotoSchemaCreated):
     """
-    Test for occurrences publisher.
+    Test for taxa publisher.
     """
 
     @classmethod
     def setUpClass(cls):
-        super(TestOccurrencesPublisher, cls).setUpClass()
+        super(TestTaxaPublisher, cls).setUpClass()
         set_taxonomy(TAXONOMY_CSV_PATH)
 
-    def test_occurrences_publisher(self):
+    def test_taxa_publisher(self):
         publisher = TaxonDataPublisher()
-        result = publisher.process(include_mptt=True)
+        result = publisher.process(
+            include_mptt=True,
+            include_synonyms=True,
+            flatten=True,
+        )
         self.assertEqual(len(result), 3)
         self.assertIsNotNone(publisher.get_key())
         self.assertIsNotNone(publisher.get_publish_formats())
-
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
