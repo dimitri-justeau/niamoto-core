@@ -66,16 +66,16 @@ class TaxonDataPublisher(BaseDataPublisher):
 
 
 def _flatten(df):
-    ranks = [opt.value for opt in meta.TaxonRankEnum]
+    ranks = [opt.value.lower() for opt in meta.TaxonRankEnum]
     for r in ranks:
         df[r] = None
 
     def _flatten_row(row):
-        row[row['rank']] = row['full_name']
+        row[row['rank'].lower()] = row['full_name']
         parent_id = row['parent_id']
         while pd.notnull(parent_id):
             parent = df.loc[parent_id]
-            row[parent['rank']] = parent['full_name']
+            row[parent['rank'].lower()] = parent['full_name']
             parent_id = parent['parent_id']
         return row
 

@@ -100,9 +100,9 @@ class BaseDimension:
         :param dataframe: The dataframe to populate from.
         """
         LOGGER.debug("Populating {}".format(self))
-        cols = list(dataframe.columns)
+        cols = [c.name for c in self.columns]
         s = io.StringIO()
-        dataframe.fillna(value=self.NS_VALUE).to_csv(s, columns=cols)
+        dataframe[cols].fillna(value=self.NS_VALUE).to_csv(s, columns=cols)
         s.seek(0)
         sql_copy = \
             """
