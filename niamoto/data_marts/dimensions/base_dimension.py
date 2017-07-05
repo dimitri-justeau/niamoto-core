@@ -44,7 +44,7 @@ class BaseDimension:
         self.table = sa.Table(
             *table_args,
             schema=dim_schema,
-            extend_existing=self._exists,
+            extend_existing=self._exists
         )
 
     @property
