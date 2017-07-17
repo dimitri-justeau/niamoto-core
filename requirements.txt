@@ -6,14 +6,12 @@ GeoAlchemy2
 
 # Data manipulation / analysis libraries
 pandas
+cubes
 
 # Geo libraries
 shapely
 rasterio
 geopandas
-
-# Tasks and workflows
-# airflow[postgres]
 
 # CLI
 click

@@ -33,3 +33,11 @@ class TaxonDimension(BaseDimension):
             flatten=True,
             **kwargs
         )
+
+    @classmethod
+    def get_key(cls):
+        return "TAXON_DIMENSION"
+
+    @classmethod
+    def get_description(cls):
+        return "Taxon dimension."

@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import io
+from datetime import datetime
 
 from sqlalchemy.engine.reflection import Inspector
 import sqlalchemy as sa
@@ -15,7 +16,23 @@ from niamoto.log import get_logger
 LOGGER = get_logger(__name__)
 
 
-class BaseDimension:
+DIMENSION_TYPE_REGISTRY = {}
+
+
+class DimensionMeta(type):
+
+    def __init__(cls, *args, **kwargs):
+        try:
+            DIMENSION_TYPE_REGISTRY[cls.get_key()] = {
+                'class': cls,
+                'description': cls.get_description()
+            }
+        except NotImplementedError:
+            pass
+        return super(DimensionMeta, cls).__init__(cls)
+
+
+class BaseDimension(metaclass=DimensionMeta):
     """
     Base class representing a dimension in the dimensional modelling.
     """
@@ -28,8 +45,8 @@ class BaseDimension:
         :param name: The name of the dimension. The dimension table will have
             this name.
         :param columns: An iterable of sqlalchemy columns objects.
-            The primary column is created automatically so it does not have
-            to be in the column list.
+            The primary key column is created automatically so it does not
+            have to be in the column list.
         :param publisher: The publisher to use for populating the dimension.
         """
         self.name = name
@@ -54,6 +71,20 @@ class BaseDimension:
     @publisher.setter
     def publisher(self, value):
         self._publisher = value
+
+    @classmethod
+    def get_key(cls):
+        """
+        :return: The key of the conformed dimension.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def get_description(cls):
+        """
+        :return: The description of the conformed dimension.
+        """
+        raise NotImplementedError()
 
     def is_created(self, connection=None):
         """
@@ -87,10 +118,42 @@ class BaseDimension:
                 "be skipped."
             LOGGER.warning(m.format(self.name))
             return
-        self.table.create(connection)
+        with connection.begin():
+            self.table.create(connection)
+            ins = meta.dimension_registry.insert().values({
+                'name': self.name,
+                'dimension_key': self.get_key(),
+                'date_create': datetime.now(),
+            })
+            connection.execute(ins)
         if close_after:
             connection.close()
         LOGGER.debug("{} successfully created".format(self))
+
+    def drop_dimension(self, connection=None):
+        """
+        Drop an existing dimension.
+        :param connection: If not None, use an existing connection.
+        """
+        LOGGER.debug("Dropping {}".format(self))
+        close_after = False
+        if connection is None:
+            connection = Connector.get_engine().connect()
+            close_after = True
+        if not self.is_created(connection):
+            m = "The dimension {} does not exists in database. Drop will " \
+                "be skipped"
+            LOGGER.warning(m.format(self.name))
+            return
+        with connection.begin():
+            self.table.drop(connection)
+            delete = meta.dimension_registry.delete().where(
+                meta.dimension_registry.c.name == self.name
+            )
+            connection.execute(delete)
+        if close_after:
+            connection.close()
+        LOGGER.debug("{} successfully dropped".format(self))
 
     def populate(self, dataframe):
         """

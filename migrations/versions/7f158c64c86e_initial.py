@@ -114,6 +114,17 @@ def upgrade():
         schema='niamoto'
     )
     op.create_table(
+        'dimension_registry',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
+        sa.Column('dimension_key', sa.String(length=100), nullable=False),
+        sa.Column('date_create', sa.DateTime(), nullable=False),
+        sa.Column('date_update', sa.DateTime(), nullable=True),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('name', name=op.f('uq_dimension_registry_name')),
+        schema='niamoto'
+    )
+    op.create_table(
         'data_provider',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(length=100), nullable=False),

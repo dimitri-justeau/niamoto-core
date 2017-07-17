@@ -285,3 +285,20 @@ vector_registry = Table(
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
+
+
+# ------------------------- #
+#  Dimension registry table #
+# ------------------------- #
+
+dimension_registry = Table(
+    'dimension_registry',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), nullable=False),
+    Column('dimension_key', String(100), nullable=False),
+    Column('date_create', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=True),
+    UniqueConstraint('name', name='name'),
+    schema=settings.NIAMOTO_SCHEMA,
+)

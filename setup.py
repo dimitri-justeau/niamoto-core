@@ -21,4 +21,18 @@ setup(
             'niamoto=niamoto.bin.cli:niamoto_cli',
         ],
     },
+    install_requires=[
+        'sqlalchemy',
+        'alembic',
+        'psycopg2',
+        'GeoAlchemy2',
+        'pandas',
+        'shapely',
+        'rasterio',
+        'geopandas',
+        'click',
+        'colorlog',
+        'rpy2',
+        'sphinx',
+    ],
  )
