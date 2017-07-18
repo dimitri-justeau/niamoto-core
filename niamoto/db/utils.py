@@ -36,7 +36,7 @@ def fix_db_sequences_ownership():
         res = connection.execute(
             """
             SELECT 'ALTER SEQUENCE '|| quote_ident(MIN(schema_name)) ||'.'|| quote_ident(MIN(seq_name))
-                   ||' OWNED BY '|| quote_ident(MIN(TABLE_NAME)) ||'.'|| quote_ident(MIN(column_name)) ||';'
+                   ||' OWNED BY '|| quote_ident(MIN(schema_name)) ||'.'|| quote_ident(MIN(TABLE_NAME)) ||'.'|| quote_ident(MIN(column_name)) ||';'
             FROM (
                 SELECT
                     n.nspname AS schema_name,

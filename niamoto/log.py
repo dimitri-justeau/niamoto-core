@@ -62,10 +62,6 @@ def get_logger(name, log_format=LOG_FORMAT, colorlog_format=COLOR_LOG_FORMAT,
         info_fmt=info_format,
         date_fmt=date_format,
     )
-    formatter_file = logging.Formatter(
-        fmt=log_format,
-        datefmt=date_format,
-    )
     # Steam handler
     stream_handler = colorlog.StreamHandler()
     stream_handler.setFormatter(formatter_stream)
@@ -74,6 +70,8 @@ def get_logger(name, log_format=LOG_FORMAT, colorlog_format=COLOR_LOG_FORMAT,
     # Create logger
     logger = colorlog.getLogger(name)
     logger.setLevel(logging.DEBUG)
+    if len(logger.handlers) > 0:
+        return logger
     if os.path.exists(NIAMOTO_HOME):
         # File handler
         file_handler = RotatingFileHandler(log_file, 'a', 1000000, 1)
@@ -81,4 +79,5 @@ def get_logger(name, log_format=LOG_FORMAT, colorlog_format=COLOR_LOG_FORMAT,
         file_handler.setLevel(file_logging_level)
         logger.addHandler(file_handler)
     logger.addHandler(stream_handler)
+    logger.propagate = False
     return logger

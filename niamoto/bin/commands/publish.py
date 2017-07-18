@@ -103,11 +103,15 @@ for pub_key in PUBLISHERS_KEYS:
                 arg_type = str
                 if default is not None:
                     arg_type = type(default)
+                flag = False
+                if arg_type == bool:
+                    flag = True
                 f = click.option(
                     "--" + p_key,
                     type=arg_type,
                     default=default,
                     help=h,
+                    is_flag=flag,
                 )(f)
 
         group.command(
