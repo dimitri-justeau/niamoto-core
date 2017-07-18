@@ -15,7 +15,7 @@ setup(
     author='Dimitri Justeau',
     author_email='dimitri.justeau@gmail.com',
     url='https://github.com/dimitri-justeau/niamoto-core/',
-    packages=find_packages(),
+    packages=find_packages() + ['migrations'],
     entry_points={
         'console_scripts': [
             'niamoto=niamoto.bin.cli:niamoto_cli',
