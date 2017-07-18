@@ -13,6 +13,13 @@ LOGS_DIR = os.path.join(NIAMOTO_HOME, 'logs')
 LOG_FILE = os.path.join(LOGS_DIR, 'niamoto.log')
 
 
+def update_log_path():
+    global LOGS_DIR, LOG_FILE
+    from niamoto.conf import NIAMOTO_HOME
+    LOGS_DIR = os.path.join(NIAMOTO_HOME, 'logs')
+    LOG_FILE = os.path.join(LOGS_DIR, 'niamoto.log')
+
+
 if os.path.exists(NIAMOTO_HOME):
     if not os.path.exists(LOGS_DIR) or not os.path.isdir(LOGS_DIR):
         os.mkdir(LOGS_DIR)
@@ -51,9 +58,9 @@ class NiamotoLogFormatter(colorlog.ColoredFormatter):
         return super(NiamotoLogFormatter, self).format(record)
 
 
-def get_logger(name, log_format=LOG_FORMAT, colorlog_format=COLOR_LOG_FORMAT,
-               info_format=INFO_LOG_FORMAT, date_format=DATE_FORMAT,
-               log_file=LOG_FILE):
+def get_logger(name, colorlog_format=COLOR_LOG_FORMAT,
+               info_format=INFO_LOG_FORMAT, date_format=DATE_FORMAT):
+    log_file = LOG_FILE
     file_logging_level = FILE_LOGGING_LEVEL
     stream_logging_level = STREAM_LOGGING_LEVEL
     # Formatter

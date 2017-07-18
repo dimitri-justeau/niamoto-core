@@ -38,6 +38,9 @@ def set_niamoto_home(niamoto_home_path=None):
         os.environ[HOME_ENVIRONMENT_VARIABLE] = NIAMOTO_HOME
     # Append NIAMOTO_HOME to sys.path
     sys.path.append(NIAMOTO_HOME)
+    # Update log file path
+    from niamoto import log
+    log.update_log_path()
 
 
 # Global settings
