@@ -10,7 +10,7 @@ from niamoto.decorators import cli_catch_unknown_error
 
 @click.command('init_niamoto_home')
 @click.option('--niamoto_home_path', default=None)
-# @cli_catch_unknown_error
+@cli_catch_unknown_error
 def init_niamoto_home_cli(niamoto_home_path=None):
     """
     Initialize the Niamoto home directory.
