@@ -29,8 +29,9 @@ class RasterDataPublisher(BaseDataPublisher):
 
     def _process(self, raster_name, *args, **kwargs):
         """
-        Return the raster PG string, usable from the GDAL PG Driver.
-        :param raster_name:
+        :param raster_name: The raster name in Niamoto raster database.
+        :return: The raster PG string, usable from the GDAL PG Driver.
+
         """
         pg_str = "dbname='{dbname}' " \
                  "host='{host}' " \

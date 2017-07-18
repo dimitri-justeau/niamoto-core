@@ -2,10 +2,11 @@
 
 import unittest
 import os
-from datetime import datetime
 import logging
 
 from sqlalchemy.engine.reflection import Inspector
+from sqlalchemy import Table
+import geopandas as gpd
 
 from niamoto.testing import set_test_path
 
@@ -131,6 +132,27 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
             VectorManager.delete_vector,
             'ncl_adm1'
         )
+
+    def test_get_geometry_column(self):
+        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        geom_col = VectorManager.get_geometry_column('ncl_adm1')
+        self.assertEqual(geom_col, ('wkb_geometry', 'MULTIPOLYGON', 4326))
+
+    def test_get_vector_primary_key_columns(self):
+        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        pk_cols = VectorManager.get_vector_primary_key_columns('ncl_adm1')
+        self.assertEqual(pk_cols, [('ogc_fid', 'integer')])
+
+    def test_get_vector_geo_dataframe(self):
+        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        df = VectorManager.get_vector_geo_dataframe('ncl_adm1')
+        self.assertIsInstance(df, gpd.GeoDataFrame)
+
+    def test_get_vector_sqlalchemy_table(self):
+        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        table = VectorManager.get_vector_sqlalchemy_table('ncl_adm1')
+        self.assertIsInstance(table, Table)
+        self.assertEqual(table.name, 'ncl_adm1')
 
 
 if __name__ == '__main__':

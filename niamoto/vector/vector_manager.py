@@ -4,8 +4,9 @@ from datetime import datetime
 import subprocess
 import os
 
-from sqlalchemy import select
+from sqlalchemy import select, MetaData
 import pandas as pd
+import geopandas as gpd
 
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
@@ -199,3 +200,92 @@ class VectorManager:
         if r == 0:
             m = "The vector '{}' does not exist in database."
             raise NoRecordFoundError(m.format(name))
+
+    @classmethod
+    def get_geometry_column(cls, vector_name):
+        """
+        Find the geometry column of a raster, inspecting the geometry_columns
+        table. Assume that there is a single geometry column, if several are
+        queried return the first one.
+        :return: The geometry column name, type and srid (name, type, srid).
+        """
+        with Connector.get_connection() as connection:
+            cls.assert_vector_exists(vector_name, connection)
+            sql = \
+                """
+                SELECT f_geometry_column,
+                    type,
+                    srid
+                FROM public.geometry_columns
+                WHERE f_table_schema = '{}'
+                    AND f_table_name = '{}'
+                LIMIT 1;
+                """.format(
+                    settings.NIAMOTO_VECTOR_SCHEMA,
+                    vector_name
+                )
+            result = connection.execute(sql)
+            return result.fetchone()
+
+    @classmethod
+    def get_vector_primary_key_columns(cls, vector_name):
+        with Connector.get_connection() as connection:
+            cls.assert_vector_exists(vector_name, connection)
+            sql = \
+                """
+                SELECT a.attname,
+                    format_type(a.atttypid, a.atttypmod) AS data_type
+                FROM pg_index i
+                JOIN pg_attribute a ON a.attrelid = i.indrelid
+                    AND a.attnum = ANY(i.indkey)
+                WHERE i.indrelid = '{}.{}'::regclass
+                    AND i.indisprimary;
+                """.format(
+                    settings.NIAMOTO_VECTOR_SCHEMA,
+                    vector_name,
+                )
+            result = connection.execute(sql)
+            return result.fetchall()
+
+    @classmethod
+    def get_vector_geo_dataframe(cls, vector_name):
+        """
+        Return a registered vector as a GeoDataFrame.
+        :param vector_name: The name of the vector.
+        :return: A GeoDataFrame corresponding to the vector.
+        """
+        geom_col = cls.get_geometry_column(vector_name)
+        pk_cols = cls.get_vector_primary_key_columns(vector_name)
+        with Connector.get_connection() as connection:
+            sql = "SELECT * FROM {}.{};".format(
+                settings.NIAMOTO_VECTOR_SCHEMA,
+                vector_name
+            )
+            return gpd.read_postgis(
+                sql,
+                connection,
+                index_col=[i[0] for i in pk_cols],
+                geom_col=geom_col[0],
+                crs='+init=epgs:{}'.format(geom_col[2]),
+            )
+
+    @classmethod
+    def get_vector_sqlalchemy_table(cls, vector_name):
+        """
+        Inspect the vector table and return a SQLAlchemy
+        Table metadata object.
+        :param vector_name: The vector to inspect.
+        :return: A SQLAlchemy Table metadata object.
+        """
+        with Connector.get_connection() as connection:
+            cls.assert_vector_exists(vector_name, connection)
+            meta_ = MetaData()
+            meta_.reflect(
+                bind=connection,
+                schema=settings.NIAMOTO_VECTOR_SCHEMA,
+            )
+            table_key = '{}.{}'.format(
+                settings.NIAMOTO_VECTOR_SCHEMA,
+                vector_name,
+            )
+            return meta_.tables[table_key]
