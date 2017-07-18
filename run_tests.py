@@ -12,6 +12,10 @@ from niamoto import log
 log.STREAM_LOGGING_LEVEL = logging.CRITICAL
 log.FILE_LOGGING_LEVEL = logging.DEBUG
 
+for handler in logging.getLogger('niamoto').handlers:
+    if isinstance(handler, logging.StreamHandler):
+        handler.setLevel(logging.CRITICAL)
+
 
 if __name__ == "__main__":
     from niamoto.testing.test_database_manager import TestDatabaseManager

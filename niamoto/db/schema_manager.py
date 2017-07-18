@@ -22,7 +22,7 @@ class SchemaManager:
     """
 
     SCRIPT_LOCATION = os.path.join(
-        os.path.dirname(os.path.dirname(niamoto.__file__)),
+        os.path.dirname(niamoto.__file__),
         'migrations',
     )
     CONFIG = Config()

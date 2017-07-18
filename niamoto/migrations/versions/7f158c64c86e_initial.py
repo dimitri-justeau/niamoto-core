@@ -280,6 +280,7 @@ def downgrade():
     op.drop_table('data_provider', schema='niamoto')
     op.drop_table('raster_registry', schema='niamoto')
     op.drop_table('vector_registry', schema='niamoto')
+    op.drop_table('dimension_registry', schema='niamoto')
     op.drop_table('taxon', schema='niamoto')
     op.drop_table('data_provider_type', schema='niamoto')
     op.drop_table('synonym_key_registry', schema='niamoto')
