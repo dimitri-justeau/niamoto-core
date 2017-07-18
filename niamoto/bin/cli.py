@@ -20,9 +20,12 @@ from niamoto.bin.commands.data_provider import list_data_provider_types, \
 from niamoto.bin.commands.taxonomy import set_taxonomy_cli, \
     map_all_synonyms_cli, get_synonym_keys_cli
 from niamoto.bin.commands.status import get_general_status_cli
-from niamoto.bin.commands.publish import publish_cli, list_publishers_cli, \
-    list_publish_formats_cli
+
 from niamoto import conf
+from niamoto.log import get_logger
+
+
+LOGGER = get_logger(__name__)
 
 
 @click.group()
@@ -38,8 +41,11 @@ def niamoto_cli(context, niamoto_home=conf.DEFAULT_NIAMOTO_HOME):
     """
     context.params['niamoto_home'] = niamoto_home
     os.environ['NIAMOTO_HOME'] = niamoto_home
-    conf.set_niamoto_home()
-    conf.set_settings()
+    try:
+        conf.set_niamoto_home()
+        conf.set_settings()
+    except Exception as err:
+        LOGGER.debug(str(err))
 
 
 # General commands
@@ -77,9 +83,15 @@ niamoto_cli.add_command(map_all_synonyms_cli)
 niamoto_cli.add_command(get_synonym_keys_cli)
 
 # Data publisher commands
-niamoto_cli.add_command(publish_cli)
-niamoto_cli.add_command(list_publishers_cli)
-niamoto_cli.add_command(list_publish_formats_cli)
+try:
+    from niamoto.bin.commands.publish import publish_cli, list_publishers_cli, \
+        list_publish_formats_cli
+    niamoto_cli.add_command(publish_cli)
+    niamoto_cli.add_command(list_publishers_cli)
+    niamoto_cli.add_command(list_publish_formats_cli)
+except Exception as e:
+    LOGGER.debug(str(e))
+
 
 
 if __name__ == '__main__':

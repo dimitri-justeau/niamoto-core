@@ -19,10 +19,15 @@ else:
     NIAMOTO_HOME = os.environ[HOME_ENVIRONMENT_VARIABLE]
 
 
+def unset_niamoto_home():
+    global NIAMOTO_HOME
+    if NIAMOTO_HOME in sys.path:
+        sys.path.remove(NIAMOTO_HOME)
+
+
 def set_niamoto_home(niamoto_home_path=None):
     global NIAMOTO_HOME
-    if NIAMOTO_HOME is sys.path:
-        sys.path.remove(NIAMOTO_HOME)
+    unset_niamoto_home()
     if niamoto_home_path is None:
         if HOME_ENVIRONMENT_VARIABLE not in os.environ:
             NIAMOTO_HOME = DEFAULT_NIAMOTO_HOME
@@ -34,10 +39,6 @@ def set_niamoto_home(niamoto_home_path=None):
     # Append NIAMOTO_HOME to sys.path
     sys.path.append(NIAMOTO_HOME)
 
-
-# Create home folder if not existing
-if not os.path.exists(NIAMOTO_HOME):
-    os.makedirs(NIAMOTO_HOME)
 
 # Global settings
 settings = DynamicSettings()

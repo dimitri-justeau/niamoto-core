@@ -11,9 +11,18 @@ from geoalchemy2.shape import to_shape
 from psycopg2.extensions import register_adapter, AsIs, adapt
 
 from niamoto import conf
+from niamoto.log import get_logger
 
-conf.set_niamoto_home()
-conf.set_settings()
+
+LOGGER = get_logger(__name__)
+
+
+try:
+    conf.set_niamoto_home()
+    conf.set_settings()
+except:
+    LOGGER.warning("It seems like your $NIAMOTO_HOME does not contains "
+                   "a settings file (settings.py)")
 
 
 __version__ = "0.1"
