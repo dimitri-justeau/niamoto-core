@@ -13,16 +13,19 @@ LOGS_DIR = os.path.join(NIAMOTO_HOME, 'logs')
 LOG_FILE = os.path.join(LOGS_DIR, 'niamoto.log')
 
 
+if os.path.exists(NIAMOTO_HOME):
+    if not os.path.exists(LOGS_DIR) or not os.path.isdir(LOGS_DIR):
+        os.mkdir(LOGS_DIR)
+
+
 def update_log_path():
     global LOGS_DIR, LOG_FILE
     from niamoto.conf import NIAMOTO_HOME
     LOGS_DIR = os.path.join(NIAMOTO_HOME, 'logs')
     LOG_FILE = os.path.join(LOGS_DIR, 'niamoto.log')
-
-
-if os.path.exists(NIAMOTO_HOME):
-    if not os.path.exists(LOGS_DIR) or not os.path.isdir(LOGS_DIR):
-        os.mkdir(LOGS_DIR)
+    if os.path.exists(NIAMOTO_HOME):
+        if not os.path.exists(LOGS_DIR) or not os.path.isdir(LOGS_DIR):
+            os.mkdir(LOGS_DIR)
 
 
 LOG_FORMAT = "%(asctime)s [%(levelname)s] <%(name)s> %(message)s"
