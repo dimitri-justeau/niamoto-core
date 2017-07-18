@@ -7,6 +7,7 @@ from alembic import migration
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic import environment
+from alembic import command
 
 import niamoto
 from niamoto.db.connector import Connector
@@ -22,10 +23,10 @@ class SchemaManager:
     """
 
     SCRIPT_LOCATION = os.path.join(
-        os.path.dirname(os.path.dirname(niamoto.__file__)),
+        os.path.dirname(niamoto.__file__),
         'migrations',
     )
-    CONFIG = Config()
+    CONFIG = Config(os.path.join(SCRIPT_LOCATION, 'alembic.ini'))
     CONFIG.set_main_option("script_location", SCRIPT_LOCATION)
     SCRIPT = ScriptDirectory.from_config(CONFIG)
     ENV = environment.EnvironmentContext(
@@ -52,7 +53,7 @@ class SchemaManager:
     @classmethod
     def upgrade_db(cls, revision):
         LOGGER.debug("Upgrading database to revision '{}'...".format(revision))
-        wd = os.path.dirname(os.path.dirname(niamoto.__file__))
+        wd = cls.SCRIPT_LOCATION
         result = subprocess.Popen(
             ["alembic", "upgrade", revision],
             cwd=wd,
@@ -68,7 +69,7 @@ class SchemaManager:
         LOGGER.debug(
             "Downgrading database to revision '{}'...".format(revision)
         )
-        wd = os.path.dirname(os.path.dirname(niamoto.__file__))
+        wd = cls.SCRIPT_LOCATION
         result = subprocess.Popen(
             ["alembic", "downgrade", revision],
             cwd=wd,

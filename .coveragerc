@@ -1,2 +1,3 @@
 [run]
   source = niamoto
+  omit = niamoto/migrations/*
