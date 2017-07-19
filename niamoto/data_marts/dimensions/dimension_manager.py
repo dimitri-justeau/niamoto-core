@@ -34,3 +34,18 @@ class DimensionManager:
                 connection,
                 index_col=meta.dimension_registry.c.id.name
             )
+
+    @classmethod
+    def get_dimension(cls, dimension_name):
+        """
+        Loads a registered dimension.
+        :param dimension_name: The name of the dimension to load.
+        :return: The loaded dimension.
+        """
+        sel = sa.select([meta.dimension_registry.c.dimension_key, ]).where(
+            meta.dimension_registry.c.name == dimension_name
+        )
+        with Connector.get_connection() as connection:
+            result = connection.execute(sel)
+            dim_type = result.fetchone()[0]
+        return DIMENSION_TYPE_REGISTRY[dim_type]['class'].load(dimension_name)

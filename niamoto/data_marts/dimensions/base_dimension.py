@@ -40,10 +40,11 @@ class BaseDimension(metaclass=DimensionMeta):
     PK_COLUMN_NAME = 'id'
     NS_VALUE = 'NS'
 
-    def __init__(self, name, columns, publisher=None):
+    def __init__(self, name, columns, publisher=None, label_col='label'):
         """
         :param name: The name of the dimension. The dimension table will have
             this name.
+        :param: label_col: The name of the label columns. Default is 'label'.
         :param columns: An iterable of sqlalchemy columns objects.
             The primary key column is created automatically so it does not
             have to be in the column list.
@@ -51,6 +52,7 @@ class BaseDimension(metaclass=DimensionMeta):
         """
         self.name = name
         self.columns = columns
+        self.label_col = label_col
         self.pk = sa.Column(self.PK_COLUMN_NAME, sa.Integer, primary_key=True)
         self._publisher = publisher
         self._exists = False
@@ -83,6 +85,15 @@ class BaseDimension(metaclass=DimensionMeta):
     def get_description(cls):
         """
         :return: The description of the conformed dimension.
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def load(cls, dimension_name):
+        """
+        Load a Dimension instance from its name.
+        :param dimension_name: The name of the dimension.
+        :return: The loaded dimension
         """
         raise NotImplementedError()
 
@@ -204,8 +215,12 @@ class BaseDimension(metaclass=DimensionMeta):
             df = pd.read_sql(sql, connection, index_col=self.PK_COLUMN_NAME)
         return df
 
+    def get_labels(self):
+        return self.get_values()[self.label_col]
+
     def __repr__(self):
-        return "BaseDimension('{}', {})".format(
+        return "{}('{}', {})".format(
+            self.__class__.__name__,
             self.name,
             self.columns
         )
