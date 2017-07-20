@@ -30,6 +30,13 @@ def create_vector_dimension(vector_name, label_col='label', populate=True):
     return dim
 
 
+def get_registered_dimensions():
+    """
+    :return: The registered dimensions.
+    """
+    return DimensionManager.get_registered_dimensions()
+
+
 def get_dimension_types():
     """
     :return: The available dimension types.
@@ -52,6 +59,13 @@ def delete_dimension(dimension_name):
     :param dimension_name: The name of the dimension to delete.
     """
     return DimensionManager.delete_dimension(dimension_name)
+
+
+def get_registered_fact_tables():
+    """
+    :return: The registered fact tables.
+    """
+    return FactTableManager.get_registered_fact_tables()
 
 
 def delete_fact_table(fact_table_name):

@@ -22,7 +22,8 @@ from niamoto.bin.commands.taxonomy import set_taxonomy_cli, \
 from niamoto.bin.commands.status import get_general_status_cli
 from niamoto.bin.commands.publish import publish_cli, list_publishers_cli, \
     list_publish_formats_cli, init_publish_cli
-from niamoto.bin.commands.data_marts import list_dimension_types_cli
+from niamoto.bin.commands.data_marts import list_dimension_types_cli, \
+    list_dimensions_cli, list_fact_tables_cli
 
 from niamoto import conf
 from niamoto.log import get_logger
@@ -93,6 +94,8 @@ niamoto_cli.add_command(list_publish_formats_cli)
 
 # Data marts commands
 niamoto_cli.add_command(list_dimension_types_cli)
+niamoto_cli.add_command(list_dimensions_cli)
+niamoto_cli.add_command(list_fact_tables_cli)
 
 
 if __name__ == '__main__':

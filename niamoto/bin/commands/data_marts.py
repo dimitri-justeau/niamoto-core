@@ -34,8 +34,19 @@ def list_dimensions_cli():
     """
     List registered dimensions.
     """
+    from niamoto.bin.utils import format_datetime_to_date
+    from niamoto.api import data_marts_api
     try:
-        pass
+        dimensions_df = data_marts_api.get_registered_dimensions()
+        if len(dimensions_df) == 0:
+            click.secho("There are no registered dimensions in database.")
+            return
+        click.secho(dimensions_df.to_string(
+            formatters={
+                'date_create': format_datetime_to_date,
+                'date_update': format_datetime_to_date,
+            }
+        ))
     except BaseDataMartException as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
@@ -43,12 +54,25 @@ def list_dimensions_cli():
 
 @click.command('fact_tables')
 @cli_catch_unknown_error
-def list_fact_tables():
+def list_fact_tables_cli():
     """
     List registered fact tables.
     """
+    from niamoto.bin.utils import format_datetime_to_date
+    from niamoto.api import data_marts_api
     try:
-        pass
+        fact_tables_df = data_marts_api.get_registered_fact_tables()
+        if len(fact_tables_df) == 0:
+            click.secho(
+                "There are no registered fact tables in database."
+            )
+            return
+        click.secho(fact_tables_df.to_string(
+            formatters={
+                'date_create': format_datetime_to_date,
+                'date_update': format_datetime_to_date,
+            }
+        ))
     except BaseDataMartException as e:
         click.secho(str(e), fg='red')
         click.get_current_context().exit(code=1)
