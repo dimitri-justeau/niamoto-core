@@ -15,6 +15,7 @@ from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.data_marts.dimensional_model import DimensionalModel, \
     load_model_from_dict
+from niamoto.testing.test_data_marts import TestDimension
 from niamoto.db.connector import Connector
 
 
