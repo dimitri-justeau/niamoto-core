@@ -4,7 +4,6 @@ import click
 
 from niamoto.exceptions import DataSourceNotFoundError
 from niamoto.decorators import cli_catch_unknown_error
-from niamoto.bin.utils import format_datetime_to_date
 
 
 @click.command('set_taxonomy')
@@ -60,6 +59,7 @@ def get_synonym_keys_cli():
     """
     List the registered synonym keys.
     """
+    from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api.taxonomy_api import get_synonym_keys
     synonym_keys = get_synonym_keys()
     click.echo(synonym_keys.to_string(

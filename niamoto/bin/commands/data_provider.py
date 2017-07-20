@@ -2,7 +2,6 @@
 
 import click
 
-from niamoto.bin.utils import format_datetime_to_date
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
     BaseDataProviderException, NiamotoException
 from niamoto.decorators import cli_catch_unknown_error
@@ -30,6 +29,7 @@ def list_data_providers():
     """
     List registered data providers.
     """
+    from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api.data_provider_api import get_data_provider_list
     providers_df = get_data_provider_list()
     if len(providers_df) == 0:

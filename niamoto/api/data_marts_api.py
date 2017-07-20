@@ -5,6 +5,8 @@ Data marts API module
 """
 
 from niamoto.data_marts.fact_tables.fact_table_manager import FactTableManager
+from niamoto.data_marts.dimensions.base_dimension import \
+    DIMENSION_TYPE_REGISTRY
 from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 from niamoto.log import get_logger
@@ -26,6 +28,13 @@ def create_vector_dimension(vector_name, label_col='label', populate=True):
     if populate:
         dim.populate_from_publisher()
     return dim
+
+
+def get_dimension_types():
+    """
+    :return: The available dimension types.
+    """
+    return DIMENSION_TYPE_REGISTRY
 
 
 def get_dimension(dimension_name):

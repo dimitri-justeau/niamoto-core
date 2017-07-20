@@ -2,7 +2,6 @@
 
 import click
 
-from niamoto.bin.utils import format_datetime_to_date
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 from niamoto.decorators import cli_catch_unknown_error
 
@@ -13,6 +12,7 @@ def list_rasters_cli():
     """
     List registered rasters.
     """
+    from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api import raster_api
     raster_df = raster_api.get_raster_list()
     if len(raster_df) == 0:

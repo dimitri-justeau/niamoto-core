@@ -41,6 +41,7 @@ class TestCLIPublish(BaseTestNiamotoSchemaCreated):
 
     def test_publish_cli(self):
         runner = CliRunner()
+        publish.init_publish_cli()
         with tempfile.NamedTemporaryFile(mode='w') as csv_temp:
             result = runner.invoke(
                 publish.publish_cli,

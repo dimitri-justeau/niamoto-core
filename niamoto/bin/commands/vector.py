@@ -2,7 +2,6 @@
 
 import click
 
-from niamoto.bin.utils import format_datetime_to_date
 from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 from niamoto.decorators import cli_catch_unknown_error
 
@@ -13,6 +12,7 @@ def list_vectors_cli():
     """
     List registered vectors.
     """
+    from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api import vector_api
     vector_df = vector_api.get_vector_list()
     if len(vector_df) == 0:
