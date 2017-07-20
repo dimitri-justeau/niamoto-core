@@ -84,6 +84,10 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
         dim = data_marts_api.get_dimension("ncl_adm1")
         self.assertIsInstance(dim, VectorDimension)
 
+    def test_delete_dimension(self):
+        data_marts_api.create_vector_dimension("ncl_adm1")
+        data_marts_api.delete_dimension("ncl_adm1")
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()

@@ -13,41 +13,9 @@ set_test_path()
 from niamoto.conf import settings
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
-from niamoto.data_marts.dimensions.base_dimension import BaseDimension
-from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
+from niamoto.testing.test_data_marts import TestDimension
 from niamoto.db.connector import Connector
 from niamoto.db.metadata import dimension_registry
-
-
-class TestPublisher(BaseDataPublisher):
-    def _process(self, *args, **kwargs):
-        df = pd.DataFrame([
-            {'idx': 0, 'value': 1, 'category': 'cat1'},
-            {'idx': 1, 'value': 2, 'category': 'cat2'},
-            {'idx': 2, 'value': 3, 'category': 'cat2'},
-            {'idx': 3, 'value': 4, 'category': 'cat1'},
-            {'idx': 4, 'value': 5, 'category': None},
-        ])
-        df.set_index(['idx'], inplace=True)
-        return df
-
-
-class TestDimension(BaseDimension):
-
-    def __init__(self, name="test_dimension", publisher=TestPublisher()):
-        super(TestDimension, self).__init__(
-            name,
-            [sa.Column('value', sa.Integer), sa.Column('category', sa.String)],
-            publisher=publisher
-        )
-
-    @classmethod
-    def get_description(cls):
-        return 'Test dimension'
-
-    @classmethod
-    def get_key(cls):
-        return 'TEST_DIMENSION'
 
 
 class TestBaseDimension(BaseTestNiamotoSchemaCreated):

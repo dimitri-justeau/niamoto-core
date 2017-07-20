@@ -27,4 +27,13 @@ def create_vector_dimension(vector_name, populate=True):
 
 
 def get_dimension(dimension_name):
+    """
+    Return a registered dimension instance.
+    :param dimension_name: The dimension name.
+    :return: The loaded dimension instance.
+    """
     return DimensionManager.get_dimension(dimension_name)
+
+
+def delete_dimension(dimension_name):
+    return DimensionManager.delete_dimension(dimension_name)

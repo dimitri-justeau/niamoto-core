@@ -42,10 +42,24 @@ class DimensionManager:
         :param dimension_name: The name of the dimension to load.
         :return: The loaded dimension.
         """
-        sel = sa.select([meta.dimension_registry.c.dimension_key, ]).where(
+        sel = sa.select([
+            meta.dimension_registry.c.dimension_type_key,
+            meta.dimension_registry.c.label_column,
+        ]).where(
             meta.dimension_registry.c.name == dimension_name
         )
         with Connector.get_connection() as connection:
-            result = connection.execute(sel)
-            dim_type = result.fetchone()[0]
-        return DIMENSION_TYPE_REGISTRY[dim_type]['class'].load(dimension_name)
+            result = connection.execute(sel).fetchone()
+            dim_type, label_column = result
+        return DIMENSION_TYPE_REGISTRY[dim_type]['class'].load(
+            dimension_name,
+            label_col=label_column,
+        )
+
+    @classmethod
+    def delete_dimension(cls, dimension_name):
+        """
+        Delete a registered dimension.
+        :param dimension_name: The dimension name.
+        """
+        cls.get_dimension(dimension_name).drop_dimension()

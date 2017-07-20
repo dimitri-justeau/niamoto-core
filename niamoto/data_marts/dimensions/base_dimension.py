@@ -89,13 +89,14 @@ class BaseDimension(metaclass=DimensionMeta):
         raise NotImplementedError()
 
     @classmethod
-    def load(cls, dimension_name):
+    def load(cls, dimension_name, label_col='label'):
         """
         Load a Dimension instance from its name.
         :param dimension_name: The name of the dimension.
+        :param label_col: The label column name of the dimension.
         :return: The loaded dimension
         """
-        raise NotImplementedError()
+        return cls(name=dimension_name, label_col=label_col)
 
     def is_created(self, connection=None):
         """
@@ -133,7 +134,8 @@ class BaseDimension(metaclass=DimensionMeta):
             self.table.create(connection)
             ins = meta.dimension_registry.insert().values({
                 'name': self.name,
-                'dimension_key': self.get_key(),
+                'dimension_type_key': self.get_key(),
+                'label_column': self.label_col,
                 'date_create': datetime.now(),
             })
             connection.execute(ins)

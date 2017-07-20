@@ -1,9 +1,5 @@
 # coding: utf-8
 
-import geopandas as gpd
-
-from niamoto.conf import settings
-from niamoto.db.connector import Connector
 from niamoto.data_marts.dimensions.base_dimension import BaseDimension
 from niamoto.vector.vector_manager import VectorManager
 from niamoto.data_publishers.vector_publisher import VectorDataPublisher
@@ -14,7 +10,7 @@ class VectorDimension(BaseDimension):
     Dimension extracted from a registered vector layer.
     """
 
-    def __init__(self, vector_name):
+    def __init__(self, vector_name, label_col='label'):
         self.vector_name = vector_name
         pk_cols = VectorManager.get_vector_primary_key_columns(vector_name)
         self.geom_col = VectorManager.get_geometry_column(vector_name)
@@ -24,12 +20,13 @@ class VectorDimension(BaseDimension):
         super(VectorDimension, self).__init__(
             vector_name,
             columns,
-            publisher=VectorDataPublisher()
+            publisher=VectorDataPublisher(),
+            label_col=label_col,
         )
 
     @classmethod
-    def load(cls, dimension_name):
-        return cls(dimension_name)
+    def load(cls, dimension_name, label_col='label'):
+        return cls(dimension_name, label_col)
 
     def get_values(self):
         """
