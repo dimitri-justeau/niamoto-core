@@ -1,10 +1,12 @@
 # coding: utf-8
 
 import io
+from datetime import datetime
 
 from sqlalchemy.engine.reflection import Inspector
 import sqlalchemy as sa
 
+from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.db import metadata as meta
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
@@ -55,6 +57,11 @@ class BaseFactTable:
         ]
         self.columns = composed_pk + measurement_columns
         table_args = [name, meta.metadata] + self.columns
+        # Remove table if already in metadata (happen when loading a fact
+        # table that had been created within the same Python process)
+        if '{}.{}'.format(fact_schema, name) in meta.metadata.tables:
+            t = meta.metadata.tables['{}.{}'.format(fact_schema, name)]
+            meta.metadata.remove(t)
         self.table = sa.Table(
             *table_args,
             schema=fact_schema,
@@ -74,6 +81,44 @@ class BaseFactTable:
     @property
     def publisher(self):
         return self._publisher
+
+    @classmethod
+    def load(cls, fact_table_name, publisher_cls=None):
+        """
+        Load a registered fact table and return it.
+        :param fact_table_name: The name of the fact table to load.
+        :param publisher_cls: The publisher class to use for populating the
+            dimension. Must be a subclass of BaseFactTablePublisher.
+        :return: The loaded fact table.
+        """
+        with Connector.get_connection() as connection:
+            meta_ = sa.MetaData()
+            meta_.reflect(
+                bind=connection,
+                schema=settings.NIAMOTO_FACT_TABLES_SCHEMA,
+            )
+            table_key = '{}.{}'.format(
+                settings.NIAMOTO_FACT_TABLES_SCHEMA,
+                fact_table_name,
+            )
+            table = meta_.tables[table_key]
+            dimensions = []
+            dim_col_names = {}
+            measures = []
+            for pk in table.primary_key:
+                dim_col_names[pk.name] = True
+                dim_name = list(pk.foreign_keys)[0].column.table.name
+                dim = DimensionManager.get_dimension(dim_name)
+                dimensions.append(dim)
+            for col in table.columns:
+                if col.name not in dim_col_names:
+                    measures.append(col.copy())
+            return cls(
+                fact_table_name,
+                dimensions,
+                measures,
+                publisher_cls=publisher_cls
+            )
 
     def get_dimension(self, dimension_name):
         return self._dimensions_dict[dimension_name]
@@ -109,7 +154,13 @@ class BaseFactTable:
                 "will be skipped."
             LOGGER.warning(m.format(self.name))
             return
-        self.table.create(connection)
+        with connection.begin():
+            self.table.create(connection)
+            ins = meta.fact_table_registry.insert().values({
+                'name': self.name,
+                'date_create': datetime.now()
+            })
+            connection.execute(ins)
         if close_after:
             connection.close()
 
@@ -130,10 +181,10 @@ class BaseFactTable:
             return
         with connection.begin():
             self.table.drop(connection)
-            # delete = meta.dimension_registry.delete().where(
-            #     meta.dimension_registry.c.name == self.name
-            # )
-            # connection.execute(delete) TODO FACT TABLE REGISTRY
+            delete = meta.fact_table_registry.delete().where(
+                meta.fact_table_registry.c.name == self.name
+            )
+            connection.execute(delete)
         if close_after:
             connection.close()
         LOGGER.debug("{} successfully dropped".format(self))

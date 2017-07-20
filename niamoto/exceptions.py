@@ -87,3 +87,15 @@ class DimensionNotRegisteredError(BaseDimensionException):
     """
     Error to raise when trying to load a non registered dimension.
     """
+
+
+class BaseFactTableException(BaseDataMartException):
+    """
+    Base class for errors related to data mart fact tables.
+    """
+
+
+class FactTableNotRegisteredError(BaseFactTableException):
+    """
+    Error to raise when trying to load a non registered fact table.
+    """
