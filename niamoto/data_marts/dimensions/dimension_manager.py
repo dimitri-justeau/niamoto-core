@@ -7,6 +7,7 @@ from niamoto.db import metadata as meta
 from niamoto.db.connector import Connector
 from niamoto.data_marts.dimensions.base_dimension import \
     DIMENSION_TYPE_REGISTRY
+from niamoto.exceptions import DimensionNotRegisteredError
 
 
 class DimensionManager:
@@ -34,6 +35,26 @@ class DimensionManager:
                 connection,
                 index_col=meta.dimension_registry.c.id.name
             )
+
+    @classmethod
+    def assert_dimension_is_registered(cls, dimension_name, connection=None):
+        """
+        Assert that a dimension is registered.
+        Raise DimensionNotRegisteredError otherwise.
+        :param dimension_name: The name of the dimension to check.
+        :param connection: If passed, use an existing connection.
+        """
+        sel = meta.dimension_registry.select().where(
+            meta.dimension_registry.c.name == dimension_name
+        )
+        if connection is not None:
+            r = connection.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                r = connection.execute(sel).rowcount
+        if r == 0:
+            m = "The dimension '{}' is not registered in database."
+            raise DimensionNotRegisteredError(m.format(dimension_name))
 
     @classmethod
     def get_dimension(cls, dimension_name):

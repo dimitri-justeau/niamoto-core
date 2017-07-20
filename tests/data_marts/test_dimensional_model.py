@@ -1,22 +1,28 @@
 # coding: utf-8
 
 import unittest
+import os
 
 from sqlalchemy.engine.reflection import Inspector
-import sqlalchemy as sa
-import pandas as pd
 
 from niamoto.testing import set_test_path
 
 set_test_path()
 
-from niamoto.conf import settings
+from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.data_marts.dimensional_model import DimensionalModel, \
     load_model_from_dict
 from niamoto.testing.test_data_marts import TestDimension
+from niamoto.api.vector_api import add_vector, delete_vector
+from niamoto.api.data_marts_api import delete_dimension, delete_fact_table
 from niamoto.db.connector import Connector
+
+
+SHP_TEST = os.path.join(
+    NIAMOTO_HOME, 'data', 'vector', 'NCL_adm', 'NCL_adm1.shp'
+)
 
 
 class TestDimensionalModel(BaseTestNiamotoSchemaCreated):
@@ -126,7 +132,43 @@ class TestDimensionalModel(BaseTestNiamotoSchemaCreated):
         self.assertIsInstance(cubes_model, dict)
         workspace = model.get_cubes_workspace()
         browser = workspace.browser('fact_table_1')
-        result = browser.aggregate(drilldown=['dim_1'])
+        browser.aggregate(drilldown=['dim_1'])
+
+    def test_occurrence_observed_model(self):
+        add_vector(SHP_TEST, 'ncl_adm1')
+        model_dict = {
+            'dimensions': [
+                {
+                    'name': 'ncl_adm1',
+                    'label_col': 'NAME_1',
+                    'dimension_type': 'VECTOR_DIMENSION'
+                },
+            ],
+            'fact_tables': [
+                {
+                    'name': 'occurrence_in_polygon',
+                    'dimensions': ['ncl_adm1', ],
+                    'measures': ['nb_occurrence'],
+                    "aggregates": [
+                        {
+                            "name": "occurrence_sum",
+                            "function": "sum",
+                            "measure": "nb_occurrence"
+                        },
+                        {
+                            "name": "record_count",
+                            "function": "count"
+                        }
+                    ],
+                }
+            ]
+        }
+        model = load_model_from_dict(model_dict)
+        model.create_model()
+        model.populate_dimensions()
+        delete_fact_table('occurrence_in_polygon')
+        delete_dimension('ncl_adm1')
+        delete_vector('ncl_adm1')
 
 
 if __name__ == '__main__':

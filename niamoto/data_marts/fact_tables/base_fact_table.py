@@ -113,6 +113,31 @@ class BaseFactTable:
         if close_after:
             connection.close()
 
+    def drop_fact_table(self, connection=None):
+        """
+        Drop an existing fact table.
+        :param connection: If not None, use an existing connection.
+        """
+        LOGGER.debug("Dropping {}".format(self))
+        close_after = False
+        if connection is None:
+            connection = Connector.get_engine().connect()
+            close_after = True
+        if not self.is_created(connection):
+            m = "The fact table {} does not exists in database. Drop will " \
+                "be skipped"
+            LOGGER.warning(m.format(self.name))
+            return
+        with connection.begin():
+            self.table.drop(connection)
+            # delete = meta.dimension_registry.delete().where(
+            #     meta.dimension_registry.c.name == self.name
+            # )
+            # connection.execute(delete) TODO FACT TABLE REGISTRY
+        if close_after:
+            connection.close()
+        LOGGER.debug("{} successfully dropped".format(self))
+
     def populate(self, dataframe):
         """
         Populates the fact table. Assume that the input dataframe had been

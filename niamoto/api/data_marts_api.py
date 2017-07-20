@@ -4,6 +4,7 @@
 Data marts API module
 """
 
+from niamoto.data_marts.fact_tables.fact_table_manager import FactTableManager
 from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 from niamoto.log import get_logger
@@ -12,14 +13,15 @@ from niamoto.log import get_logger
 LOGGER = get_logger(__name__)
 
 
-def create_vector_dimension(vector_name, populate=True):
+def create_vector_dimension(vector_name, label_col='label', populate=True):
     """
     Create a vector dimension from a registered vector.
     :param vector_name: The vector name.
+    :param label_col: The label column name of the dimension.
     :param populate: If True, populate the dimension.
     :return: The created dimension.
     """
-    dim = VectorDimension(vector_name)
+    dim = VectorDimension(vector_name, label_col)
     dim.create_dimension()
     if populate:
         dim.populate_from_publisher()
@@ -36,4 +38,16 @@ def get_dimension(dimension_name):
 
 
 def delete_dimension(dimension_name):
+    """
+    Delete a registered dimension.
+    :param dimension_name: The name of the dimension to delete.
+    """
     return DimensionManager.delete_dimension(dimension_name)
+
+
+def delete_fact_table(fact_table_name):
+    """
+    Delete a registered fact table.
+    :param fact_table_name: The name of the fact table to delete.
+    """
+    return FactTableManager.delete_fact_table(fact_table_name)

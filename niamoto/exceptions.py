@@ -69,3 +69,21 @@ class UnavailablePublishFormat(BaseDataPublisherException):
     """
     Error to raise when invoking an unavailable publish format.
     """
+
+
+class BaseDataMartException(NiamotoException):
+    """
+    Base class for errors related to data marts.
+    """
+
+
+class BaseDimensionException(BaseDataMartException):
+    """
+    Base class for errors related to data mart dimensions.
+    """
+
+
+class DimensionNotRegisteredError(BaseDimensionException):
+    """
+    Error to raise when trying to load a non registered dimension.
+    """

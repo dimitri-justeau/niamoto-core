@@ -9,6 +9,8 @@ from niamoto.data_marts.fact_tables.base_fact_table import BaseFactTable
 from niamoto.data_marts.dimensions.base_dimension import \
     DIMENSION_TYPE_REGISTRY
 from niamoto.data_publishers.base_data_publisher import PUBLISHER_REGISTRY
+from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
+from niamoto.exceptions import DimensionNotRegisteredError
 
 
 class DimensionalModel:
@@ -105,8 +107,10 @@ def load_model_from_dict(model_dict):
         {
             'dimensions': [
                 {
-                    'name': 'dim_1',
-                    'dimension_type': 'DIM_1_TYPE',
+                    'name': 'dim_1', # MANDATORY
+                    'label_col': 'label',
+                    'dimension_type': 'DIMTYPE', # MANDATORY IF NOT REGISTERED
+                    'extra_arg': extra_value,
                 },
                 {
                     'name': 'dim_2',
@@ -140,16 +144,25 @@ def load_model_from_dict(model_dict):
     fact_tables = {}
     aggregates = {}
     for dim in dims:
-        dim_name = dim['name']
-        dim_cls = DIMENSION_TYPE_REGISTRY[dim['dimension_type']]['class']
-        d = dim_cls(name=dim_name)
-        dimensions[dim_name] = d
+        dim_name = dim.pop('name')
+        try:
+            # If the dimension is already registered, load it
+            DimensionManager.assert_dimension_is_registered(dim_name)
+            dimensions[dim_name] = DimensionManager.get_dimension(dim_name)
+        except DimensionNotRegisteredError:
+            # Else, instantiate it
+            dim_type = dim.pop('dimension_type')
+            dim_cls = DIMENSION_TYPE_REGISTRY[dim_type]['class']
+            d = dim_cls(dim_name, **dim)
+            dimensions[dim_name] = d
     for ft in f_tables:
         ft_name = ft['name']
         ft_dims = [dimensions[i] for i in ft['dimensions']]
         measures = [sa.Column(i, sa.Float()) for i in ft['measures']]
-        pub_key = ft['publisher_key']
-        publisher_cls = PUBLISHER_REGISTRY[pub_key]['class']
+        publisher_cls = None
+        if 'publisher_key' in ft:
+            pub_key = ft['publisher_key']
+            publisher_cls = PUBLISHER_REGISTRY[pub_key]['class']
         fact_tables[ft_name] = BaseFactTable(
             ft_name,
             ft_dims,
