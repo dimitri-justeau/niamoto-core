@@ -61,6 +61,8 @@ class TestVectorDimension(BaseTestNiamotoSchemaCreated):
                 connection.execute("DROP TABLE {};".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
                 ))
+            delete_stmt = meta.fact_table_registry.delete()
+            connection.execute(delete_stmt)
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
@@ -70,6 +72,8 @@ class TestVectorDimension(BaseTestNiamotoSchemaCreated):
                 connection.execute("DROP TABLE {};".format(
                     "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
                 ))
+            delete_stmt = meta.dimension_registry.delete()
+            connection.execute(delete_stmt)
 
     def test_vector_dimension(self):
         dim = VectorDimension('ncl_adm1')

@@ -15,7 +15,7 @@ from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_data_marts import TestDimension
 from niamoto.db.connector import Connector
-from niamoto.db.metadata import dimension_registry
+from niamoto.db.metadata import dimension_registry, fact_table_registry
 
 
 class TestBaseDimension(BaseTestNiamotoSchemaCreated):
@@ -37,6 +37,8 @@ class TestBaseDimension(BaseTestNiamotoSchemaCreated):
                 connection.execute("DROP TABLE {};".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
                 ))
+            delete_stmt = fact_table_registry.delete()
+            connection.execute(delete_stmt)
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(

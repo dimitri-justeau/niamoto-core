@@ -147,8 +147,8 @@ def load_model_from_dict(model_dict):
         dim_name = dim.pop('name')
         try:
             # If the dimension is already registered, load it
-            DimensionManager.assert_dimension_is_registered(dim_name)
-            dimensions[dim_name] = DimensionManager.get_dimension(dim_name)
+            loaded_dimension = DimensionManager.get_dimension(dim_name)
+            dimensions[dim_name] = loaded_dimension
         except DimensionNotRegisteredError:
             # Else, instantiate it
             dim_type = dim.pop('dimension_type')

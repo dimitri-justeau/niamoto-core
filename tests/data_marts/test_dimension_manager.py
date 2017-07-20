@@ -38,6 +38,8 @@ class TestDimensionManager(BaseTestNiamotoSchemaCreated):
                 connection.execute("DROP TABLE {};".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
                 ))
+            delete_stmt = meta.fact_table_registry.delete()
+            connection.execute(delete_stmt)
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(

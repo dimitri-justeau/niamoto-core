@@ -15,6 +15,28 @@ class FactTableManager:
     """
 
     @classmethod
+    def register_fact_table(cls, name, dimensions, measure_columns,
+                            publisher_cls=None):
+        """
+        :param name: The name of the fact table.
+        :param dimensions: The dimensions of the fact table. Must be
+            BaseDimension subclass instances.
+        :param measure_columns: An iterable of sqlalchemy columns
+            corresponding to fact measurements.
+        :param publisher_cls: The publisher class to use for populating the
+            dimension. Must be a subclass of BaseFactTablePublisher.
+        :return The registered fact table object.
+        """
+        fact_table = BaseFactTable(
+            name,
+            dimensions,
+            measure_columns,
+            publisher_cls=publisher_cls
+        )
+        fact_table.create_fact_table()
+        return fact_table
+
+    @classmethod
     def get_registered_fact_tables(cls):
         """
         :return: The list of registered fact tables.
@@ -46,6 +68,20 @@ class FactTableManager:
         if r == 0:
             m = "The fact table '{}' is not registered in database."
             raise FactTableNotRegisteredError(m.format(fact_table_name))
+
+    @classmethod
+    def get_fact_table(cls, fact_table_name, publisher_cls=None):
+        """
+        Load a registered fact table.
+        :param fact_table_name: The name of the fact table to load.
+        :param publisher_cls: The fact table publish class.
+        :return: The loaded dimension.
+        """
+        cls.assert_fact_table_is_registered(fact_table_name)
+        return BaseFactTable.load(
+            fact_table_name,
+            publisher_cls=publisher_cls
+        )
 
     @classmethod
     def delete_fact_table(cls, fact_table_name):

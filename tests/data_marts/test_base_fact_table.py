@@ -57,7 +57,7 @@ class TestBaseFactTable(BaseTestNiamotoSchemaCreated):
         ft = BaseFactTable(
             "test_fact",
             dimensions=[dim_1, dim_2],
-            measurement_columns=[
+            measure_columns=[
                 sa.Column('measure_1', sa.Float),
             ],
             publisher_cls=TestFactTablePublisher
@@ -83,7 +83,7 @@ class TestBaseFactTable(BaseTestNiamotoSchemaCreated):
         ft = BaseFactTable(
             "test_fact",
             dimensions=[dim_1, dim_2],
-            measurement_columns=[
+            measure_columns=[
                 sa.Column('measure_1', sa.Float),
             ],
             publisher_cls=TestFactTablePublisher

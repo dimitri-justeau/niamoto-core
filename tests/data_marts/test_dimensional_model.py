@@ -18,6 +18,7 @@ from niamoto.testing.test_data_marts import TestDimension
 from niamoto.api.vector_api import add_vector, delete_vector
 from niamoto.api.data_marts_api import delete_dimension, delete_fact_table
 from niamoto.db.connector import Connector
+from niamoto.db import metadata as meta
 
 
 SHP_TEST = os.path.join(
@@ -44,6 +45,8 @@ class TestDimensionalModel(BaseTestNiamotoSchemaCreated):
                 connection.execute("DROP TABLE {};".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
                 ))
+            delete_stmt = meta.fact_table_registry.delete()
+            connection.execute(delete_stmt)
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
@@ -53,6 +56,8 @@ class TestDimensionalModel(BaseTestNiamotoSchemaCreated):
                 connection.execute("DROP TABLE {}.{}".format(
                     settings.NIAMOTO_DIMENSIONS_SCHEMA, tb
                 ))
+            delete_stmt = meta.dimension_registry.delete()
+            connection.execute(delete_stmt)
 
     def test_load_model_from_dict(self):
         model_dict = {

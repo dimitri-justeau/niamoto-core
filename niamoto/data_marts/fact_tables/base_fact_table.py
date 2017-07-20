@@ -21,13 +21,13 @@ class BaseFactTable:
     Base class representing a fact table in the dimensional modelling.
     """
 
-    def __init__(self, name, dimensions, measurement_columns,
+    def __init__(self, name, dimensions, measure_columns,
                  publisher_cls=None):
         """
         :param name: The name of the fact table.
         :param dimensions: The dimensions of the fact table. Must be
             BaseDimension subclass instances.
-        :param measurement_columns: An iterable of sqlalchemy columns
+        :param measure_columns: An iterable of sqlalchemy columns
             corresponding to fact measurements.
         :param publisher_cls: The publisher class to use for populating the
             dimension. Must be a subclass of BaseFactTablePublisher.
@@ -35,7 +35,7 @@ class BaseFactTable:
         self.name = name
         self.dimensions = dimensions
         self._dimensions_dict = {d.name: d for d in self.dimensions}
-        self.measurement_columns = measurement_columns
+        self.measurement_columns = measure_columns
         self._publisher_cls = publisher_cls
         self._publisher = None
         if self._publisher_cls is not None:
@@ -55,7 +55,7 @@ class BaseFactTable:
                 primary_key=True
             ) for dim in self.dimensions
         ]
-        self.columns = composed_pk + measurement_columns
+        self.columns = composed_pk + measure_columns
         table_args = [name, meta.metadata] + self.columns
         # Remove table if already in metadata (happen when loading a fact
         # table that had been created within the same Python process)
