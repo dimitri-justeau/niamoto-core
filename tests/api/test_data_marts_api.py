@@ -23,6 +23,7 @@ from niamoto.db.connector import Connector
 from niamoto.api.vector_api import add_vector
 from niamoto.api import data_marts_api
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
+from niamoto.exceptions import DimensionNotRegisteredError
 
 
 SHP_TEST = os.path.join(
@@ -55,6 +56,7 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
             connection.execute(delete_stmt)
 
     def tearDown(self):
+        super(TestDataMartsApi, self).tearDown()
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
@@ -64,6 +66,8 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
                 connection.execute("DROP TABLE {};".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
                 ))
+            delete_stmt = meta.fact_table_registry.delete()
+            connection.execute(delete_stmt)
         with Connector.get_connection() as connection:
             inspector = Inspector.from_engine(connection)
             tables = inspector.get_table_names(
@@ -87,6 +91,37 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
     def test_delete_dimension(self):
         data_marts_api.create_vector_dimension("ncl_adm1")
         data_marts_api.delete_dimension("ncl_adm1")
+
+    def test_get_dimension_types(self):
+        data_marts_api.get_dimension_types()
+
+    def test_get_registered_fact_tables(self):
+        fact_tables = data_marts_api.get_registered_fact_tables()
+        self.assertEqual(len(fact_tables), 0)
+        data_marts_api.create_vector_dimension("ncl_adm1")
+        data_marts_api.create_fact_table(
+            'fact_table',
+            ['ncl_adm1', ],
+            ['measure_1', ]
+        )
+        fact_tables = data_marts_api.get_registered_fact_tables()
+        self.assertEqual(len(fact_tables), 1)
+
+    def test_create_fact_table(self):
+        data_marts_api.create_vector_dimension("ncl_adm1")
+        data_marts_api.create_fact_table(
+            'fact_table',
+            ['ncl_adm1', ],
+            ['measure_1', ],
+        )
+        data_marts_api.get_fact_table('fact_table')
+        self.assertRaises(
+            DimensionNotRegisteredError,
+            data_marts_api.create_fact_table,
+            'fact_table_2',
+            ['ncl', ],
+            ['measure_2', ],
+        )
 
 
 if __name__ == '__main__':

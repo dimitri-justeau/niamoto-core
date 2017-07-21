@@ -43,6 +43,23 @@ def list_dimensions_cli():
     ))
 
 
+@click.command('delete_dimension')
+@click.argument('dimension_name')
+@cli_catch_unknown_error
+def delete_dimension_cli(dimension_name):
+    """
+    Delete a registered dimension.
+    """
+    from niamoto.api import data_marts_api
+    click.secho("Deleting the '{}' dimension...".format(dimension_name))
+    data_marts_api.delete_dimension(dimension_name)
+    click.secho(
+        "The '{}' dimension had been successfully deleted!".format(
+            dimension_name
+        )
+    )
+
+
 @click.command('create_vector_dimension')
 @click.option(
     '--label_col',
@@ -67,7 +84,7 @@ def create_vector_dim_cli(vector_name, label_col='label', populate=True):
         s1 = " and populating"
         s2 = " and populated!"
     click.echo(
-        "Creating{} the {} vector dimension...".format(s1, vector_name)
+        "Creating{} the '{}' vector dimension...".format(s1, vector_name)
     )
     data_marts_api.create_vector_dimension(
         vector_name,
@@ -75,7 +92,7 @@ def create_vector_dim_cli(vector_name, label_col='label', populate=True):
         populate=populate
     )
     click.echo(
-        "The {} vector dimension had been successfully created{}".format(
+        "The '{}' vector dimension had been successfully created{}".format(
             vector_name,
             s2
         )
@@ -102,3 +119,59 @@ def list_fact_tables_cli():
             'date_update': format_datetime_to_date,
         }
     ))
+
+
+@click.command('create_fact_table')
+@click.option(
+    '--dimension',
+    '-d',
+    help="The fact table's dimension names",
+    type=str,
+    multiple=True,
+    required=True,
+)
+@click.option(
+    '--measure',
+    '-m',
+    help="The fact table's measures names",
+    type=str,
+    multiple=True,
+    required=True,
+)
+@click.argument('name')
+@cli_catch_unknown_error
+def create_fact_table_cli(name, dimension, measure):
+    """
+    Create and register a fact table from existing dimensions.
+    Use -d <dimension_name> for each dimension, and -m <measure_name> for each
+    measure.
+    """
+    from niamoto.api import data_marts_api
+    click.echo(
+        "Creating the '{}' fact table...".format(name)
+    )
+    data_marts_api.create_fact_table(
+        name,
+        dimension_names=dimension,
+        measure_names=measure
+    )
+    click.echo(
+        "The '{}' fact table had been successfully created!".format(name)
+    )
+
+
+@click.command('delete_fact_table')
+@click.argument('fact_table_name')
+# @cli_catch_unknown_error
+def delete_fact_table_cli(fact_table_name):
+    """
+    Delete a registered fact table.
+    """
+    from niamoto.api import data_marts_api
+    click.secho("Deleting the '{}' fact table...".format(fact_table_name))
+    data_marts_api.delete_fact_table(fact_table_name)
+    click.secho(
+        "The '{}' fact table had been successfully deleted!".format(
+            fact_table_name
+        )
+    )

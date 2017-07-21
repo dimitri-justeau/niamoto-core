@@ -24,7 +24,7 @@ class FactTableManager:
         :param measure_columns: An iterable of sqlalchemy columns
             corresponding to fact measurements.
         :param publisher_cls: The publisher class to use for populating the
-            dimension. Must be a subclass of BaseFactTablePublisher.
+            fact table. Must be a subclass of BaseFactTablePublisher.
         :return The registered fact table object.
         """
         fact_table = BaseFactTable(
@@ -74,8 +74,8 @@ class FactTableManager:
         """
         Load a registered fact table.
         :param fact_table_name: The name of the fact table to load.
-        :param publisher_cls: The fact table publish class.
-        :return: The loaded dimension.
+        :param publisher_cls: The fact table publisher class.
+        :return: The loaded fact table.
         """
         cls.assert_fact_table_is_registered(fact_table_name)
         return BaseFactTable.load(
@@ -89,6 +89,4 @@ class FactTableManager:
         Delete a registered fact table.
         :param fact_table_name: The name of the fact table to delete.
         """
-        # TODO USE FACT TABLE REGISTRY
-        ft = BaseFactTable(fact_table_name, [], [])
-        ft.drop_fact_table()
+        cls.get_fact_table(fact_table_name).drop_fact_table()
