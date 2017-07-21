@@ -43,6 +43,42 @@ def list_dimensions_cli():
     ))
 
 
+@click.command('create_vector_dimension')
+@click.option(
+    '--label_col',
+    help='The label column name of the dimension',
+    default='label',
+    type=str,
+)
+@click.option(
+    '--populate',
+    help='Populate the dimension',
+    is_flag=True,
+)
+@click.argument('vector_name')
+@cli_catch_unknown_error
+def create_vector_dim_cli(vector_name, label_col='label', populate=True):
+    from niamoto.api import data_marts_api
+    s1, s2 = '', '!'
+    if populate:
+        s1 = " and populating"
+        s2 = " and populated!"
+    click.echo(
+        "Creating{} the {} vector dimension...".format(s1, vector_name)
+    )
+    data_marts_api.create_vector_dimension(
+        vector_name,
+        label_col=label_col,
+        populate=populate
+    )
+    click.echo(
+        "The {} vector dimension had been successfully created{}".format(
+            vector_name,
+            s2
+        )
+    )
+
+
 @click.command('fact_tables')
 @cli_catch_unknown_error
 def list_fact_tables_cli():

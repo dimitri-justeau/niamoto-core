@@ -35,7 +35,7 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
 
-    def list_dimensions_cli(self):
+    def test_list_dimensions_cli(self):
         runner = CliRunner()
         result = runner.invoke(
             data_marts.list_dimensions_cli,
@@ -50,7 +50,7 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
 
-    def list_fact_tables_cli(self):
+    def test_list_fact_tables_cli(self):
         runner = CliRunner()
         result = runner.invoke(
             data_marts.list_fact_tables_cli,
