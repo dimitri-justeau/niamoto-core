@@ -27,6 +27,18 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
     Test case for data marts cli methods.
     """
 
+    @classmethod
+    def setUpClass(cls):
+        super(TestCLIDataMarts, cls).setUpClass()
+        vector_api.add_vector(SHP_TEST, 'ncl_adm')
+
+    def tearDown(self):
+        super(TestCLIDataMarts, self).tearDown()
+        try:
+            data_marts_api.delete_dimension('ncl_adm')
+        except:
+            pass
+
     def test_list_dimension_types_cli(self):
         runner = CliRunner()
         result = runner.invoke(
@@ -42,7 +54,6 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
             []
         )
         self.assertEqual(result.exit_code, 0)
-        vector_api.add_vector(SHP_TEST, 'ncl_adm')
         data_marts_api.create_vector_dimension('ncl_adm')
         result = runner.invoke(
             data_marts.list_dimensions_cli,
@@ -55,6 +66,14 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         result = runner.invoke(
             data_marts.list_fact_tables_cli,
             []
+        )
+        self.assertEqual(result.exit_code, 0)
+
+    def test_create_vector_dimension(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            data_marts.create_vector_dim_cli,
+            ['ncl_adm', '--populate']
         )
         self.assertEqual(result.exit_code, 0)
 
