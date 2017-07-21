@@ -21,10 +21,13 @@ class TestCLI(BaseTest):
     """
 
     def test_cli(self):
+        @niamoto_cli.command()
+        def foo():
+            pass
         runner = CliRunner()
         result = runner.invoke(
             niamoto_cli,
-            ['status']
+            ['foo']
         )
         assert result.exit_code == 0
 
