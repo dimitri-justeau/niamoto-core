@@ -32,6 +32,11 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         super(TestCLIDataMarts, cls).setUpClass()
         vector_api.add_vector(SHP_TEST, 'ncl_adm')
 
+    @classmethod
+    def tearDownClass(cls):
+        vector_api.delete_vector('ncl_adm')
+        super(TestCLIDataMarts, cls).tearDownClass()
+
     def tearDown(self):
         super(TestCLIDataMarts, self).tearDown()
         try:
