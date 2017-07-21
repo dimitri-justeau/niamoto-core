@@ -9,7 +9,7 @@ from niamoto.decorators import cli_catch_unknown_error
 @cli_catch_unknown_error
 def list_vectors_cli():
     """
-    List registered vectors.
+    List the registered vectors.
     """
     from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api import vector_api

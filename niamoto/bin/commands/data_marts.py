@@ -27,7 +27,7 @@ def list_dimension_types_cli():
 @cli_catch_unknown_error
 def list_dimensions_cli():
     """
-    List registered dimensions.
+    List the registered dimensions.
     """
     from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api import data_marts_api
@@ -58,6 +58,9 @@ def list_dimensions_cli():
 @click.argument('vector_name')
 @cli_catch_unknown_error
 def create_vector_dim_cli(vector_name, label_col='label', populate=True):
+    """
+    Create a vector dimension from a registered vector.
+    """
     from niamoto.api import data_marts_api
     s1, s2 = '', '!'
     if populate:
@@ -83,7 +86,7 @@ def create_vector_dim_cli(vector_name, label_col='label', populate=True):
 @cli_catch_unknown_error
 def list_fact_tables_cli():
     """
-    List registered fact tables.
+    List the registered fact tables.
     """
     from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api import data_marts_api

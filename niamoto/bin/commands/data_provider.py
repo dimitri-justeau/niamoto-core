@@ -9,7 +9,7 @@ from niamoto.decorators import cli_catch_unknown_error
 @cli_catch_unknown_error
 def list_data_provider_types():
     """
-    List registered data provider types.
+    List the registered data provider types.
     """
     from niamoto.api.data_provider_api import get_data_provider_type_list
     provider_types_df = get_data_provider_type_list()
@@ -25,7 +25,7 @@ def list_data_provider_types():
 @cli_catch_unknown_error
 def list_data_providers():
     """
-    List registered data providers.
+    List the registered data providers.
     """
     from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api.data_provider_api import get_data_provider_list

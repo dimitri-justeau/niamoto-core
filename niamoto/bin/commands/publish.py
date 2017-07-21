@@ -28,6 +28,9 @@ def make_publish_format_func(publish_key, publish_format):
 
 @click.group("publish")
 def publish_cli():
+    """
+    Publish data using a data publisher.
+    """
     pass
 
 

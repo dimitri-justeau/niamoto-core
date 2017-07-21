@@ -9,7 +9,7 @@ from niamoto.decorators import cli_catch_unknown_error
 @cli_catch_unknown_error
 def list_rasters_cli():
     """
-    List registered rasters.
+    List the registered rasters.
     """
     from niamoto.bin.utils import format_datetime_to_date
     from niamoto.api import raster_api

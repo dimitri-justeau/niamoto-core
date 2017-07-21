@@ -1,9 +1,11 @@
 # coding: utf-8
 
 import os
+from collections import OrderedDict
 
 import click
 
+from niamoto.bin import CustomCommandOrderGroup
 from niamoto.bin.commands.raster import list_rasters_cli, add_raster_cli, \
     update_raster_cli, delete_raster_cli, \
     extract_raster_values_to_occurrences_cli, \
@@ -32,7 +34,7 @@ from niamoto.log import get_logger
 LOGGER = get_logger(__name__)
 
 
-@click.group()
+@click.group(cls=CustomCommandOrderGroup)
 @click.option(
     '--niamoto_home',
     default=conf.DEFAULT_NIAMOTO_HOME,
@@ -97,6 +99,56 @@ niamoto_cli.add_command(list_dimension_types_cli)
 niamoto_cli.add_command(list_dimensions_cli)
 niamoto_cli.add_command(list_fact_tables_cli)
 niamoto_cli.add_command(create_vector_dim_cli)
+
+
+display_dict = OrderedDict()
+display_dict["General commands"] = [
+    init_niamoto_home_cli,
+    init_db_cli,
+    get_general_status_cli,
+]
+display_dict["Taxonomy commands"] = [
+    set_taxonomy_cli,
+    map_all_synonyms_cli,
+    get_synonym_keys_cli,
+]
+display_dict["Data provider commands"] = [
+    list_data_provider_types,
+    list_data_providers,
+    add_data_provider,
+    delete_data_provider,
+    update_data_provider_cli,
+    sync,
+]
+display_dict["Vector commands"] = [
+    list_vectors_cli,
+    add_vector_cli,
+    update_vector_cli,
+    delete_vector_cli,
+]
+display_dict["Raster commands"] = [
+    list_rasters_cli,
+    add_raster_cli,
+    update_raster_cli,
+    delete_raster_cli,
+    extract_raster_values_to_occurrences_cli,
+    extract_raster_values_to_plots_cli,
+    extract_all_rasters_values_to_occurrences_cli,
+    extract_all_rasters_values_to_plots_cli,
+]
+display_dict["Data publisher commands"] = [
+    publish_cli,
+    list_publishers_cli,
+    list_publish_formats_cli,
+]
+display_dict["Data marts commands"] = [
+    list_dimension_types_cli,
+    list_dimensions_cli,
+    list_fact_tables_cli,
+    create_vector_dim_cli,
+]
+
+niamoto_cli.commands_display_dict = display_dict
 
 
 if __name__ == '__main__':
