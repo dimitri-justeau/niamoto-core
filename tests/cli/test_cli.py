@@ -30,6 +30,11 @@ class TestCLI(BaseTest):
             ['foo']
         )
         assert result.exit_code == 0
+        result = runner.invoke(
+            niamoto_cli,
+            []
+        )
+        assert result.exit_code == 0
 
 
 if __name__ == '__main__':
