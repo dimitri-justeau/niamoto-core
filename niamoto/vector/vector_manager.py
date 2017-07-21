@@ -51,11 +51,11 @@ class VectorManager:
             vector_file_path,
             name
         ))
+        cls.assert_vector_does_not_exist(name)
         if not os.path.exists(vector_file_path):
             raise FileNotFoundError(
-                "The vector {} does not exist".format(vector_file_path)
+                "The file {} does not exist.".format(vector_file_path)
             )
-        cls.assert_vector_does_not_exist(name)
         pg_str = "dbname='{}' host='{}' port='{}' user='{}' password='{}'"
         pg_str = pg_str.format(
             settings.NIAMOTO_DATABASE["NAME"],

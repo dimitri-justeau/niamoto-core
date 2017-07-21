@@ -93,7 +93,7 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
         self.assertRaises(
             FileNotFoundError,
             VectorManager.add_vector,
-            null_path, "ncl",
+            null_path, "ncl_bis",
         )
         VectorManager.add_vector(SHP_TEST, 'ncl_adm')
         self.assertRaises(

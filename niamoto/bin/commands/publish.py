@@ -6,7 +6,6 @@ import inspect
 import click
 
 from niamoto.decorators import cli_catch_unknown_error
-from niamoto.exceptions import BaseDataPublisherException
 
 
 def make_publish_format_func(publish_key, publish_format):
@@ -17,17 +16,13 @@ def make_publish_format_func(publish_key, publish_format):
     @cli_catch_unknown_error
     def func(ctx, *args, destination=sys.stdout, **kwargs):
         kwargs.update(ctx.obj)
-        try:
-            publish_api.publish(
-                publish_key,
-                publish_format,
-                *args,
-                destination=destination,
-                **kwargs
-            )
-        except BaseDataPublisherException as e:
-            click.secho(str(e), fg='red')
-            click.get_current_context().exit(code=1)
+        publish_api.publish(
+            publish_key,
+            publish_format,
+            *args,
+            destination=destination,
+            **kwargs
+        )
     return func
 
 
@@ -154,17 +149,12 @@ def list_publish_formats_cli(publisher_key):
     """
     from niamoto.api import publish_api
     from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
-    try:
-        keys = publish_api.list_publish_formats(publisher_key)
-        max_length = max([len(i) for i in keys])
-        for k in keys:
-            click.secho(
-                '    {} :    {}'.format(
-                    k.ljust(max_length),
-                    BaseDataPublisher.PUBLISH_FORMATS_DESCRIPTION[k]
-                )
+    keys = publish_api.list_publish_formats(publisher_key)
+    max_length = max([len(i) for i in keys])
+    for k in keys:
+        click.secho(
+            '    {} :    {}'.format(
+                k.ljust(max_length),
+                BaseDataPublisher.PUBLISH_FORMATS_DESCRIPTION[k]
             )
-    except BaseDataPublisherException as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
-
+        )

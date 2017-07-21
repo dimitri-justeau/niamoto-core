@@ -2,7 +2,6 @@
 
 import click
 
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 from niamoto.decorators import cli_catch_unknown_error
 
 
@@ -36,16 +35,12 @@ def add_vector_cli(name, vector_file_path):
     """
     from niamoto.api import vector_api
     click.echo("Registering the vector in database...")
-    try:
-        vector_api.add_vector(
-            vector_file_path,
-            name,
-        )
-        click.echo("The vector had been successfully registered to the "
-                   "Niamoto vector database!")
-    except RecordAlreadyExistsError as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    vector_api.add_vector(
+        vector_file_path,
+        name,
+    )
+    click.echo("The vector had been successfully registered to the "
+               "Niamoto vector database!")
 
 
 @click.command('update_vector')
@@ -63,16 +58,12 @@ def update_vector_cli(name, vector_file_path, new_name=None):
     """
     from niamoto.api import vector_api
     click.echo("Updating {} vector...".format(name))
-    try:
-        vector_api.update_vector(
-            vector_file_path,
-            name,
-            new_name=new_name,
-        )
-        click.echo("The vector had been successfully updated!")
-    except NoRecordFoundError as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    vector_api.update_vector(
+        vector_file_path,
+        name,
+        new_name=new_name,
+    )
+    click.echo("The vector had been successfully updated!")
 
 
 @click.command('delete_vector')
@@ -91,9 +82,5 @@ def delete_vector_cli(name, y=False):
             return
     from niamoto.api import vector_api
     click.echo("Deleting {} vector...".format(name))
-    try:
-        vector_api.delete_vector(name)
-        click.echo("The vector had been successfully deleted!")
-    except NoRecordFoundError as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    vector_api.delete_vector(name)
+    click.echo("The vector had been successfully deleted!")

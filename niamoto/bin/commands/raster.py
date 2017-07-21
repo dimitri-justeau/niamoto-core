@@ -2,7 +2,6 @@
 
 import click
 
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
 from niamoto.decorators import cli_catch_unknown_error
 
 
@@ -53,18 +52,14 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None,
     click.echo("Registering the raster in database...")
     if tile_dimension is not None:
         tile_dimension = [int(i) for i in tile_dimension.split('x')]
-    try:
-        raster_api.add_raster(
-            raster_file_path,
-            name,
-            tile_dimension=tile_dimension,
-            register=register
-        )
-        click.echo("The raster had been successfully registered to the Niamoto"
-                   " raster database!")
-    except RecordAlreadyExistsError as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    raster_api.add_raster(
+        raster_file_path,
+        name,
+        tile_dimension=tile_dimension,
+        register=register
+    )
+    click.echo("The raster had been successfully registered to the Niamoto"
+               " raster database!")
 
 
 @click.command('update_raster')
@@ -99,18 +94,14 @@ def update_raster_cli(name, raster_file_path, new_name=None,
     click.echo("Updating {} raster...".format(name))
     if tile_dimension is not None:
         tile_dimension = [int(i) for i in tile_dimension.split('x')]
-    try:
-        raster_api.update_raster(
-            raster_file_path,
-            name,
-            new_name=new_name,
-            tile_dimension=tile_dimension,
-            register=register,
-        )
-        click.echo("The raster had been successfully updated!")
-    except NoRecordFoundError as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    raster_api.update_raster(
+        raster_file_path,
+        name,
+        new_name=new_name,
+        tile_dimension=tile_dimension,
+        register=register,
+    )
+    click.echo("The raster had been successfully updated!")
 
 
 @click.command('delete_raster')
@@ -129,12 +120,8 @@ def delete_raster_cli(name, y=False):
             return
     from niamoto.api import raster_api
     click.echo("Deleting {} raster...".format(name))
-    try:
-        raster_api.delete_raster(name)
-        click.echo("The raster had been successfully deleted!")
-    except NoRecordFoundError as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    raster_api.delete_raster(name)
+    click.echo("The raster had been successfully deleted!")
 
 
 @click.command('raster_to_occurrences')
@@ -145,15 +132,11 @@ def extract_raster_values_to_occurrences_cli(raster_name):
     Extract raster values to occurrences properties.
     """
     from niamoto.api import raster_api
-    try:
-        click.secho("Extracting '{}' raster values to occurrences...".format(
-            raster_name
-        ))
-        raster_api.extract_raster_values_to_occurrences(raster_name)
-        click.echo("The raster values had been successfully extracted!")
-    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    click.secho("Extracting '{}' raster values to occurrences...".format(
+        raster_name
+    ))
+    raster_api.extract_raster_values_to_occurrences(raster_name)
+    click.echo("The raster values had been successfully extracted!")
 
 
 @click.command('raster_to_plots')
@@ -164,15 +147,11 @@ def extract_raster_values_to_plots_cli(raster_name):
     Extract raster values to plots properties.
     """
     from niamoto.api import raster_api
-    try:
-        click.secho("Extracting '{}' raster values to plots...".format(
-            raster_name
-        ))
-        raster_api.extract_raster_values_to_plots(raster_name)
-        click.echo("The raster values had been successfully extracted!")
-    except (NoRecordFoundError, RecordAlreadyExistsError) as e:
-        click.secho(str(e), fg='red')
-        click.get_current_context().exit(code=1)
+    click.secho("Extracting '{}' raster values to plots...".format(
+        raster_name
+    ))
+    raster_api.extract_raster_values_to_plots(raster_name)
+    click.echo("The raster values had been successfully extracted!")
 
 
 @click.command('all_rasters_to_occurrences')
