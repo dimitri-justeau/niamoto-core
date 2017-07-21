@@ -10,6 +10,8 @@ from niamoto.testing import set_test_path
 set_test_path()
 
 from niamoto.conf import settings, NIAMOTO_HOME
+from niamoto.api import data_marts_api
+from niamoto.api import vector_api
 from niamoto.bin.commands import data_marts
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -35,6 +37,13 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
 
     def list_dimensions_cli(self):
         runner = CliRunner()
+        result = runner.invoke(
+            data_marts.list_dimensions_cli,
+            []
+        )
+        self.assertEqual(result.exit_code, 0)
+        vector_api.add_vector(SHP_TEST, 'ncl_adm')
+        data_marts_api.create_vector_dimension('ncl_adm')
         result = runner.invoke(
             data_marts.list_dimensions_cli,
             []
