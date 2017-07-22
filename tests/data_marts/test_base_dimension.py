@@ -79,9 +79,19 @@ class TestBaseDimension(BaseTestNiamotoSchemaCreated):
         df.index.names = [dim.PK_COLUMN_NAME]
         dim.populate(df)
         df2 = dim.get_values()
-        self.assertTrue((df['value'] == df2['value']).all())
-        self.assertTrue((df['category'] == df2['category']).all())
-        self.assertTrue((df.index == df2.index).all())
+        df_check = pd.DataFrame([
+            {'value': 1, 'category': 'cat1'},
+            {'value': 2, 'category': 'cat2'},
+            {'value': 3, 'category': 'cat2'},
+            {'value': 4, 'category': 'cat1'},
+            {'value': 5, 'category': 'NS'},
+            {'value': pd.np.nan, 'category': 'NS'},
+        ])
+        self.assertTrue(
+            (df_check['value'].fillna(0) == df2['value'].fillna(0)).all()
+        )
+        self.assertTrue((df_check['category'] == df2['category']).all())
+        self.assertTrue((df_check.index == df2.index).all())
 
     def test_populate_from_publisher(self):
         dim = TestDimension()

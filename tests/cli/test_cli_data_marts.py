@@ -16,6 +16,8 @@ from niamoto.api import vector_api
 from niamoto.bin.commands import data_marts
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
+from niamoto.data_publishers.base_fact_table_publisher import \
+    BaseFactTablePublisher
 from niamoto.db.connector import Connector
 from niamoto.db import metadata as meta
 
@@ -103,7 +105,15 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
 
-    def test_delete_vector_dimension_cli(self):
+    def test_create_taxon_dimension_cli(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            data_marts.create_taxon_dim_cli,
+            ['--populate']
+        )
+        self.assertEqual(result.exit_code, 0)
+
+    def test_delete_dimension_cli(self):
         runner = CliRunner()
         runner.invoke(
             data_marts.create_vector_dim_cli,
@@ -139,6 +149,29 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         result = runner.invoke(
             data_marts.delete_fact_table_cli,
             ['fact_table', ]
+        )
+        self.assertEqual(result.exit_code, 0)
+
+    def test_populate_fact_table_cli(self):
+        data_marts_api.create_taxon_dimension('taxon_dim')
+        data_marts_api.create_fact_table('fact_table', ['taxon_dim'], ['n'])
+
+        class TestCLIFactTablePublisher(BaseFactTablePublisher):
+            @classmethod
+            def get_key(cls):
+                return 'test_cli_fact_table_publisher'
+
+            def _process(self, *args, **kwargs):
+                dim = data_marts_api.get_dimension('taxon_dim')
+                df = dim.get_values()
+                df['n'] = df.index
+                df['taxon_dim_id'] = df.index
+                return df[['taxon_dim_id', 'n']]
+
+        runner = CliRunner()
+        result = runner.invoke(
+            data_marts.populate_fact_table_cli,
+            ['fact_table', 'test_cli_fact_table_publisher']
         )
         self.assertEqual(result.exit_code, 0)
 

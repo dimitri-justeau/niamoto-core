@@ -11,6 +11,8 @@ from niamoto.data_marts.dimensions.base_dimension import \
     DIMENSION_TYPE_REGISTRY
 from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
+from niamoto.data_marts.dimensions.taxon_dimension import TaxonDimension
+from niamoto.api import publish_api
 from niamoto.log import get_logger
 
 
@@ -26,6 +28,21 @@ def create_vector_dimension(vector_name, label_col='label', populate=True):
     :return: The created dimension.
     """
     dim = VectorDimension(vector_name, label_col)
+    dim.create_dimension()
+    if populate:
+        dim.populate_from_publisher()
+    return dim
+
+
+def create_taxon_dimension(dimension_name=TaxonDimension.DEFAULT_NAME,
+                           populate=True):
+    """
+    Create a taxon dimension.
+    :param dimension_name: The dimension name.
+    :param populate: If True, populate the dimension.
+    :return: The created dimension
+    """
+    dim = TaxonDimension(dimension_name)
     dim.create_dimension()
     if populate:
         dim.populate_from_publisher()
@@ -110,3 +127,17 @@ def delete_fact_table(fact_table_name):
     :param fact_table_name: The name of the fact table to delete.
     """
     return FactTableManager.delete_fact_table(fact_table_name)
+
+
+def populate_fact_table(fact_table_name, publisher_key, *args, **kwargs):
+    """
+    Populate a registered fact table using an available publisher.
+    :param fact_table_name: The name of the fact table to populate.
+    :param publisher_key: The key of the publisher to use for populating the
+        fact table.
+    """
+    fact_table = get_fact_table(
+        fact_table_name,
+        publisher_cls=publish_api.get_publisher_class(publisher_key)
+    )
+    fact_table.populate_from_publisher(*args, **kwargs)

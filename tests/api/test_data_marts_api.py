@@ -22,6 +22,8 @@ from niamoto.db import metadata as meta
 from niamoto.db.connector import Connector
 from niamoto.api.vector_api import add_vector
 from niamoto.api import data_marts_api
+from niamoto.testing.test_data_marts import TestDimension, \
+    TestFactTablePublisher
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 from niamoto.exceptions import DimensionNotRegisteredError
 
@@ -83,6 +85,9 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
     def test_create_vector_dimension(self):
         data_marts_api.create_vector_dimension("ncl_adm1")
 
+    def test_create_taxon_dimension(self):
+        data_marts_api.create_taxon_dimension()
+
     def test_get_dimension(self):
         data_marts_api.create_vector_dimension("ncl_adm1")
         dim = data_marts_api.get_dimension("ncl_adm1")
@@ -121,6 +126,23 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
             'fact_table_2',
             ['ncl', ],
             ['measure_2', ],
+        )
+
+    def test_populate_fact_table(self):
+        dim_1 = TestDimension("dim_1")
+        dim_2 = TestDimension("dim_2")
+        dim_1.create_dimension()
+        dim_2.create_dimension()
+        dim_1.populate_from_publisher()
+        dim_2.populate_from_publisher()
+        data_marts_api.create_fact_table(
+            "test_fact",
+            dimension_names=['dim_1', 'dim_2'],
+            measure_names=['measure_1'],
+        )
+        data_marts_api.populate_fact_table(
+            'test_fact',
+            TestFactTablePublisher.get_key()
         )
 
 

@@ -99,6 +99,23 @@ def create_vector_dim_cli(vector_name, label_col='label', populate=True):
     )
 
 
+@click.command('create_taxon_dimension')
+@click.option(
+    '--populate',
+    help='Populate the dimension',
+    is_flag=True,
+)
+@cli_catch_unknown_error
+def create_taxon_dim_cli(populate=True):
+    """
+    Create the taxon dimension.
+    """
+    from niamoto.api import data_marts_api
+    click.echo("Creating the taxon dimension...")
+    data_marts_api.create_taxon_dimension(populate=populate)
+    click.echo("The taxon dimension had been successfully created!")
+
+
 @click.command('fact_tables')
 @cli_catch_unknown_error
 def list_fact_tables_cli():
@@ -162,7 +179,7 @@ def create_fact_table_cli(name, dimension, measure):
 
 @click.command('delete_fact_table')
 @click.argument('fact_table_name')
-# @cli_catch_unknown_error
+@cli_catch_unknown_error
 def delete_fact_table_cli(fact_table_name):
     """
     Delete a registered fact table.
@@ -172,6 +189,29 @@ def delete_fact_table_cli(fact_table_name):
     data_marts_api.delete_fact_table(fact_table_name)
     click.secho(
         "The '{}' fact table had been successfully deleted!".format(
+            fact_table_name
+        )
+    )
+
+
+@click.command('populate_fact_table')
+@click.argument('fact_table_name')
+@click.argument('publisher_key')
+@cli_catch_unknown_error
+def populate_fact_table_cli(fact_table_name, publisher_key):
+    """
+    Populate a registered fact table using an available publisher.
+    """
+    from niamoto.api import data_marts_api
+    click.secho(
+        "Populating the '{}' fact table using the '{}' publisher...".format(
+            fact_table_name,
+            publisher_key
+        )
+    )
+    data_marts_api.populate_fact_table(fact_table_name, publisher_key)
+    click.secho(
+        "The '{}' fact table had been successfully populated!".format(
             fact_table_name
         )
     )

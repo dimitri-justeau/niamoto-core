@@ -38,7 +38,13 @@ class BaseDimension(metaclass=DimensionMeta):
     """
 
     PK_COLUMN_NAME = 'id'
-    NS_VALUE = 'NS'
+    NS_VALUES = {
+        sa.VARCHAR: 'NS',
+        sa.NUMERIC: pd.np.nan,
+        sa.Text: 'NS',
+        sa.String: 'NS',
+    }
+    DEFAULT_NS_VALUE = pd.np.nan
 
     def __init__(self, name, columns, publisher=None, label_col='label'):
         """
@@ -168,17 +174,30 @@ class BaseDimension(metaclass=DimensionMeta):
             connection.close()
         LOGGER.debug("{} successfully dropped".format(self))
 
-    def populate(self, dataframe):
+    def populate(self, dataframe, append_ns_row=True):
         """
         Populates the dimension. Assume that the input dataframe had been
         correctly formatted to fit the dimension columns. All the null values
-        are set to 'NS' before populating.
+        are set to the corresponding type NS before populating.
         :param dataframe: The dataframe to populate from.
+        :param append_ns_row: If True, append a NS row to the dimension.
         """
         LOGGER.debug("Populating {}".format(self))
         cols = [c.name for c in self.columns]
         s = io.StringIO()
-        dataframe[cols].fillna(value=self.NS_VALUE).to_csv(s, columns=cols)
+        ns = {}
+        for c in self.columns:
+            if type(c.type) in self.NS_VALUES:
+                ns[c.name] = self.NS_VALUES[type(c.type)]
+            else:
+                ns[c.name] = self.DEFAULT_NS_VALUE
+        dataframe[cols].fillna(value=ns).to_csv(s, columns=cols)
+        if append_ns_row:
+            idx = 0
+            if len(dataframe.index) > 0:
+                idx = dataframe.index.max() + 1
+            ns_row = pd.DataFrame(ns, index=[idx])
+            ns_row[cols].to_csv(s, columns=cols, header=False)
         s.seek(0)
         sql_copy = \
             """
@@ -196,13 +215,14 @@ class BaseDimension(metaclass=DimensionMeta):
         raw_connection.close()
         LOGGER.debug("{} successfully populated".format(self))
 
-    def populate_from_publisher(self, *args, **kwargs):
+    def populate_from_publisher(self, *args, append_ns_row=True, **kwargs):
         """
         Populates the dimension using its associated publisher.
+        :param append_ns_row: If True, append a NS row to the dimension.
         """
         LOGGER.debug("Start populating {} using publisher".format(self))
         data = self.publisher.process(*args, **kwargs)[0]
-        self.populate(data)
+        self.populate(data, append_ns_row=append_ns_row)
 
     def get_values(self):
         """

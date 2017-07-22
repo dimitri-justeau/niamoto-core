@@ -42,13 +42,17 @@ class VectorDimension(BaseDimension):
             **kwargs
         )
 
-    def populate(self, dataframe):
+    def populate(self, dataframe, *args, **kwargs):
         geom_col_name = self.geom_col[0]
         srid = self.geom_col[2]
         dataframe[geom_col_name] = dataframe[geom_col_name].apply(
             lambda x: "SRID={};{}".format(srid, x)
         )
-        return super(VectorDimension, self).populate(dataframe)
+        return super(VectorDimension, self).populate(
+            dataframe,
+            *args,
+            **kwargs
+        )
 
     @classmethod
     def get_description(cls):
