@@ -5,7 +5,6 @@
 import unittest
 
 from click.testing import CliRunner
-import click
 
 from niamoto.testing import set_test_path
 
@@ -29,6 +28,7 @@ class TestCLI(BaseTest):
             niamoto_cli,
             ['foo']
         )
+        print(result.output)
         assert result.exit_code == 0
         result = runner.invoke(
             niamoto_cli,

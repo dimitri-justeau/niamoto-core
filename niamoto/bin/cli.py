@@ -30,6 +30,7 @@ from niamoto.bin.commands.data_marts import list_dimension_types_cli, \
     create_taxon_dim_cli, populate_fact_table_cli
 
 from niamoto import conf
+from niamoto.decorators import cli_catch_unknown_error
 from niamoto.log import get_logger
 
 
@@ -39,16 +40,20 @@ LOGGER = get_logger(__name__)
 @click.group(cls=CustomCommandOrderGroup)
 @click.option(
     '--niamoto_home',
-    default=conf.DEFAULT_NIAMOTO_HOME,
     help='Niamoto home path (default: ~/niamoto).'
 )
 @click.pass_context
-def niamoto_cli(context, niamoto_home=conf.DEFAULT_NIAMOTO_HOME):
+@cli_catch_unknown_error
+def niamoto_cli(context, niamoto_home=None):
     """
     Niamoto command line interface.
     """
-    context.params['niamoto_home'] = niamoto_home
-    os.environ['NIAMOTO_HOME'] = niamoto_home
+    if niamoto_home is not None:
+        context.params['niamoto_home'] = niamoto_home
+        os.environ['NIAMOTO_HOME'] = niamoto_home
+    elif 'NIAMOTO_HOME' not in os.environ:
+        context.params['niamoto_home'] = conf.DEFAULT_NIAMOTO_HOME
+        os.environ['NIAMOTO_HOME'] = conf.DEFAULT_NIAMOTO_HOME
     try:
         conf.set_niamoto_home()
         conf.set_settings()
@@ -56,6 +61,7 @@ def niamoto_cli(context, niamoto_home=conf.DEFAULT_NIAMOTO_HOME):
             init_publish_cli()
     except Exception as err:
         LOGGER.debug(str(err))
+        raise
 
 # General commands
 niamoto_cli.add_command(init_niamoto_home_cli)

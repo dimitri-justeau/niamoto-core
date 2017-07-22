@@ -24,6 +24,18 @@ class VectorDimension(BaseDimension):
             label_col=label_col,
         )
 
+    @property
+    def geom_column_name(self):
+        return self.geom_col[0]
+
+    @property
+    def geom_type(self):
+        return self.geom_col[1]
+
+    @property
+    def srid(self):
+        return self.geom_col[2]
+
     @classmethod
     def load(cls, dimension_name, label_col='label'):
         return cls(dimension_name, label_col)
@@ -43,8 +55,8 @@ class VectorDimension(BaseDimension):
         )
 
     def populate(self, dataframe, *args, **kwargs):
-        geom_col_name = self.geom_col[0]
-        srid = self.geom_col[2]
+        geom_col_name = self.geom_column_name
+        srid = self.srid
         dataframe[geom_col_name] = dataframe[geom_col_name].apply(
             lambda x: "SRID={};{}".format(srid, x)
         )

@@ -39,7 +39,7 @@ class BaseFactTable:
         self._publisher_cls = publisher_cls
         self._publisher = None
         if self._publisher_cls is not None:
-            self._publisher = self._publisher_cls(self)
+            self._publisher = self._publisher_cls()
         self._exists = False
         fact_schema = settings.NIAMOTO_FACT_TABLES_SCHEMA
         if "{}.{}".format(fact_schema, name) in meta.metadata.tables:

@@ -8,8 +8,7 @@ class BaseFactTablePublisher(BaseDataPublisher):
     Base class for publishers populating fact tables.
     """
 
-    def __init__(self, fact_table):
-        self.fact_table = fact_table
+    def __init__(self):
         super(BaseFactTablePublisher, self).__init__()
 
     def _process(self, *args, **kwargs):
