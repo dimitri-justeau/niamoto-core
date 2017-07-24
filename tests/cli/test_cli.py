@@ -28,7 +28,6 @@ class TestCLI(BaseTest):
             niamoto_cli,
             ['foo']
         )
-        print(result.output)
         assert result.exit_code == 0
         result = runner.invoke(
             niamoto_cli,
