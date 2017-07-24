@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import sqlalchemy as sa
+from geoalchemy2 import Geography, Geometry
 from cubes import Workspace
 
 from niamoto.conf import settings
@@ -18,6 +19,11 @@ class DimensionalModel:
     Class representing the whole dimensional model: dimensions and
     fact tables.
     """
+
+    EXCLUDED_DIMENSION_ATTRIBUTE_TYPES = {
+        Geography: True,
+        Geometry: True,
+    }
 
     def __init__(self, dimensions, fact_tables, aggregates):
         """
@@ -39,12 +45,25 @@ class DimensionalModel:
         Generate a model for the cubes OLAP framework.
         """
         dims = []
+        mappings = {}
         for k, v in self.dimensions.items():
+            dim_attributes = [v.pk.name]
+            mappings[v.name] = '{}.id'.format(v.name)
+            for c in v.columns:
+                c_cls = c.type.__class__
+                exclude = c_cls in self.EXCLUDED_DIMENSION_ATTRIBUTE_TYPES
+                if not exclude:
+                    dim_attributes.append(c.name)
             dims.append({
                 'name': '{}'.format(v.name),
                 'label': '{}'.format(v.name),
                 'description': v.get_description(),
-                'attributes': [c.name for c in v.columns],
+                'levels': [
+                    {
+                        'name': v.name,
+                        'attributes': dim_attributes
+                    }
+                ],
             })
         cubes = []
         for k, v in self.fact_tables.items():
@@ -58,7 +77,11 @@ class DimensionalModel:
                 ],
                 'joins': [
                     {
-                        'master': '{}.{}_id'.format(v.name, d.name),
+                        'master': {
+                            'schema': settings.NIAMOTO_FACT_TABLES_SCHEMA,
+                            'table': v.name,
+                            'column': '{}_id'.format(d.name),
+                        },
                         'detail': {
                             'schema': settings.NIAMOTO_DIMENSIONS_SCHEMA,
                             'table': d.name,
@@ -66,6 +89,7 @@ class DimensionalModel:
                         }
                     } for d in v.dimensions
                 ],
+                'mappings': mappings,
                 'aggregates': self.aggregates[k],
             })
         return {'dimensions': dims, 'cubes': cubes}
