@@ -22,12 +22,12 @@ Niamoto documentation
 
 .. important::
     Niamoto is currently in active development and thus not ready for
-    production use. A lot of functionalities are still to implement. If you
-    are interested in the project and willing to contribute or collaborate
-    feel free to contact.
+    production use. If you are interested in the project and willing to
+    contribute or collaborate feel free to contact.
 
-Niamoto is a project of ecological information system for decision support in
-ecosystems and biodiversity conservation.
+Niamoto is an ecological data warehouse framework, it aims to provide a
+flexible and efficient platform for decision support in ecosystems and
+biodiversity conservation.
 
 Niamoto is funded by the COGEFOR projet in New Caledonia, which is a
 partnership between the North Province of New Caledonia, the New Caledonian

@@ -219,7 +219,6 @@ delete_raster
       Delete an existing raster from Niamoto's raster database.
 
     Options:
-      -y TEXT
       --help   Show this message and exit.
 
 raster_to_occurrences
@@ -275,6 +274,53 @@ all_rasters_to_plots
 Vector commands
 ---------------
 
+vectors
+.......
+
+.. code-block:: shell-session
+
+    Usage: niamoto vectors [OPTIONS]
+
+      List the registered vectors.
+
+    Options:
+      --help  Show this message and exit.
+
+add_vector
+..........
+
+.. code-block:: shell-session
+
+    Usage: niamoto add_vector [OPTIONS] NAME VECTOR_FILE_PATH
+
+      Add a raster in Niamoto's vector database.
+
+    Options:
+      --help  Show this message and exit.
+
+update_vector
+.............
+
+.. code-block:: shell-session
+
+    Usage: niamoto add_vector [OPTIONS] NAME VECTOR_FILE_PATH
+
+      Add a raster in Niamoto's vector database.
+
+    Options:
+      --help  Show this message and exit.
+
+delete_vector
+.............
+
+.. code-block:: shell-session
+
+    Usage: niamoto delete_vector [OPTIONS] NAME
+
+      Delete an existing vector from Niamoto's vector database.
+
+    Options:
+      --help   Show this message and exit.
 
 Data publisher commands
 -----------------------
@@ -320,3 +366,122 @@ publish
     Options:
       -d, --destination TEXT
       --help                  Show this message and exit.
+
+
+Data marts commands
+-------------------
+
+dimension_types
+...............
+
+.. code-block:: shell-session
+
+    Usage: niamoto dimension_types [OPTIONS]
+
+      List the available dimension types.
+
+    Options:
+      --help  Show this message and exit.
+
+dimensions
+..........
+
+.. code-block:: shell-session
+
+    Usage: niamoto dimensions [OPTIONS]
+
+      List the registered dimensions.
+
+    Options:
+      --help  Show this message and exit.
+
+fact_tables
+...........
+
+.. code-block:: shell-session
+
+    Usage: niamoto fact_tables [OPTIONS]
+
+      List the registered fact tables.
+
+    Options:
+      --help  Show this message and exit.
+
+create_taxon_dimension
+......................
+
+.. code-block:: shell-session
+
+    Usage: niamoto create_taxon_dimension [OPTIONS]
+
+      Create the taxon dimension.
+
+    Options:
+      --populate  Populate the dimension
+      --help      Show this message and exit.
+
+create_vector_dimension
+.......................
+
+.. code-block:: shell-session
+
+    Usage: niamoto create_vector_dimension [OPTIONS] VECTOR_NAME
+
+      Create a vector dimension from a registered vector.
+
+    Options:
+      --label_col TEXT  The label column name of the dimension
+      --populate        Populate the dimension
+      --help            Show this message and exit.
+
+create_fact_table
+.................
+
+.. code-block:: shell-session
+
+    Usage: niamoto create_fact_table [OPTIONS] NAME
+
+      Create and register a fact table from existing dimensions. Use -d
+      <dimension_name> for each dimension, and -m <measure_name> for each
+      measure.
+
+    Options:
+      -d, --dimension TEXT  The fact table's dimension names  [required]
+      -m, --measure TEXT    The fact table's measures names  [required]
+      --help                Show this message and exit.
+
+delete_dimension
+................
+
+.. code-block:: shell-session
+
+    Usage: niamoto delete_dimension [OPTIONS] DIMENSION_NAME
+
+      Delete a registered dimension.
+
+    Options:
+      --help  Show this message and exit.
+
+delete_fact_table
+.................
+
+.. code-block:: shell-session
+
+    Usage: niamoto delete_fact_table [OPTIONS] FACT_TABLE_NAME
+
+      Delete a registered fact table.
+
+    Options:
+      --help  Show this message and exit.
+
+populate_fact_table
+...................
+
+.. code-block:: shell-session
+
+    Usage: niamoto populate_fact_table [OPTIONS] FACT_TABLE_NAME PUBLISHER_KEY
+
+      Populate a registered fact table using an available publisher.
+
+    Options:
+      --help  Show this message and exit.

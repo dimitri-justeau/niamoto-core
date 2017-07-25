@@ -416,9 +416,9 @@ We can see the registered rasters with the ``niamoto rasters`` command:
 .. code-block:: shell-session
 
     $ niamoto rasters
-              tile_width  tile_height  date_create date_update
-    name
-    rainfall         100          100   2017/06/08  2017/06/08
+            name date_create date_update
+    id
+    1   rainfall  2017/06/08        None
 
 
 
@@ -526,5 +526,47 @@ the ``niamoto publish_formats`` command:
 .. code-block:: shell-session
 
     $ niamoto publish_formats occurrences
-        csv    :    Publish the data using the csv format.
-        stream :    Publish the data as a text stream.
+        csv :    Publish the data using the csv format.
+        sql :    Publish the data as a table to a SQL database
+
+
+For each publisher, it is possible to get the list options
+using the ``niamoto publish <publisher> --help`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto publish occurrences --help
+    Usage: niamoto publish occurrences [OPTIONS] COMMAND [ARGS]...
+
+      Publish the occurrence dataframe with properties as columns.
+
+    Options:
+      --drop_null_properties
+      --properties TEXT       List of properties to retain. Can be a python list
+                              or a comma (',') separated string.
+      --help                  Show this message and exit.
+
+    Commands:
+      csv  Publish the data in a csv file.
+      sql  Publish a DataFrame as a table to a SQL...
+
+The same is possible for each publisher's publish format:
+
+.. code-block:: shell-session
+
+    $ niamoto publish occurrences csv --help
+    Usage: niamoto publish occurrences csv [OPTIONS]
+
+      Publish the data in a csv file.
+
+    Options:
+      --index_label TEXT
+      -d, --destination TEXT
+      --help                  Show this message and exit.
+
+Let's publish the occurrence dataframe in a csv file:
+
+.. code-block:: shell-session
+
+    $ niamoto publish occurrences csv -d occurrences.csv
+

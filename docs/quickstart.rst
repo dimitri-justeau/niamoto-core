@@ -3,117 +3,113 @@
 Quickstart
 ==========
 
+Setting the taxonomy
+--------------------
 
-Setting up the Niamoto database
--------------------------------
+The Niamoto's taxonomic referential is set using the
+``set_taxonomy`` command:
 
-.. note::
-    For more options with the Niamoto database, please refer to
-    :ref:`configuration`.
+.. code-block:: shell-session
 
-1. Create Database and Database User
-....................................
-
-First, change the current Linux user to ``postgres``:
-
-.. code-block:: bash
-
-    sudo su postgres
-
-Then, log into PostgreSQL:
-
-.. code-block:: bash
-
-    psql
-
-Create the Niamoto database (default name is ``niamoto``, see
-:ref:`configuration` for more details):
-
-.. code-block:: sql
-
-    CREATE DATABASE niamoto;
-
-Then, create the Niamoto user and grant full access to Niamoto database to it
-(to ensure a secure instance, you must change at least the default user
-password see :ref:`configuration` for more details):
-
-.. code-block:: sql
-
-    CREATE USER niamoto WITH PASSWORD niamoto;
-    GRANT ALL PRIVILEGES ON DATABASE niamoto TO niamoto;
-
-Finally, logout with ``\q``.
-
-2. Create PostGIS extension and niamoto schema
-..............................................
-
-Log into PostgreSQL, with ``postgres`` user and ``niamoto`` database:
-
-.. code-block:: bash
-
-    psql -d niamoto
-
-Create the PostGIS extension:
-
-.. code-block:: sql
-
-    CREATE EXTENSION POSTGIS;
-
-Logout with ``\q``.
+    $ niamoto set_taxonomy taxonomy.csv
+    Setting the taxonomy...
+    The taxonomy had been successfully set!
+        4 taxa inserted
+        2 synonyms inserted: {'taxref', 'gbif'}
 
 
-3. Create Database Schemas
-..........................
+Adding data providers and importing data
+----------------------------------------
 
-Log into PostgreSQL, with ``niamoto`` user and ``niamoto`` database:
+Plots and occurrences data is imported registered data providers and syncing
+with them.
 
-.. code-block:: bash
+.. code-block:: shell-session
 
-    psql -U niamoto -d niamoto
+    $ niamoto add_provider csv_gbif CSV gbif
+      Registering the data provider in database...
+      The data provider had been successfully registered to Niamoto!
 
-Create the ``niamoto``, ``niamoto_raster``, ``niamoto_vector`` schemas
-(see :ref:`configuration` for more details
-and options):
+It is possible to see the registered providers using the
+``niamoto providers`` command:
 
-.. code-block:: sql
+.. code-block:: shell-session
 
-    CREATE SCHEMA niamoto;
-    CREATE SCHEMA niamoto_raster;
-    CREATE SCHEMA niamoto_vector;
-
-Logout with ``\q``.
-
-
-Initializing the Niamoto home directory
----------------------------------------
-
-.. note::
-    For more options with the Niamoto home directory, please refer to
-    :ref:`configuration`.
-
-Niamoto home is the place where configuration files, scripts and plugins will
-be stored. Niamoto comes with a handy command for initializing it:
-
-.. code-block:: bash
-
-    niamoto init_niamoto_home
+    $ niamoto providers
+               name provider_type synonym_key
+    id
+    1      csv_gbif           CSV        gbif
 
 
-Initializing the Niamoto database
----------------------------------
+Importing data using the csv data provider is done with three csv files:
 
-Initializing the Niamoto database means creating the tables, indexes and
-constraints and registering the available data provider types.
-The procedure is straightforward:
+ - The **occurrences** csv file, containing the occurrence data.
+ - The **plots** csv file, containing the plot data.
+ - The **plots/occurrences** csv file, mapping plots with occurrences.
 
-.. code-block:: bash
+All of them are optional, you can import only occurrences, only plots or only
+map existing plots with existing occurrences. The command for importing data
+from a provider is ``niamoto sync PROVIDER_NAME [PROVIDER_ARGS]``. With the
+csv data provider, three arguments are needed, corresponding to the csv files
+paths:
 
-    niamoto init_db
+.. code-block:: shell-session
+
+    $ niamoto sync <csv_data_provider_name> <occurrences.csv> <plots.csv> <plots_occurrences.csv>
+
+Using ``0`` instead of a path means that no data is to be imported. For
+instance, importing only plot data can be achieved using:
+
+.. code-block:: shell-session
+
+    $ niamoto sync <csv_data_provider_name> 0 <plots.csv> 0
+
+Now let's import some data:
+
+.. code-block:: shell-session
+
+    $ niamoto sync csv_gbif csv_niamoto_gbif_occurrences.csv csv_gbif_plots.csv csv_gbif_plots_occurrences.csv
+    Syncing the Niamoto database with 'csv_gbif'...
+    [INFO] *** Data sync starting ('csv_gbif' - CSV)...
+    [INFO] ** Occurrence sync starting ('csv_gbif' - CSV)...
+    [INFO] ** Occurrence sync with 'csv_gbif' done (0.08 s)!
+    [INFO] ** Plot sync starting ('csv_gbif' - CSV)...
+    [INFO] ** Plot sync with 'csv_gbif' done (0.06 s)!
+    [INFO] *** Data sync with 'csv_gbif' done (total time: 0.08 s)!
+    The Niamoto database had been successfully synced with 'csv_gbif'!
+    Bellow is a summary of what had been done:
+        Occurrences:
+            432 inserted
+            0 updated
+            0 deleted
+        Plots:
+            34 inserted
+            0 updated
+            0 deleted
+        Plots / Occurrences:
+            432 inserted
+            0 updated
+            0 deleted
+
+We can check the Niamoto database status with the ``niamoto status`` command:
+
+.. code-block:: shell-session
+
+    $ niamoto status
+        1 data providers are registered.
+        123 taxa are stored.
+        3 taxon synonym keys are registered.
+        432 occurrences are stored.
+        34 plots are stored.
+        432 plots/occurrences are stored.
+        0 rasters are stored.
+        0 vectors are stored.
 
 
-What's next?
-------------
+Importing rasters and vectors
+-----------------------------
 
-At this point, you should have a working Niamoto environment. If you are ready
-to play, you can go to the :ref:`tutorial`!
+
+Processing and publishing data
+------------------------------
 
