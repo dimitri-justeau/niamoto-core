@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from niamoto.db.connector import Connector
+from niamoto.conf import settings
 
 
 def fix_db_sequences():
@@ -23,8 +24,9 @@ def fix_db_sequences():
                 AND D.refobjid = C.attrelid
                 AND D.refobjsubid = C.attnum
                 AND T.relname = PGT.tablename
+                AND PGT.schemaname = '{}'
             ORDER BY S.relname;
-            """
+            """.format(settings.NIAMOTO_SCHEMA)
         )
         statements = res.fetchall()
         for s in statements:
