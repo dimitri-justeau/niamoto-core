@@ -25,6 +25,7 @@ from niamoto.api import data_marts_api
 from niamoto.testing.test_data_marts import TestDimension, \
     TestFactTablePublisher
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
+from niamoto.data_marts.dimensional_model import DimensionalModel
 from niamoto.exceptions import DimensionNotRegisteredError
 
 
@@ -144,6 +145,26 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
             'test_fact',
             TestFactTablePublisher.get_key()
         )
+
+    def test_get_dimensional_model(self):
+        dim_1 = TestDimension("dim_1")
+        dim_2 = TestDimension("dim_2")
+        dim_1.create_dimension()
+        dim_2.create_dimension()
+        data_marts_api.create_fact_table(
+            "test_fact",
+            dimension_names=['dim_1', 'dim_2'],
+            measure_names=['measure_1'],
+        )
+        dm = data_marts_api.get_dimensional_model(
+            'test_fact',
+            {
+                "name": "measure_1_sum",
+                "function": "sum",
+                "measure": "measure_1",
+            },
+        )
+        self.assertIsInstance(dm, DimensionalModel)
 
 
 if __name__ == '__main__':

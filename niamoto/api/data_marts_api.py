@@ -12,6 +12,7 @@ from niamoto.data_marts.dimensions.base_dimension import \
 from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 from niamoto.data_marts.dimensions.taxon_dimension import TaxonDimension
+from niamoto.data_marts.dimensional_model import DimensionalModel
 from niamoto.api import publish_api
 from niamoto.log import get_logger
 
@@ -141,3 +142,21 @@ def populate_fact_table(fact_table_name, publisher_key, *args, **kwargs):
         publisher_cls=publish_api.get_publisher_class(publisher_key)
     )
     fact_table.populate_from_publisher(*args, **kwargs)
+
+
+def get_dimensional_model(fact_table_name, aggregates):
+    """
+    Return a DimensionalModel object from a fact table name and a
+    dictionary of cubes style aggregates.
+    :param fact_table_name: The name of the fact table.
+    :param aggregates: A dict of aggregates.
+    :return: A DimensionalModel object constructed from the fact table,
+        its dimensions and the passed aggregates.
+    """
+    fact_table = get_fact_table(fact_table_name)
+    dimensions = {dim.name: dim for dim in fact_table.dimensions}
+    return DimensionalModel(
+        dimensions,
+        {fact_table_name: fact_table},
+        aggregates
+    )
