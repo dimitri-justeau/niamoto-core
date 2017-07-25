@@ -147,9 +147,9 @@ def populate_fact_table(fact_table_name, publisher_key, *args, **kwargs):
 def get_dimensional_model(fact_table_name, aggregates):
     """
     Return a DimensionalModel object from a fact table name and a
-    dictionary of cubes style aggregates.
+    dictionary of cubes style aggregates for the fact table.
     :param fact_table_name: The name of the fact table.
-    :param aggregates: A dict of aggregates.
+    :param aggregates: A list of aggregates.
     :return: A DimensionalModel object constructed from the fact table,
         its dimensions and the passed aggregates.
     """
@@ -158,5 +158,5 @@ def get_dimensional_model(fact_table_name, aggregates):
     return DimensionalModel(
         dimensions,
         {fact_table_name: fact_table},
-        aggregates
+        {fact_table_name: aggregates},
     )

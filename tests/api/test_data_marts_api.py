@@ -158,13 +158,16 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
         )
         dm = data_marts_api.get_dimensional_model(
             'test_fact',
-            {
-                "name": "measure_1_sum",
-                "function": "sum",
-                "measure": "measure_1",
-            },
+            [
+                {
+                    "name": "measure_1_sum",
+                    "function": "sum",
+                    "measure": "measure_1",
+                },
+            ]
         )
         self.assertIsInstance(dm, DimensionalModel)
+        wk = dm.get_cubes_workspace()
 
 
 if __name__ == '__main__':
