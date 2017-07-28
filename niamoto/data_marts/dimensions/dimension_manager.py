@@ -66,16 +66,18 @@ class DimensionManager:
         sel = sa.select([
             meta.dimension_registry.c.dimension_type_key,
             meta.dimension_registry.c.label_column,
+            meta.dimension_registry.c.properties,
         ]).where(
             meta.dimension_registry.c.name == dimension_name
         )
         with Connector.get_connection() as connection:
             cls.assert_dimension_is_registered(dimension_name, connection)
             result = connection.execute(sel).fetchone()
-            dim_type, label_column = result
+            dim_type, label_column, properties = result
         return DIMENSION_TYPE_REGISTRY[dim_type]['class'].load(
             dimension_name,
             label_col=label_column,
+            properties=properties,
         )
 
     @classmethod

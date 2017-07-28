@@ -98,14 +98,21 @@ class BaseDimension(metaclass=DimensionMeta):
         raise NotImplementedError()
 
     @classmethod
-    def load(cls, dimension_name, label_col='label'):
+    def load(cls, dimension_name, label_col='label', properties={}):
         """
-        Load a Dimension instance from its name.
+        Load a Dimension instance from its name. This method is used by the
+        dimension manager to load Dimension instances from the information
+        stored in the 'dimension_registry' table.
         :param dimension_name: The name of the dimension.
         :param label_col: The label column name of the dimension.
+        :param properties: A dict of arbitrary properties.
         :return: The loaded dimension
         """
-        return cls(name=dimension_name, label_col=label_col)
+        return cls(
+            name=dimension_name,
+            label_col=label_col,
+            properties=properties
+        )
 
     def is_created(self, connection=None):
         """

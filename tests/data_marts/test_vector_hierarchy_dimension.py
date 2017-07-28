@@ -12,8 +12,8 @@ set_test_path()
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
-from niamoto.api.vector_api import add_vector
-from niamoto.api.data_marts_api import create_vector_dimension
+from niamoto.api import vector_api
+from niamoto.api import data_marts_api
 from niamoto.data_marts.dimensions.vector_hierarchy_dimension import \
     VectorHierarchyDimension
 from niamoto.db.connector import Connector
@@ -39,9 +39,9 @@ class TestVectorHierarchyDimension(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestVectorHierarchyDimension, cls).setUpClass()
-        add_vector(SHP_TEST_1, 'ncl_adm0')
-        add_vector(SHP_TEST_1, 'ncl_adm1')
-        add_vector(SHP_TEST_2, 'ncl_adm2')
+        vector_api.add_vector(SHP_TEST_0, 'ncl_adm0')
+        vector_api.add_vector(SHP_TEST_1, 'ncl_adm1')
+        vector_api.add_vector(SHP_TEST_2, 'ncl_adm2')
 
     def setUp(self):
         super(TestVectorHierarchyDimension, self).setUp()
@@ -79,18 +79,24 @@ class TestVectorHierarchyDimension(BaseTestNiamotoSchemaCreated):
                 schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
             )
             for tb in tables:
-                connection.execute("DROP TABLE {};".format(
+                connection.execute("DROP TABLE {} CASCADE;".format(
                     "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
                 ))
             delete_stmt = meta.dimension_registry.delete()
             connection.execute(delete_stmt)
 
-    def test_vector_dimension(self):
-        dim0 = create_vector_dimension('ncl_adm0')
-        dim1 = create_vector_dimension('ncl_adm1')
-        dim2 = create_vector_dimension('ncl_adm2')
+    def test_vector_hierarchy_dimension(self):
+        dim0 = data_marts_api.create_vector_dimension('ncl_adm0')
+        dim1 = data_marts_api.create_vector_dimension('ncl_adm1')
+        dim2 = data_marts_api.create_vector_dimension('ncl_adm2')
         vh_dim = VectorHierarchyDimension('ncl_adm', [dim0, dim1, dim2])
-        print(vh_dim.columns)
+        vh_dim.create_dimension()
+        loaded_dim = data_marts_api.get_dimension('ncl_adm')
+        self.assertIsInstance(loaded_dim, VectorHierarchyDimension)
+        self.assertEqual(
+            loaded_dim.levels,
+            ['ncl_adm0', 'ncl_adm1', 'ncl_adm2']
+        )
 
 
 if __name__ == '__main__':

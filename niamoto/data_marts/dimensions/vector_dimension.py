@@ -37,7 +37,7 @@ class VectorDimension(BaseDimension):
         return self.geom_col[2]
 
     @classmethod
-    def load(cls, dimension_name, label_col='label'):
+    def load(cls, dimension_name, label_col='label', properties={}):
         return cls(dimension_name, label_col)
 
     def get_values(self):
