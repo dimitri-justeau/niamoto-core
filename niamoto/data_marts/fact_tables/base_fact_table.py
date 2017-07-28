@@ -22,7 +22,7 @@ class BaseFactTable:
     """
 
     def __init__(self, name, dimensions, measure_columns,
-                 publisher_cls=None):
+                 publisher_cls=None, properties={}):
         """
         :param name: The name of the fact table.
         :param dimensions: The dimensions of the fact table. Must be
@@ -31,6 +31,7 @@ class BaseFactTable:
             corresponding to fact measurements.
         :param publisher_cls: The publisher class to use for populating the
             dimension. Must be a subclass of BaseFactTablePublisher.
+        :param properties: A dict of arbitrary properties.
         """
         self.name = name
         self.dimensions = dimensions
@@ -38,6 +39,7 @@ class BaseFactTable:
         self.measurement_columns = measure_columns
         self._publisher_cls = publisher_cls
         self._publisher = None
+        self.properties = properties
         if self._publisher_cls is not None:
             self._publisher = self._publisher_cls()
         self._exists = False
@@ -91,6 +93,7 @@ class BaseFactTable:
             dimension. Must be a subclass of BaseFactTablePublisher.
         :return: The loaded fact table.
         """
+        # TODO: Load properties from registry
         with Connector.get_connection() as connection:
             meta_ = sa.MetaData()
             meta_.reflect(
@@ -158,7 +161,8 @@ class BaseFactTable:
             self.table.create(connection)
             ins = meta.fact_table_registry.insert().values({
                 'name': self.name,
-                'date_create': datetime.now()
+                'date_create': datetime.now(),
+                'properties': self.properties,
             })
             connection.execute(ins)
         if close_after:

@@ -51,16 +51,19 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
                 'name': 'raster_1',
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
+                'properties': {},
             },
             {
                 'name': 'raster_2',
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
+                'properties': {},
             },
             {
                 'name': 'raster_3',
                 'date_create': datetime.now(),
                 'date_update': datetime.now(),
+                'properties': {},
             },
         ]
         ins = niamoto_db_meta.raster_registry.insert().values(data)

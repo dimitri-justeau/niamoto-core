@@ -46,7 +46,8 @@ class BaseDimension(metaclass=DimensionMeta):
     }
     DEFAULT_NS_VALUE = pd.np.nan
 
-    def __init__(self, name, columns, publisher=None, label_col='label'):
+    def __init__(self, name, columns, publisher=None, label_col='label',
+                 properties={}):
         """
         :param name: The name of the dimension. The dimension table will have
             this name.
@@ -55,6 +56,7 @@ class BaseDimension(metaclass=DimensionMeta):
             The primary key column is created automatically so it does not
             have to be in the column list.
         :param publisher: The publisher to use for populating the dimension.
+        :param properties: A dict of arbitrary properties.
         """
         self.name = name
         self.columns = columns
@@ -62,6 +64,7 @@ class BaseDimension(metaclass=DimensionMeta):
         self.pk = sa.Column(self.PK_COLUMN_NAME, sa.Integer, primary_key=True)
         self._publisher = publisher
         self._exists = False
+        self.properties = properties
         dim_schema = settings.NIAMOTO_DIMENSIONS_SCHEMA
         if "{}.{}".format(dim_schema, name) in meta.metadata.tables:
             self._exists = True
@@ -143,6 +146,7 @@ class BaseDimension(metaclass=DimensionMeta):
                 'dimension_type_key': self.get_key(),
                 'label_column': self.label_col,
                 'date_create': datetime.now(),
+                'properties': self.properties,
             })
             connection.execute(ins)
         if close_after:

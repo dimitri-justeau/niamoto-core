@@ -266,6 +266,7 @@ raster_registry = Table(
     Column('name', String(100), nullable=False),
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=True),
+    Column('properties', JSONB, nullable=False),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
@@ -282,6 +283,7 @@ vector_registry = Table(
     Column('name', String(100), nullable=False),
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=True),
+    Column('properties', JSONB, nullable=False),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
@@ -300,6 +302,7 @@ dimension_registry = Table(
     Column('label_column', String(100), nullable=False),
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=True),
+    Column('properties', JSONB, nullable=False),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )
@@ -316,6 +319,7 @@ fact_table_registry = Table(
     Column('name', String(100), nullable=False),
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=True),
+    Column('properties', JSONB, nullable=False),
     UniqueConstraint('name', name='name'),
     schema=settings.NIAMOTO_SCHEMA,
 )

@@ -39,7 +39,7 @@ class RasterManager:
 
     @classmethod
     def add_raster(cls, raster_file_path, name, tile_dimension=None,
-                   register=False):
+                   register=False, properties={}):
         """
         Add a raster in database and register it the Niamoto raster registry.
         Uses raster2pgsql command. The raster is cut in tiles, using the
@@ -53,6 +53,7 @@ class RasterManager:
             tile dimension will be chosen automatically by PostGIS.
         :param register: Register the raster as a filesystem (out-db) raster.
             (-R option of raster2pgsql).
+        :param properties: A dict of arbitrary properties.
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
@@ -99,13 +100,14 @@ class RasterManager:
         ins = niamoto_db_meta.raster_registry.insert().values({
             'name': name,
             'date_create': datetime.now(),
+            'properties': properties,
         })
         with Connector.get_connection() as connection:
             connection.execute(ins)
 
     @classmethod
     def update_raster(cls, raster_file_path, name, new_name=None,
-                      tile_dimension=None, register=False):
+                      tile_dimension=None, register=False, properties={}):
         """
         Update an existing raster in database and update it the Niamoto
         raster registry. Uses raster2pgsql command. The raster is cut in
@@ -120,6 +122,7 @@ class RasterManager:
             tile dimension will be chosen automatically by PostGIS.
         :param register: Register the raster as a filesystem (out-db) raster.
             (-R option of raster2pgsql).
+        :param properties: A dict of arbitrary properties.
         """
         if not os.path.exists(raster_file_path):
             raise FileNotFoundError(
@@ -168,6 +171,7 @@ class RasterManager:
         upd = niamoto_db_meta.raster_registry.update().values({
             'name': new_name,
             'date_update': datetime.now(),
+            'properties': properties,
         }).where(niamoto_db_meta.raster_registry.c.name == name)
         with Connector.get_connection() as connection:
             connection.execute(upd)

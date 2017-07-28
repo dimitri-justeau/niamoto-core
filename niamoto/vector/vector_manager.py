@@ -38,7 +38,7 @@ class VectorManager:
             )
 
     @classmethod
-    def add_vector(cls, vector_file_path, name):
+    def add_vector(cls, vector_file_path, name, properties={}):
         """
         Add a vector in database and register it the Niamoto vector registry.
         Uses ogr2ogr. All vectors are stored in the
@@ -46,6 +46,7 @@ class VectorManager:
         :param vector_file_path: The path to the vector file.
         :param name: The name of the vector. The created table will have this
         name.
+        :param properties: A dict of arbitrary properties.
         """
         LOGGER.debug("VectorManager.add_vector({}, {})".format(
             vector_file_path,
@@ -82,12 +83,14 @@ class VectorManager:
         ins = meta.vector_registry.insert().values({
             'name': name,
             'date_create': datetime.now(),
+            'properties': properties,
         })
         with Connector.get_connection() as connection:
             connection.execute(ins)
 
     @classmethod
-    def update_vector(cls, vector_file_path, name, new_name=None):
+    def update_vector(cls, vector_file_path, name, new_name=None,
+                      properties={}):
         """
         Update an existing vector in database and update it the Niamoto
         vector registry. Uses ogr2ogr. All vectors are stored in the
@@ -95,6 +98,7 @@ class VectorManager:
         :param vector_file_path: The path to the vector file.
         :param name: The name of the vector.
         :param new_name: The new name of the vector (not changed if None).
+        :param properties: A dict of arbitrary properties.
         """
         LOGGER.debug(
             "VectorManager.update_vector({}, {}, new_name={})".format(
@@ -145,6 +149,7 @@ class VectorManager:
         upd = meta.vector_registry.update().values({
             'name': new_name,
             'date_update': datetime.now(),
+            'properties': properties,
         }).where(meta.vector_registry.c.name == name)
         with Connector.get_connection() as connection:
             if new_name != name:
