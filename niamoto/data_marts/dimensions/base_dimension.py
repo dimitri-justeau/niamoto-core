@@ -127,6 +127,7 @@ class BaseDimension(metaclass=DimensionMeta):
         tables = inspector.get_table_names(
             schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
         )
+        # print(tables)
         if close_after:
             connection.close()
         return self.name in tables

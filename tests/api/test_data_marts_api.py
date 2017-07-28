@@ -44,20 +44,6 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
         super(TestDataMartsApi, cls).setUpClass()
         add_vector(SHP_TEST, 'ncl_adm1')
 
-    @classmethod
-    def tearDownClass(cls):
-        with Connector.get_connection() as connection:
-            inspector = Inspector.from_engine(connection)
-            tables = inspector.get_table_names(
-                schema=settings.NIAMOTO_VECTOR_SCHEMA
-            )
-            for tb in tables:
-                connection.execute("DROP TABLE IF EXISTS {};".format(
-                    "{}.{}".format(settings.NIAMOTO_VECTOR_SCHEMA, tb)
-                ))
-            delete_stmt = meta.vector_registry.delete()
-            connection.execute(delete_stmt)
-
     def tearDown(self):
         super(TestDataMartsApi, self).tearDown()
         with Connector.get_connection() as connection:

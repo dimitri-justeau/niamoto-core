@@ -9,6 +9,7 @@ from niamoto.testing import set_test_path
 
 set_test_path()
 
+from niamoto.db.connector import Connector
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -16,8 +17,6 @@ from niamoto.api import vector_api
 from niamoto.api import data_marts_api
 from niamoto.data_marts.dimensions.vector_hierarchy_dimension import \
     VectorHierarchyDimension
-from niamoto.db.connector import Connector
-from niamoto.db import metadata as meta
 
 
 SHP_TEST_0 = os.path.join(
@@ -43,47 +42,12 @@ class TestVectorHierarchyDimension(BaseTestNiamotoSchemaCreated):
         vector_api.add_vector(SHP_TEST_1, 'ncl_adm1')
         vector_api.add_vector(SHP_TEST_2, 'ncl_adm2')
 
-    def setUp(self):
-        super(TestVectorHierarchyDimension, self).setUp()
-        self.tearDown()
+    def tearDown(self):
+        super(TestVectorHierarchyDimension, self).tearDownClass()
 
     @classmethod
     def tearDownClass(cls):
-        with Connector.get_connection() as connection:
-            inspector = Inspector.from_engine(connection)
-            tables = inspector.get_table_names(
-                schema=settings.NIAMOTO_VECTOR_SCHEMA
-            )
-            for tb in tables:
-                connection.execute("DROP TABLE IF EXISTS {};".format(
-                    "{}.{}".format(settings.NIAMOTO_VECTOR_SCHEMA, tb)
-                ))
-            delete_stmt = meta.vector_registry.delete()
-            connection.execute(delete_stmt)
-
-    def tearDown(self):
-        with Connector.get_connection() as connection:
-            inspector = Inspector.from_engine(connection)
-            tables = inspector.get_table_names(
-                schema=settings.NIAMOTO_FACT_TABLES_SCHEMA
-            )
-            for tb in tables:
-                connection.execute("DROP TABLE {};".format(
-                    "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
-                ))
-            delete_stmt = meta.fact_table_registry.delete()
-            connection.execute(delete_stmt)
-        with Connector.get_connection() as connection:
-            inspector = Inspector.from_engine(connection)
-            tables = inspector.get_table_names(
-                schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
-            )
-            for tb in tables:
-                connection.execute("DROP TABLE {} CASCADE;".format(
-                    "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
-                ))
-            delete_stmt = meta.dimension_registry.delete()
-            connection.execute(delete_stmt)
+        super(TestVectorHierarchyDimension, cls).tearDownClass()
 
     def test_vector_hierarchy_dimension(self):
         dim0 = data_marts_api.create_vector_dimension('ncl_adm0')

@@ -21,8 +21,6 @@ db_url = db_url.format(**{
     'database': database,
 })
 
-print(db_url)
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

@@ -32,7 +32,7 @@ class TestDimension(BaseDimension):
         )
 
     @classmethod
-    def load(cls, dimension_name, label_col=None):
+    def load(cls, dimension_name, label_col=None, properties={}):
         return cls(dimension_name)
 
     @classmethod

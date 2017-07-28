@@ -37,11 +37,6 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         super(TestCLIDataMarts, cls).setUpClass()
         vector_api.add_vector(SHP_TEST, 'ncl_adm')
 
-    @classmethod
-    def tearDownClass(cls):
-        vector_api.delete_vector('ncl_adm')
-        super(TestCLIDataMarts, cls).tearDownClass()
-
     def tearDown(self):
         super(TestCLIDataMarts, self).tearDown()
         with Connector.get_connection() as connection:
@@ -50,7 +45,7 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
                 schema=settings.NIAMOTO_FACT_TABLES_SCHEMA
             )
             for tb in tables:
-                connection.execute("DROP TABLE {};".format(
+                connection.execute("DROP TABLE {} CASCADE;".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
                 ))
             delete_stmt = meta.fact_table_registry.delete()
@@ -61,11 +56,20 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
                 schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
             )
             for tb in tables:
-                connection.execute("DROP TABLE {};".format(
+                connection.execute("DROP TABLE {} CASCADE;".format(
                     "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
                 ))
             delete_stmt = meta.dimension_registry.delete()
             connection.execute(delete_stmt)
+
+    @classmethod
+    def tearDownClass(cls):
+        with Connector.get_connection() as c:
+            inspector = Inspector.from_engine(c)
+            tables = inspector.get_table_names(
+                schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
+            )
+        super(TestCLIDataMarts, cls).tearDownClass()
 
     def test_list_dimension_types_cli(self):
         runner = CliRunner()
