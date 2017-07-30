@@ -75,5 +75,6 @@ class VectorHierarchyDimension(BaseDimension):
         return super(VectorHierarchyDimension, self).populate_from_publisher(
             self.levels,
             *args,
-            **kwargs,
+            **kwargs
         )
+

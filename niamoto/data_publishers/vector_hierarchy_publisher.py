@@ -4,7 +4,7 @@ import pandas as pd
 
 from niamoto.conf import settings
 from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
-from niamoto.api import data_marts_api
+from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 from niamoto.db.connector import Connector
 from niamoto.log import get_logger
 
@@ -51,11 +51,9 @@ class VectorHierarchyPublisher(BaseDataPublisher):
             'tb': highest_level,
         })
         previous_level = highest_level
-        previous_geom = data_marts_api.get_dimension(
-            highest_level
-        ).geom_col[0]
+        previous_geom = VectorDimension(highest_level).geom_col[0]
         for level in vector_names:
-            geom = data_marts_api.get_dimension(level).geom_col[0]
+            geom = VectorDimension(level).geom_col[0]
             dim_tables += \
                 """
                 LEFT JOIN {schema}.{tb} AS {tb}

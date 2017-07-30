@@ -4,6 +4,7 @@ import io
 from datetime import datetime
 
 from sqlalchemy.engine.reflection import Inspector
+from geoalchemy2 import Geography, Geometry
 import sqlalchemy as sa
 import pandas as pd
 
@@ -36,6 +37,11 @@ class BaseDimension(metaclass=DimensionMeta):
     """
     Base class representing a dimension in the dimensional modelling.
     """
+
+    EXCLUDED_DIMENSION_ATTRIBUTE_TYPES = {
+        Geography: True,
+        Geometry: True,
+    }
 
     PK_COLUMN_NAME = 'id'
     NS_VALUES = {
@@ -113,6 +119,29 @@ class BaseDimension(metaclass=DimensionMeta):
             label_col=label_col,
             properties=properties
         )
+
+    def get_cubes_json(self):
+        """
+        :return: A JSON representation of the dimension, corresponding to the
+            cubes format.
+        """
+        dim_attributes = [self.pk.name]
+        for c in self.columns:
+            c_cls = c.type.__class__
+            exclude = c_cls in self.EXCLUDED_DIMENSION_ATTRIBUTE_TYPES
+            if not exclude:
+                dim_attributes.append(c.name)
+        return {
+            'name': self.name,
+            'label': self.name,
+            'description': self.get_description(),
+            'levels': [
+                {
+                    'name': self.name,
+                    'attributes': dim_attributes,
+                }
+            ]
+        }
 
     def is_created(self, connection=None):
         """

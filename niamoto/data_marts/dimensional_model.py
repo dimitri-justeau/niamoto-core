@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import sqlalchemy as sa
-from geoalchemy2 import Geography, Geometry
 from cubes import Workspace
 
 from niamoto.conf import settings
@@ -19,11 +18,6 @@ class DimensionalModel:
     Class representing the whole dimensional model: dimensions and
     fact tables.
     """
-
-    EXCLUDED_DIMENSION_ATTRIBUTE_TYPES = {
-        Geography: True,
-        Geometry: True,
-    }
 
     def __init__(self, dimensions, fact_tables, aggregates):
         """
@@ -47,24 +41,8 @@ class DimensionalModel:
         dims = []
         mappings = {}
         for k, v in self.dimensions.items():
-            dim_attributes = [v.pk.name]
             mappings[v.name] = '{}.id'.format(v.name)
-            for c in v.columns:
-                c_cls = c.type.__class__
-                exclude = c_cls in self.EXCLUDED_DIMENSION_ATTRIBUTE_TYPES
-                if not exclude:
-                    dim_attributes.append(c.name)
-            dims.append({
-                'name': '{}'.format(v.name),
-                'label': '{}'.format(v.name),
-                'description': v.get_description(),
-                'levels': [
-                    {
-                        'name': v.name,
-                        'attributes': dim_attributes
-                    }
-                ],
-            })
+            dims.append(v.get_cubes_json())
         cubes = []
         for k, v in self.fact_tables.items():
             cubes.append({
