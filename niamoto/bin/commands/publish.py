@@ -46,7 +46,9 @@ def init_publish_cli():
         publisher = PUBLISHER_REGISTRY[pub_key]['class']
 
         try:
-            publisher.get_publish_formats()
+            formats = publisher.get_publish_formats()
+            if len(formats) == 0:
+                continue
         except NotImplementedError:
             continue
 

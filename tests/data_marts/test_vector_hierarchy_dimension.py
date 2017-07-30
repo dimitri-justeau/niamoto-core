@@ -52,15 +52,15 @@ class TestVectorHierarchyDimension(BaseTestNiamotoSchemaCreated):
     def test_vector_hierarchy_dimension(self):
         dim0 = data_marts_api.create_vector_dimension('ncl_adm0')
         dim1 = data_marts_api.create_vector_dimension('ncl_adm1')
-        dim2 = data_marts_api.create_vector_dimension('ncl_adm2')
-        vh_dim = VectorHierarchyDimension('ncl_adm', [dim0, dim1, dim2])
+        vh_dim = VectorHierarchyDimension('ncl_adm', [dim0, dim1])
         vh_dim.create_dimension()
         loaded_dim = data_marts_api.get_dimension('ncl_adm')
         self.assertIsInstance(loaded_dim, VectorHierarchyDimension)
         self.assertEqual(
             loaded_dim.levels,
-            ['ncl_adm0', 'ncl_adm1', 'ncl_adm2']
+            ['ncl_adm0', 'ncl_adm1']
         )
+        loaded_dim.populate_from_publisher()
 
 
 if __name__ == '__main__':

@@ -3,6 +3,8 @@
 import sqlalchemy as sa
 
 from niamoto.conf import settings
+from niamoto.data_publishers.vector_hierarchy_publisher import \
+    VectorHierarchyPublisher
 from niamoto.data_marts.dimensions.base_dimension import BaseDimension
 from niamoto.api.data_marts_api import get_dimension
 
@@ -39,7 +41,7 @@ class VectorHierarchyDimension(BaseDimension):
         super(VectorHierarchyDimension, self).__init__(
             name,
             columns,
-            publisher=None,  # TODO
+            publisher=VectorHierarchyPublisher(),
             label_col=label_col,
             properties={
                 'levels': self.levels
@@ -67,4 +69,11 @@ class VectorHierarchyDimension(BaseDimension):
             dimension_name,
             dims,
             label_col,
+        )
+
+    def populate_from_publisher(self, *args, **kwargs):
+        return super(VectorHierarchyDimension, self).populate_from_publisher(
+            self.levels,
+            *args,
+            **kwargs,
         )
