@@ -6,7 +6,7 @@ from niamoto.conf import settings
 from niamoto.data_publishers.vector_hierarchy_publisher import \
     VectorHierarchyPublisher
 from niamoto.data_marts.dimensions.base_dimension import BaseDimension
-from niamoto.api.data_marts_api import get_dimension
+from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 
 
 class VectorHierarchyDimension(BaseDimension):
@@ -64,7 +64,7 @@ class VectorHierarchyDimension(BaseDimension):
                 ' loaded from the database.'
             )
         levels = properties['levels']
-        dims = [get_dimension(level) for level in levels]
+        dims = [VectorDimension(level) for level in levels]
         return cls(
             dimension_name,
             dims,

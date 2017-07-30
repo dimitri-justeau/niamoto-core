@@ -12,12 +12,23 @@ from niamoto.data_marts.dimensions.base_dimension import \
 from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 from niamoto.data_marts.dimensions.taxon_dimension import TaxonDimension
+from niamoto.data_marts.dimensions.vector_hierarchy_dimension import \
+    VectorHierarchyDimension
 from niamoto.data_marts.dimensional_model import DimensionalModel
 from niamoto.api import publish_api
 from niamoto.log import get_logger
 
 
 LOGGER = get_logger(__name__)
+
+
+def get_dimension(dimension_name):
+    """
+    Return a registered dimension instance.
+    :param dimension_name: The dimension name.
+    :return: The loaded dimension instance.
+    """
+    return DimensionManager.get_dimension(dimension_name)
 
 
 def create_vector_dimension(vector_name, label_col='label', populate=True):
@@ -29,6 +40,25 @@ def create_vector_dimension(vector_name, label_col='label', populate=True):
     :return: The created dimension.
     """
     dim = VectorDimension(vector_name, label_col)
+    dim.create_dimension()
+    if populate:
+        dim.populate_from_publisher()
+    return dim
+
+
+def create_vector_hierarchy_dimension(name, vector_dimension_names,
+                                      populate=True):
+    """
+    Create a vector hierarchy dimension from registered vector dimensions.
+    :param name: The dimension name.
+    :param vector_dimension_names:
+    :param populate: If True, populate the dimension.
+    :return: The created dimension
+    """
+    dim = VectorHierarchyDimension(
+        name,
+        [get_dimension(v) for v in vector_dimension_names],
+    )
     dim.create_dimension()
     if populate:
         dim.populate_from_publisher()
@@ -62,15 +92,6 @@ def get_dimension_types():
     :return: The available dimension types.
     """
     return DIMENSION_TYPE_REGISTRY
-
-
-def get_dimension(dimension_name):
-    """
-    Return a registered dimension instance.
-    :param dimension_name: The dimension name.
-    :return: The loaded dimension instance.
-    """
-    return DimensionManager.get_dimension(dimension_name)
 
 
 def delete_dimension(dimension_name):

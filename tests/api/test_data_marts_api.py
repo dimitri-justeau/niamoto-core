@@ -32,6 +32,9 @@ from niamoto.exceptions import DimensionNotRegisteredError
 SHP_TEST = os.path.join(
     NIAMOTO_HOME, 'data', 'vector', 'NCL_adm', 'NCL_adm1.shp'
 )
+SHP_TEST_0 = os.path.join(
+    NIAMOTO_HOME, 'data', 'vector', 'NCL_adm', 'NCL_adm0.shp'
+)
 
 
 class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
@@ -43,6 +46,7 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
     def setUpClass(cls):
         super(TestDataMartsApi, cls).setUpClass()
         add_vector(SHP_TEST, 'ncl_adm1')
+        add_vector(SHP_TEST_0, 'ncl_adm0')
 
     def tearDown(self):
         super(TestDataMartsApi, self).tearDown()
@@ -52,7 +56,7 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
                 schema=settings.NIAMOTO_FACT_TABLES_SCHEMA
             )
             for tb in tables:
-                connection.execute("DROP TABLE {};".format(
+                connection.execute("DROP TABLE {} CASCADE;".format(
                     "{}.{}".format(settings.NIAMOTO_FACT_TABLES_SCHEMA, tb)
                 ))
             delete_stmt = meta.fact_table_registry.delete()
@@ -63,7 +67,7 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
                 schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
             )
             for tb in tables:
-                connection.execute("DROP TABLE {};".format(
+                connection.execute("DROP TABLE {} CASCADE;".format(
                     "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
                 ))
             delete_stmt = meta.dimension_registry.delete()
@@ -71,6 +75,15 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
 
     def test_create_vector_dimension(self):
         data_marts_api.create_vector_dimension("ncl_adm1")
+
+    def test_create_vector_hierarchy_dimension(self):
+        data_marts_api.create_vector_dimension("ncl_adm1")
+        data_marts_api.create_vector_dimension("ncl_adm0")
+        data_marts_api.create_vector_hierarchy_dimension(
+            'vector_hierarchy',
+            ["ncl_adm1", "ncl_adm0"],
+            populate=False,
+        )
 
     def test_create_taxon_dimension(self):
         data_marts_api.create_taxon_dimension()
