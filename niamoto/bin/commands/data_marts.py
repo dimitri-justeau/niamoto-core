@@ -99,6 +99,48 @@ def create_vector_dim_cli(vector_name, label_col='label', populate=True):
     )
 
 
+@click.command('create_vector_hierarchy_dimension')
+@click.argument('name')
+@click.option(
+    '--populate',
+    help='Populate the dimension',
+    is_flag=True,
+)
+@click.option(
+    '--vector_dimension',
+    '-vd',
+    help="The vector dimension's names",
+    type=str,
+    multiple=True,
+    required=True,
+)
+@cli_catch_unknown_error
+def create_vector_hierarchy_dim_cli(name, vector_dimension, populate=True):
+    """
+    Create a vector hierarchy dimension from registered vector dimensions.
+    """
+    from niamoto.api import data_marts_api
+    s1, s2 = '', '!'
+    if populate:
+        s1 = " and populating"
+        s2 = " and populated!"
+    click.echo(
+        "Creating{} the '{}' vector hierarchy dimension...".format(s1, name)
+    )
+    data_marts_api.create_vector_hierarchy_dimension(
+        name,
+        vector_dimension,
+        populate=populate
+    )
+    m = "The '{}' vector hierarchy dimension had been successfully created{}"
+    click.echo(
+        m.format(
+            name,
+            s2
+        )
+    )
+
+
 @click.command('create_taxon_dimension')
 @click.option(
     '--populate',
