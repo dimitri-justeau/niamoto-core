@@ -120,10 +120,9 @@ class BaseDimension(metaclass=DimensionMeta):
             properties=properties
         )
 
-    def get_cubes_json(self):
+    def get_cubes_attributes(self):
         """
-        :return: A JSON representation of the dimension, corresponding to the
-            cubes format.
+        :return: The list of attribute to pass to the cubes dict descriptor.
         """
         dim_attributes = [self.pk.name]
         for c in self.columns:
@@ -131,6 +130,26 @@ class BaseDimension(metaclass=DimensionMeta):
             exclude = c_cls in self.EXCLUDED_DIMENSION_ATTRIBUTE_TYPES
             if not exclude:
                 dim_attributes.append(c.name)
+        return dim_attributes
+
+    def get_cubes_joins(self):
+        """
+        :return: The list of joins to pass to the cubes dict descriptor.
+        """
+        return []
+
+    def get_cubes_mappings(self):
+        """
+        :return: The list of mappings to pass to the cubes dict descriptor.
+        """
+        return []
+
+    def get_cubes_dict(self):
+        """
+        :return: A dict representation of the dimension, corresponding to the
+            cubes format.
+        """
+        dim_attributes = self.get_cubes_attributes()
         return {
             'name': self.name,
             'label': self.name,
@@ -280,6 +299,25 @@ class BaseDimension(metaclass=DimensionMeta):
 
     def get_labels(self):
         return self.get_values()[self.label_col]
+
+    def get_value(self, pk, attributes=None):
+        attrs = "*"
+        if attributes is not None:
+            attrs = ", ".join(attributes)
+        sql = \
+            """
+                SELECT {attrs}
+                FROM {schema}.{tb}
+                WHERE {schema}.{tb}.{id} = {pk};
+            """.format(**{
+                'attrs': attrs,
+                'schema': settings.NIAMOTO_DIMENSIONS_SCHEMA,
+                'tb': self.name,
+                'id': self.pk.name,
+                'pk': pk
+            })
+        with Connector.get_connection() as connection:
+            return connection.execute(sql).fetchone()
 
     def __repr__(self):
         return "{}('{}', {})".format(

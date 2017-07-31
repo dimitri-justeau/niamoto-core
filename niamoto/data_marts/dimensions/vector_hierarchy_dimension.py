@@ -78,3 +78,38 @@ class VectorHierarchyDimension(BaseDimension):
             **kwargs
         )
 
+    def get_cubes_dict(self):
+        levels = []
+        for v in self.vector_dimensions:
+            levels.append({
+                "name": v.name,
+                "attributes": [
+                    '{}_{}'.format(v.name, a)
+                    for a in v.get_cubes_attributes()
+                ],
+            })
+        {
+            "name": self.name,
+            "levels": levels
+        }
+        return super(VectorHierarchyDimension, self).get_cubes_json()
+
+    def get_cubes_joins(self):
+        joins = []
+        for v in self.vector_dimensions:
+            joins.append({
+                "master": "{}.{}_id".join(self.name, v.name),
+                "detail": "{}.id".join(v.name)
+            })
+
+    def get_cubes_mappings(self):
+        mappings = {}
+        for v in self.vector_dimensions:
+            for a in v.get_cubes_attributes():
+                k = '{}.{}_{}'.format(
+                    self.name,
+                    v.name,
+                    a
+                )
+                mappings[k] = '{}.{}'.format(v.name, a)
+        return mappings

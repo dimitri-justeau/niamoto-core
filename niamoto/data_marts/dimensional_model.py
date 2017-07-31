@@ -40,9 +40,12 @@ class DimensionalModel:
         """
         dims = []
         mappings = {}
+        joins = []
         for k, v in self.dimensions.items():
             mappings[v.name] = '{}.id'.format(v.name)
-            dims.append(v.get_cubes_json())
+            dims.append(v.get_cubes_dict())
+            joins += v.get_cubes_joins()
+            mappings.update(v.get_cubes_mappings())
         cubes = []
         for k, v in self.fact_tables.items():
             cubes.append({
@@ -66,7 +69,7 @@ class DimensionalModel:
                             'column': 'id',
                         }
                     } for d in v.dimensions
-                ],
+                ] + joins,
                 'mappings': mappings,
                 'aggregates': self.aggregates[k],
             })
