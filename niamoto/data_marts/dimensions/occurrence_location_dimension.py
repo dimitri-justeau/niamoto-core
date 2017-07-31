@@ -13,7 +13,7 @@ class OccurrenceLocationDimension(BaseDimension):
     Dimension representing occurrences location
     """
 
-    DEFAULT_NAME = 'occurrence_location_dimension'
+    DEFAULT_NAME = 'occurrence_location'
     PUBLISHER = OccurrenceLocationPublisher()
 
     def __init__(self, name=DEFAULT_NAME, publisher=PUBLISHER):
@@ -44,3 +44,7 @@ class OccurrenceLocationDimension(BaseDimension):
     @classmethod
     def get_description(cls):
         return "Dimension representing occurrences location."
+
+    @classmethod
+    def load(cls, dimension_name, label_col='label', properties={}):
+        return cls(name=dimension_name)
