@@ -82,10 +82,9 @@ class OccurrenceLocationPublisher(BaseDataPublisher):
                     meta.occurrence.c.location,
                     String
                 )).label('location'),
-                distinct(cast(
-                    meta.occurrence.c.location,
-                    String
-                )).label('location_wkt'),
+                func.st_astext(
+                    meta.occurrence.c.location
+                ).label('location_wkt'),
             ])
             df = gpd.read_postgis(sel, connection, geom_col='location')
             return df
