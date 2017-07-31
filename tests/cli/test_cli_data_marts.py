@@ -117,6 +117,14 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
 
+    def test_create_occurrence_location_dimension_cli(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            data_marts.create_occurrence_location_dim_cli,
+            ['--populate']
+        )
+        self.assertEqual(result.exit_code, 0)
+
     def test_delete_dimension_cli(self):
         runner = CliRunner()
         runner.invoke(

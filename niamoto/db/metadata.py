@@ -42,7 +42,7 @@ occurrence = Table(
         index=True,
     ),
     Column('provider_pk', Integer, nullable=False, index=True),
-    Column('location', Geometry('POINT', srid=4326), nullable=False),
+    Column('location', Geometry('POINT', srid=4326)),
     Column(
         'taxon_id',
         ForeignKey(

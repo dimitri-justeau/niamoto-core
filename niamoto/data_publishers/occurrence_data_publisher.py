@@ -1,7 +1,8 @@
 # coding: utf-8
 
-from sqlalchemy import select, func, cast, String
+from sqlalchemy import select, func, cast, String, distinct
 import pandas as pd
+import geopandas as gpd
 
 from niamoto.data_publishers.base_data_publisher import BaseDataPublisher
 from niamoto.db import metadata as meta
@@ -67,3 +68,32 @@ class OccurrenceDataPublisher(BaseDataPublisher):
     def get_publish_formats(cls):
         return [cls.CSV, cls.SQL]
 
+
+class OccurrenceLocationPublisher(BaseDataPublisher):
+    """
+    Data publisher publishing only the locations of occurrences.
+    Implemented for populating the occurrence location dimension.
+    """
+
+    def _process(self, *args, **kwargs):
+        with Connector.get_connection() as connection:
+            sel = select([
+                distinct(cast(
+                    meta.occurrence.c.location,
+                    String
+                )).label('location'),
+            ])
+            df = gpd.read_postgis(sel, connection, geom_col='location')
+            return df
+
+    @classmethod
+    def get_description(cls):
+        return "Publish the locations of occurrences."
+
+    @classmethod
+    def get_publish_formats(cls):
+        return []
+
+    @classmethod
+    def get_key(cls):
+        return "occurrence_locations"

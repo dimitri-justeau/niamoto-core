@@ -158,6 +158,25 @@ def create_taxon_dim_cli(populate=True):
     click.echo("The taxon dimension had been successfully created!")
 
 
+@click.command('create_occurrence_location_dimension')
+@click.option(
+    '--populate',
+    help='Populate the dimension',
+    is_flag=True,
+)
+@cli_catch_unknown_error
+def create_occurrence_location_dim_cli(populate=True):
+    """
+    Create the occurrence location dimension.
+    """
+    from niamoto.api import data_marts_api
+    click.echo("Creating the occurrence location dimension...")
+    data_marts_api.create_occurrence_location_dimension(populate=populate)
+    click.echo(
+        "The occurrence location dimension had been successfully created!"
+    )
+
+
 @click.command('fact_tables')
 @cli_catch_unknown_error
 def list_fact_tables_cli():

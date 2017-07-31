@@ -14,7 +14,7 @@ log.FILE_LOGGING_LEVEL = logging.DEBUG
 
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.data_publishers.occurrence_data_publisher import \
-    OccurrenceDataPublisher
+    OccurrenceDataPublisher, OccurrenceLocationPublisher
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.data_providers.csv_provider import CsvDataProvider
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -48,6 +48,10 @@ class TestOccurrencesPublisher(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(result), 3)
         self.assertIsNotNone(op.get_key())
         self.assertIsNotNone(op.get_publish_formats())
+
+    def test_occurrence_locations_publisher(self):
+        op = OccurrenceLocationPublisher()
+        result = op.process()
 
 
 if __name__ == '__main__':

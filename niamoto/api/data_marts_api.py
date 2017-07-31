@@ -12,6 +12,8 @@ from niamoto.data_marts.dimensions.base_dimension import \
 from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.data_marts.dimensions.vector_dimension import VectorDimension
 from niamoto.data_marts.dimensions.taxon_dimension import TaxonDimension
+from niamoto.data_marts.dimensions.occurrence_location_dimension import \
+    OccurrenceLocationDimension
 from niamoto.data_marts.dimensions.vector_hierarchy_dimension import \
     VectorHierarchyDimension
 from niamoto.data_marts.dimensional_model import DimensionalModel
@@ -74,6 +76,22 @@ def create_taxon_dimension(dimension_name=TaxonDimension.DEFAULT_NAME,
     :return: The created dimension
     """
     dim = TaxonDimension(dimension_name)
+    dim.create_dimension()
+    if populate:
+        dim.populate_from_publisher()
+    return dim
+
+
+def create_occurrence_location_dimension(
+        dimension_name=OccurrenceLocationDimension.DEFAULT_NAME,
+        populate=True):
+    """
+    Create an occurrence location dimension.
+    :param dimension_name: The dimension name.
+    :param populate: If True, populate the dimension.
+    :return: The created dimension
+    """
+    dim = OccurrenceLocationDimension(dimension_name)
     dim.create_dimension()
     if populate:
         dim.populate_from_publisher()

@@ -88,6 +88,9 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
     def test_create_taxon_dimension(self):
         data_marts_api.create_taxon_dimension()
 
+    def test_create_occurrence_location_dimension(self):
+        data_marts_api.create_occurrence_location_dimension()
+
     def test_get_dimension(self):
         data_marts_api.create_vector_dimension("ncl_adm1")
         dim = data_marts_api.get_dimension("ncl_adm1")
