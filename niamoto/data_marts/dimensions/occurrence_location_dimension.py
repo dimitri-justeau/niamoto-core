@@ -2,7 +2,10 @@
 
 import sqlalchemy as sa
 from geoalchemy2 import Geometry
+import geopandas as gpd
 
+from niamoto.conf import settings
+from niamoto.db.connector import Connector
 from niamoto.data_publishers.occurrence_data_publisher import \
     OccurrenceLocationPublisher
 from niamoto.data_marts.dimensions.base_dimension import BaseDimension
@@ -18,7 +21,8 @@ class OccurrenceLocationDimension(BaseDimension):
 
     def __init__(self, name=DEFAULT_NAME, publisher=PUBLISHER):
         columns = [
-            sa.Column('location', Geometry('POINT', srid=4326))
+            sa.Column('location', Geometry('POINT', srid=4326)),
+            sa.Column('location_wkt', sa.String())
         ]
         super(OccurrenceLocationDimension, self).__init__(
             name,
@@ -48,3 +52,25 @@ class OccurrenceLocationDimension(BaseDimension):
     @classmethod
     def load(cls, dimension_name, label_col='label', properties={}):
         return cls(name=dimension_name)
+
+    def get_values(self, wkt_filter=None):
+        where_clause = "WHERE location IS NOT NULL"
+        if wkt_filter is not None:
+            where_clause += \
+                " AND ST_Intersects(location, " \
+                "ST_GeomFromEWKT('SRID=4326;{}'))".format(
+                    wkt_filter
+                )
+        sql = "SELECT * FROM {}.{} {};".format(
+            settings.NIAMOTO_DIMENSIONS_SCHEMA,
+            self.name,
+            where_clause
+        )
+        with Connector.get_connection() as connection:
+            df = gpd.read_postgis(
+                sql,
+                connection,
+                index_col='id',
+                geom_col='location',
+            )
+        return df
