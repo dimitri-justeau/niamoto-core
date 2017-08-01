@@ -53,7 +53,7 @@ def map_all_synonyms():
         name = record['name']
         provider_type = record['provider_type']
         synonym_key = record['synonym_key']
-        data_provider = PROVIDER_REGISTRY[provider_type](name)
+        data_provider = PROVIDER_REGISTRY[provider_type]['class'](name)
         m, s = data_provider.occurrence_provider.update_synonym_mapping()
         msg = "DataProvider(provider_type='{}', name='{}', synonym_key='{}'" \
               "): {} taxa had been mapped, over {} occurrences."
