@@ -64,7 +64,6 @@ class TestBaseDataPublisher(BaseTestNiamotoSchemaCreated):
         temp_csv.close()
 
     def test_publish_to_postgis(self):
-        CsvDataProvider.register_data_provider_type()
         CsvDataProvider.register_data_provider('csv_provider')
         csv_provider = CsvDataProvider(
             'csv_provider',

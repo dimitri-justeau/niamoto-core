@@ -29,7 +29,6 @@ class TestBaseOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestBaseOccurrenceProvider, cls).setUpClass()
-        TestDataProvider.register_data_provider_type()
         data_provider_1 = TestDataProvider.register_data_provider(
             'test_data_provider_1',
         )

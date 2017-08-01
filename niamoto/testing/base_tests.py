@@ -26,7 +26,6 @@ class BaseTestNiamotoSchemaCreated(BaseTest):
             meta.plot,
             meta.plot_occurrence,
             meta.data_provider,
-            meta.data_provider_type,
             meta.taxon,
             meta.synonym_key_registry,
             meta.raster_registry,

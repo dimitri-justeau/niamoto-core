@@ -33,16 +33,13 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
 
     def tearDown(self):
         del1 = niamoto_db_meta.data_provider.delete()
-        del2 = niamoto_db_meta.data_provider_type.delete()
         with Connector.get_connection() as connection:
             connection.execute(del1)
-            connection.execute(del2)
 
     def test_list_data_provider_types(self):
         runner = CliRunner()
         result = runner.invoke(data_provider.list_data_provider_types)
         self.assertEqual(result.exit_code, 0)
-        TestDataProvider.register_data_provider_type()
         result = runner.invoke(data_provider.list_data_provider_types)
         self.assertEqual(result.exit_code, 0)
 
@@ -50,15 +47,12 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
         runner = CliRunner()
         result = runner.invoke(data_provider.list_data_providers)
         self.assertEqual(result.exit_code, 0)
-        TestDataProvider.register_data_provider_type()
         TestDataProvider.register_data_provider('test_data_provider_1')
         result = runner.invoke(data_provider.list_data_providers)
         self.assertEqual(result.exit_code, 0)
 
     def test_add_data_provider(self):
         runner = CliRunner()
-        TestDataProvider.register_data_provider_type()
-        PlantnoteDataProvider.register_data_provider_type()
         result = runner.invoke(
             data_provider.add_data_provider,
             ['test_provider', 'PLANTNOTE'],
@@ -72,7 +66,6 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
 
     def test_update_data_provider(self):
         runner = CliRunner()
-        PlantnoteDataProvider.register_data_provider_type()
         PlantnoteDataProvider.register_data_provider(
             'test_data_provider_1'
         )
@@ -84,7 +77,6 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
 
     def test_delete_data_provider(self):
         runner = CliRunner()
-        TestDataProvider.register_data_provider_type()
         TestDataProvider.register_data_provider('test_data_provider_1')
         result = runner.invoke(
             data_provider.delete_data_provider,
@@ -105,8 +97,6 @@ class TestCLIDataProvider(BaseTestNiamotoSchemaCreated):
 
     def test_sync(self):
         runner = CliRunner()
-        TestDataProvider.register_data_provider_type()
-        PlantnoteDataProvider.register_data_provider_type()
         PlantnoteDataProvider.register_data_provider(
             'plantnote_provider',
             self.TEST_DB_PATH,

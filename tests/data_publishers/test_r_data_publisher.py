@@ -57,7 +57,6 @@ class TestRDataPublisher(BaseTestNiamotoSchemaCreated):
         result = r_data_publisher._process()[0]
         self.assertIsInstance(result, pd.DataFrame)
         #  Add data
-        CsvDataProvider.register_data_provider_type()
         CsvDataProvider.register_data_provider('csv_provider')
         csv_provider = CsvDataProvider(
             'csv_provider',

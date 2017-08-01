@@ -37,7 +37,6 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
     def tearDown(self):
         with Connector.get_connection() as connection:
             del1 = niamoto_db_meta.data_provider.delete()
-            del2 = niamoto_db_meta.data_provider_type.delete()
             del3 = niamoto_db_meta.occurrence.delete()
             del4 = niamoto_db_meta.plot.delete()
             del5 = niamoto_db_meta.plot_occurrence.delete()
@@ -45,19 +44,11 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
             connection.execute(del3)
             connection.execute(del4)
             connection.execute(del1)
-            connection.execute(del2)
 
     def test_get_data_provider_type_list(self):
-        l1 = get_data_provider_type_list()
-        self.assertEqual(len(l1), 0)
-        PlantnoteDataProvider.register_data_provider_type()
-        TestDataProvider.register_data_provider_type()
-        l2 = get_data_provider_type_list()
-        self.assertEqual(len(l2), 2)
+        get_data_provider_type_list()
 
     def test_get_data_provider_list(self):
-        PlantnoteDataProvider.register_data_provider_type()
-        TestDataProvider.register_data_provider_type()
         l1 = get_data_provider_list()
         self.assertEqual(len(l1), 0)
         TestDataProvider.register_data_provider('test_data_provider_1')
@@ -73,8 +64,6 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(l2), 3)
 
     def test_add_data_provider(self):
-        TestDataProvider.register_data_provider_type()
-        PlantnoteDataProvider.register_data_provider_type()
         l1 = get_data_provider_list()
         self.assertEqual(len(l1), 0)
         add_data_provider(
@@ -85,8 +74,6 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         self.assertEqual(len(l2), 1)
 
     def test_update_data_provider(self):
-        TestDataProvider.register_data_provider_type()
-        PlantnoteDataProvider.register_data_provider_type()
         add_data_provider(
             "pl@ntnote_provider_1",
             "PLANTNOTE",
@@ -102,8 +89,6 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         self.assertIn("YO", list(l2['synonym_key']))
 
     def test_delete_data_provider(self):
-        TestDataProvider.register_data_provider_type()
-        PlantnoteDataProvider.register_data_provider_type()
         add_data_provider(
             "pl@ntnote_provider_1",
             "PLANTNOTE",
@@ -122,8 +107,6 @@ class TestDataProvidersApi(BaseTestNiamotoSchemaCreated):
         )
 
     def test_sync_with_data_provider(self):
-        TestDataProvider.register_data_provider_type()
-        PlantnoteDataProvider.register_data_provider_type()
         add_data_provider(
             "pl@ntnote_provider_1",
             "PLANTNOTE",

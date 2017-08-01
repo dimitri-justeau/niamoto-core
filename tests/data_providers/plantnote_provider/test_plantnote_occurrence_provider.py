@@ -30,7 +30,6 @@ class TestPlantnoteOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     def setUpClass(cls):
         super(TestPlantnoteOccurrenceProvider, cls).setUpClass()
         # Register Pl@ntnote data provider
-        PlantnoteDataProvider.register_data_provider_type()
         PlantnoteDataProvider.register_data_provider(
             'pl@ntnote_provider',
             cls.TEST_DB_PATH,

@@ -19,15 +19,6 @@ class TestBaseDataProvider(BaseTestNiamotoSchemaCreated):
     """
 
     def test_base_data_provider(self):
-        TestDataProvider.register_data_provider_type()
-        TestDataProvider.unregister_data_provider_type()
-        # Test with bind
-        with Connector.get_connection() as connection:
-            TestDataProvider.register_data_provider_type(bind=connection)
-            TestDataProvider.unregister_data_provider_type(bind=connection)
-            TestDataProvider.register_data_provider_type(bind=connection)
-        db_id = TestDataProvider.get_data_provider_type_db_id()
-        self.assertIsNotNone(db_id)
         TestDataProvider.register_data_provider('test_data_provider_1')
         test_data_provider = TestDataProvider('test_data_provider_1')
         self.assertIsNotNone(test_data_provider)

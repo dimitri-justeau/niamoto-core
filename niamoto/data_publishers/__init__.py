@@ -59,7 +59,7 @@ for file in os.listdir(PYTHON_SCRIPTS_HOME):
             spec.loader.exec_module(module)
         else:
             from importlib.machinery import SourceFileLoader
-            settings_module = SourceFileLoader(
+            module = SourceFileLoader(
                 file[:-3],
                 os.path.join(PYTHON_SCRIPTS_HOME, file)
             ).load_module()

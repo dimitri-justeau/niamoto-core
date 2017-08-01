@@ -26,7 +26,6 @@ class TestSynonymsTaxon(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestSynonymsTaxon, cls).setUpClass()
-        TestDataProvider.register_data_provider_type()
         TestDataProvider.register_data_provider('test_data_provider_1')
         TestDataProvider.register_data_provider('test_data_provider_2')
 

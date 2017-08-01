@@ -217,26 +217,12 @@ plot_occurrence = Table(
 #  Data provider tables  #
 # ---------------------- #
 
-data_provider_type = Table(
-    'data_provider_type',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(100), nullable=False),
-    UniqueConstraint('name', name='name'),
-    schema=settings.NIAMOTO_SCHEMA,
-)
-
 data_provider = Table(
     'data_provider',
     metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(100), nullable=False),
-    Column(
-        'provider_type_id',
-        ForeignKey('{}.data_provider_type.id'.format(settings.NIAMOTO_SCHEMA)),
-        nullable=False,
-        index=True,
-    ),
+    Column('provider_type_key', String(100), nullable=False),
     Column(
         'synonym_key_id',
         ForeignKey(

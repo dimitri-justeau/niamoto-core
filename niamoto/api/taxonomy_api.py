@@ -8,8 +8,8 @@ from sqlalchemy import select
 from niamoto.taxonomy.taxonomy_manager import TaxonomyManager
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
-from niamoto.api.data_provider_api import get_data_provider_list, \
-    PROVIDER_TYPES
+from niamoto.api.data_provider_api import get_data_provider_list
+from niamoto.data_providers.base_data_provider import PROVIDER_REGISTRY
 from niamoto.exceptions import DataSourceNotFoundError
 from niamoto.log import get_logger
 
@@ -53,7 +53,7 @@ def map_all_synonyms():
         name = record['name']
         provider_type = record['provider_type']
         synonym_key = record['synonym_key']
-        data_provider = PROVIDER_TYPES[provider_type](name)
+        data_provider = PROVIDER_REGISTRY[provider_type](name)
         m, s = data_provider.occurrence_provider.update_synonym_mapping()
         msg = "DataProvider(provider_type='{}', name='{}', synonym_key='{}'" \
               "): {} taxa had been mapped, over {} occurrences."

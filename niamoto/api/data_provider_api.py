@@ -8,21 +8,21 @@ from sqlalchemy import *
 import pandas as pd
 
 from niamoto.db.connector import Connector
-from niamoto.db.metadata import data_provider_type, data_provider, \
+from niamoto.db.metadata import data_provider, \
     synonym_key_registry
 from niamoto.db.utils import fix_db_sequences
 from niamoto.data_providers.base_data_provider import BaseDataProvider
-from niamoto.data_providers.provider_types import PROVIDER_TYPES
+from niamoto.data_providers.base_data_provider import PROVIDER_REGISTRY
 
 
 def get_data_provider_type_list():
     """
     :return: A Dataframe containing all the registered data provider types.
     """
-    sel = select([data_provider_type])
-    with Connector.get_connection() as connection:
-        df = pd.read_sql(sel, connection, index_col='id')
-    return df
+    return pd.DataFrame(
+        list(PROVIDER_REGISTRY.keys()),
+        columns=['provider_type_key']
+    )
 
 
 def get_data_provider_list():
@@ -32,16 +32,13 @@ def get_data_provider_list():
     sel = select([
         data_provider.c.id,
         data_provider.c.name,
-        data_provider_type.c.name.label('provider_type'),
+        data_provider.c.provider_type_key.label('provider_type'),
         synonym_key_registry.c.name.label('synonym_key'),
         data_provider.c.date_create.label('date_create'),
         data_provider.c.date_update.label('date_update'),
         data_provider.c.last_sync.label('last_sync'),
     ]).select_from(
-        data_provider.join(
-            data_provider_type,
-            data_provider.c.provider_type_id == data_provider_type.c.id
-        ).outerjoin(
+        data_provider.outerjoin(
             synonym_key_registry,
             synonym_key_registry.c.id == data_provider.c.synonym_key_id
         )
@@ -56,25 +53,22 @@ def add_data_provider(name, provider_type, *args, properties={},
     """
     Register a data provider in a given Niamoto database.
     :param name: The name of the provider to register (must be unique).
-    :param provider_type: The type of the provider to register. Must be a
-    string value among:
-        - 'PLANTNOTE': The Pl@ntnote data provider.
-        - 'CSV': The CSV data provider.
+    :param provider_type: The type of the provider to register.
     :param synonym_key: The synonym key for this provider.
     :param args: Additional args.
     :param properties: Properties dict to store for the data provider.
     :param return_object: If True, return the created object.
     :param kwargs: Additional keyword args.
     """
-    if provider_type not in PROVIDER_TYPES:
+    if provider_type not in PROVIDER_REGISTRY:
         m = "The provider type '{}' does not exist. Please use one of the " \
             "following values: {}."
         e = ValueError(m.format(
             provider_type,
-            ', '.join(PROVIDER_TYPES.keys())
+            ', '.join(PROVIDER_REGISTRY.keys())
         ))
         raise e
-    provider_cls = PROVIDER_TYPES[provider_type]
+    provider_cls = PROVIDER_REGISTRY[provider_type]['class']
     return provider_cls.register_data_provider(
         name,
         *args,
@@ -136,13 +130,8 @@ def load_data_provider(name, *args, connection=None, **kwargs):
     sel = select([
         data_provider.c.id,
         data_provider.c.name,
-        data_provider_type.c.name.label('provider_type'),
-    ]).select_from(
-        data_provider.join(
-            data_provider_type,
-            data_provider.c.provider_type_id == data_provider_type.c.id
-        )
-    ).where(
+        data_provider.c.provider_type_key.label('provider_type'),
+    ]).where(
         data_provider.c.name == name
     )
     # Look for args that must be set None
@@ -156,7 +145,7 @@ def load_data_provider(name, *args, connection=None, **kwargs):
     record = r.fetchone()
     name = record.name
     type_key = record.provider_type
-    provider = PROVIDER_TYPES[type_key](name, *nargs, **kwargs)
+    provider = PROVIDER_REGISTRY[type_key]['class'](name, *nargs, **kwargs)
     if close_after:
         connection.close()
     return provider

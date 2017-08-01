@@ -15,7 +15,22 @@ from niamoto.log import get_logger
 LOGGER = get_logger(__name__)
 
 
-class BaseDataProvider:
+PROVIDER_REGISTRY = {}
+
+
+class ProviderMeta(type):
+
+    def __init__(cls, *args, **kwargs):
+        try:
+            PROVIDER_REGISTRY[cls.get_type_name()] = {
+                'class': cls,
+            }
+        except NotImplementedError:
+            pass
+        return super(ProviderMeta, cls).__init__(cls)
+
+
+class BaseDataProvider(metaclass=ProviderMeta):
     """
     Abstract base class for plot and occurrence data providers.
     """
@@ -150,30 +165,6 @@ class BaseDataProvider:
         raise NotImplementedError()
 
     @classmethod
-    def get_data_provider_type_db_id(cls):
-        sel = select([niamoto_db_meta.data_provider_type.c.id]).where(
-            niamoto_db_meta.data_provider_type.c.name == cls.get_type_name()
-        )
-        with Connector.get_connection() as connection:
-            result = connection.execute(sel)
-            return result.fetchone()['id']
-
-    @classmethod
-    def register_data_provider_type(cls, bind=None):
-        """
-        Register the cls data provider type in database.
-        :param bind: If passed, use an existing engine or connection.
-        """
-        ins = niamoto_db_meta.data_provider_type.insert({
-            'name': cls.get_type_name()
-        })
-        if bind is not None:
-            bind.execute(ins)
-            return
-        with Connector.get_connection() as connection:
-            connection.execute(ins)
-
-    @classmethod
     def register_data_provider(cls, name, *args, properties={},
                                synonym_key=None, return_object=True, **kwargs):
         m = "DataProvider(name='{}', type_name='{}', properties='{}', " \
@@ -191,7 +182,7 @@ class BaseDataProvider:
                 )['id']
             ins = niamoto_db_meta.data_provider.insert({
                 'name': name,
-                'provider_type_id': cls.get_data_provider_type_db_id(),
+                'provider_type_key': cls.get_type_name(),
                 'properties': properties,
                 'synonym_key_id': synonym_key_id,
                 'date_create': datetime.now(),
@@ -261,21 +252,6 @@ class BaseDataProvider:
             return
         with Connector.get_connection() as connection:
             with connection.begin():
-                connection.execute(delete_stmt)
-
-    @classmethod
-    def unregister_data_provider_type(cls, bind=None):
-        """
-        Unregister the cls data provider type in database.
-        :param bind: If passed, use an existing engine or connection.
-        """
-        delete_stmt = niamoto_db_meta.data_provider_type.delete().where(
-            niamoto_db_meta.data_provider_type.c.name == cls.get_type_name()
-        )
-        if bind is not None:
-            bind.execute(delete_stmt)
-        else:
-            with Connector.get_connection() as connection:
                 connection.execute(delete_stmt)
 
     @staticmethod

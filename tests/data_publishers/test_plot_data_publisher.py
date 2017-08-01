@@ -32,7 +32,6 @@ class TestPlotPublisher(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestPlotPublisher, cls).setUpClass()
-        CsvDataProvider.register_data_provider_type()
         CsvDataProvider.register_data_provider('csv_provider')
         csv_provider = CsvDataProvider(
             'csv_provider',

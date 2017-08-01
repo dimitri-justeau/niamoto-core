@@ -63,7 +63,6 @@ class TestCsvDataProvider(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestCsvDataProvider, cls).setUpClass()
-        CsvDataProvider.register_data_provider_type()
         CsvDataProvider.register_data_provider('csv_provider')
 
     def test_csv_data_provider(self):

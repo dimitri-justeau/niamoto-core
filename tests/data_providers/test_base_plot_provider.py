@@ -27,7 +27,6 @@ class TestBasePlotProvider(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestBasePlotProvider, cls).setUpClass()
-        TestDataProvider.register_data_provider_type()
         data_provider_1 = TestDataProvider.register_data_provider(
             'test_data_provider_1',
         )

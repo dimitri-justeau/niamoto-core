@@ -90,9 +90,6 @@ class TestSQLDataProvider(BaseTestNiamotoSchemaCreated):
     """
 
     def test_plantnote_data_provider(self):
-        SQLTestProvider.register_data_provider_type()
-        db_id = SQLTestProvider.get_data_provider_type_db_id()
-        self.assertIsNotNone(db_id)
         db_url = "sqlite:///{}".format(TEST_DB_PATH)
         SQLTestProvider.register_data_provider(
             'sql_provider',

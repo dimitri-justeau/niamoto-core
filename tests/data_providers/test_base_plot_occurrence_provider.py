@@ -27,7 +27,6 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestBasePlotOccurrenceProvider, cls).setUpClass()
-        TestDataProvider.register_data_provider_type()
         data_provider_1 = TestDataProvider.register_data_provider(
             'test_data_provider_1'
         )
@@ -277,7 +276,6 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         self.tearDownClass()
         super(TestBasePlotOccurrenceProvider, self).setUpClass()
         # Reset the data
-        TestDataProvider.register_data_provider_type()
         data_provider_1 = TestDataProvider.register_data_provider('test_data_provider_1')
         plot_1 = test_data.get_plot_data_1(data_provider_1)
         occ_1 = test_data.get_occurrence_data_1(data_provider_1)
