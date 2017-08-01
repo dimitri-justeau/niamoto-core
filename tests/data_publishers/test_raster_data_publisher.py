@@ -16,7 +16,8 @@ log.FILE_LOGGING_LEVEL = logging.DEBUG
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.api.raster_api import add_raster
 from niamoto.testing.test_database_manager import TestDatabaseManager
-from niamoto.data_publishers.raster_data_publisher import RasterDataPublisher
+from niamoto.data_publishers.raster_data_publisher import \
+    RasterDataPublisher, RasterValueCountPublisher
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 
 
@@ -44,6 +45,10 @@ class TestRasterDataPublisher(BaseTestNiamotoSchemaCreated):
         self.assertIn('tiff', publisher.get_publish_formats())
         tmp = tempfile.NamedTemporaryFile()
         publisher._publish_tiff(raster_uri, tmp.name)
+
+    def test_raster_value_count_publisher(self):
+        publisher = RasterValueCountPublisher()
+        values = publisher._process('test_raster')
 
 
 if __name__ == '__main__':
