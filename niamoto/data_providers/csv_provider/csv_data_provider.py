@@ -20,9 +20,6 @@ class CsvDataProvider(BaseDataProvider):
         self.occurrence_csv_path = occurrence_csv_path
         self.plot_csv_path = plot_csv_path
         self.plot_occurrence_csv_path = plot_occurrence_csv_path
-        self._occurrence_provider = None
-        self._plot_provider = None
-        self._plot_occurrence_provider = None
         self._occurrence_provider = CsvOccurrenceProvider(
             self,
             occurrence_csv_path
