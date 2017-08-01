@@ -61,6 +61,10 @@ class TestVectorHierarchyDimension(BaseTestNiamotoSchemaCreated):
             ['ncl_adm0', 'ncl_adm1']
         )
         loaded_dim.populate_from_publisher()
+        # TODO: Test values
+        loaded_dim.get_cubes_dict()
+        loaded_dim.get_cubes_joins()
+        loaded_dim.get_cubes_mappings()
 
 
 if __name__ == '__main__':

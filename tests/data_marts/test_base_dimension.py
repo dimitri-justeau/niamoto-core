@@ -92,6 +92,9 @@ class TestBaseDimension(BaseTestNiamotoSchemaCreated):
         )
         self.assertTrue((df_check['category'] == df2['category']).all())
         self.assertTrue((df_check.index == df2.index).all())
+        dim.get_labels()
+        dim.get_value(1)
+        dim.get_value(2, ['category', ])
 
     def test_populate_from_publisher(self):
         dim = TestDimension()

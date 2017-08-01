@@ -92,14 +92,14 @@ class VectorHierarchyDimension(BaseDimension):
             "name": self.name,
             "levels": levels
         }
-        return super(VectorHierarchyDimension, self).get_cubes_json()
+        return super(VectorHierarchyDimension, self).get_cubes_dict()
 
     def get_cubes_joins(self):
         joins = []
         for v in self.vector_dimensions:
             joins.append({
-                "master": "{}.{}_id".join(self.name, v.name),
-                "detail": "{}.id".join(v.name)
+                "master": "{}.{}_id".format(self.name, v.name),
+                "detail": "{}.id".format(v.name)
             })
 
     def get_cubes_mappings(self):

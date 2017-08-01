@@ -78,6 +78,8 @@ class TestOccurrenceLocationDimension(BaseTestNiamotoSchemaCreated):
         dim = OccurrenceLocationDimension()
         dim.create_dimension()
         dim.populate_from_publisher()
+        loaded_dim = OccurrenceLocationDimension.load(dim.name)
+        loaded_dim.get_values()
 
 
 if __name__ == '__main__':

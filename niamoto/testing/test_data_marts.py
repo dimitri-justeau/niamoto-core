@@ -24,11 +24,13 @@ class TestPublisher(BaseDataPublisher):
 
 class TestDimension(BaseDimension):
 
-    def __init__(self, name="test_dimension", publisher=TestPublisher()):
+    def __init__(self, name="test_dimension", label_col='category',
+                 publisher=TestPublisher()):
         super(TestDimension, self).__init__(
             name,
             [sa.Column('value', sa.Integer), sa.Column('category', sa.String)],
-            publisher=publisher
+            publisher=publisher,
+            label_col=label_col
         )
 
     @classmethod
