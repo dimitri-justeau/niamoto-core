@@ -13,7 +13,6 @@ from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.bin.commands.taxonomy import set_taxonomy_cli, \
     map_all_synonyms_cli, get_synonym_keys_cli
 from niamoto.bin.commands.status import get_general_status_cli
-from niamoto.data_providers.base_data_provider import PROVIDER_REGISTRY
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.test_data_provider import TestDataProvider
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -57,7 +56,6 @@ class TestCLITaxonomy(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
         TestDataProvider.register_data_provider("test")
-        PROVIDER_REGISTRY[TestDataProvider.get_type_name()] = TestDataProvider
         result = runner.invoke(
             map_all_synonyms_cli,
             [],

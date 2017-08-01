@@ -20,7 +20,6 @@ from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.db.connector import Connector
 from niamoto.data_providers.base_occurrence_provider import \
     BaseOccurrenceProvider
-from niamoto.data_providers.base_data_provider import PROVIDER_REGISTRY
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.test_data_provider import TestDataProvider
@@ -76,7 +75,6 @@ class TestTaxonomyApi(BaseTestNiamotoSchemaCreated):
         )
 
     def test_map_all_synonyms(self):
-        PROVIDER_REGISTRY[TestDataProvider.get_type_name()] = TestDataProvider
         data_provider_a = TestDataProvider.register_data_provider(
             'test_data_provider_a',
         )
