@@ -21,6 +21,7 @@ from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
 from niamoto.db import metadata as meta
 from niamoto.db.connector import Connector
 from niamoto.api.vector_api import add_vector
+from niamoto.api.raster_api import add_raster
 from niamoto.api import data_marts_api
 from niamoto.testing.test_data_marts import TestDimension, \
     TestFactTablePublisher
@@ -36,6 +37,13 @@ SHP_TEST_0 = os.path.join(
     NIAMOTO_HOME, 'data', 'vector', 'NCL_adm', 'NCL_adm0.shp'
 )
 
+TEST_RASTER = os.path.join(
+    NIAMOTO_HOME,
+    "data",
+    "raster",
+    "rainfall_wgs84.tif"
+)
+
 
 class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
     """
@@ -47,6 +55,7 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
         super(TestDataMartsApi, cls).setUpClass()
         add_vector(SHP_TEST, 'ncl_adm1')
         add_vector(SHP_TEST_0, 'ncl_adm0')
+        add_raster(TEST_RASTER, 'rainfall')
 
     def tearDown(self):
         super(TestDataMartsApi, self).tearDown()
@@ -75,6 +84,9 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
 
     def test_create_vector_dimension(self):
         data_marts_api.create_vector_dimension("ncl_adm1")
+
+    def test_create_raster_dimension(self):
+        data_marts_api.create_raster_dimension("rainfall")
 
     def test_create_vector_hierarchy_dimension(self):
         data_marts_api.create_vector_dimension("ncl_adm1")

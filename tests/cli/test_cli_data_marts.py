@@ -13,6 +13,7 @@ set_test_path()
 from niamoto.conf import settings, NIAMOTO_HOME
 from niamoto.api import data_marts_api
 from niamoto.api import vector_api
+from niamoto.api import raster_api
 from niamoto.bin.commands import data_marts
 from niamoto.testing.test_database_manager import TestDatabaseManager
 from niamoto.testing.base_tests import BaseTestNiamotoSchemaCreated
@@ -26,6 +27,13 @@ SHP_TEST = os.path.join(
     NIAMOTO_HOME, 'data', 'vector', 'NCL_adm', 'NCL_adm1.shp'
 )
 
+TEST_RASTER = os.path.join(
+    NIAMOTO_HOME,
+    "data",
+    "raster",
+    "rainfall_wgs84.tif"
+)
+
 
 class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
     """
@@ -36,6 +44,7 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
     def setUpClass(cls):
         super(TestCLIDataMarts, cls).setUpClass()
         vector_api.add_vector(SHP_TEST, 'ncl_adm')
+        raster_api.add_raster(TEST_RASTER, 'rainfall')
 
     def tearDown(self):
         super(TestCLIDataMarts, self).tearDown()
@@ -61,15 +70,6 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
                 ))
             delete_stmt = meta.dimension_registry.delete()
             connection.execute(delete_stmt)
-
-    @classmethod
-    def tearDownClass(cls):
-        with Connector.get_connection() as c:
-            inspector = Inspector.from_engine(c)
-            tables = inspector.get_table_names(
-                schema=settings.NIAMOTO_DIMENSIONS_SCHEMA
-            )
-        super(TestCLIDataMarts, cls).tearDownClass()
 
     def test_list_dimension_types_cli(self):
         runner = CliRunner()
@@ -106,6 +106,14 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         result = runner.invoke(
             data_marts.create_vector_dim_cli,
             ['ncl_adm', '--populate']
+        )
+        self.assertEqual(result.exit_code, 0)
+
+    def test_create_raster_dimension_cli(self):
+        runner = CliRunner()
+        result = runner.invoke(
+            data_marts.create_raster_dim_cli,
+            ['rainfall', '--populate']
         )
         self.assertEqual(result.exit_code, 0)
 

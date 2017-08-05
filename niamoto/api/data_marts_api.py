@@ -16,6 +16,7 @@ from niamoto.data_marts.dimensions.occurrence_location_dimension import \
     OccurrenceLocationDimension
 from niamoto.data_marts.dimensions.vector_hierarchy_dimension import \
     VectorHierarchyDimension
+from niamoto.data_marts.dimensions.raster_dimension import RasterDimension
 from niamoto.data_marts.dimensional_model import DimensionalModel
 from niamoto.api import publish_api
 from niamoto.log import get_logger
@@ -42,6 +43,20 @@ def create_vector_dimension(vector_name, label_col='label', populate=True):
     :return: The created dimension.
     """
     dim = VectorDimension(vector_name, label_col)
+    dim.create_dimension()
+    if populate:
+        dim.populate_from_publisher()
+    return dim
+
+
+def create_raster_dimension(raster_name, populate=True):
+    """
+    Create a raster dimension.
+    :param raster_name: The raster name.
+    :param populate: If True, populate the dimension.
+    :return: The created dimension
+    """
+    dim = RasterDimension(raster_name)
     dim.create_dimension()
     if populate:
         dim.populate_from_publisher()

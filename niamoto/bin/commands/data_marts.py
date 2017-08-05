@@ -141,6 +141,38 @@ def create_vector_hierarchy_dim_cli(name, vector_dimension, populate=True):
     )
 
 
+@click.command('create_raster_dimension')
+@click.option(
+    '--populate',
+    help='Populate the dimension',
+    is_flag=True,
+)
+@click.argument('raster_name')
+@cli_catch_unknown_error
+def create_raster_dim_cli(raster_name, populate=True):
+    """
+    Create a raster dimension from a registered raster.
+    """
+    from niamoto.api import data_marts_api
+    s1, s2 = '', '!'
+    if populate:
+        s1 = " and populating"
+        s2 = " and populated!"
+    click.echo(
+        "Creating{} the '{}' raster dimension...".format(s1, raster_name)
+    )
+    data_marts_api.create_raster_dimension(
+        raster_name,
+        populate=populate
+    )
+    click.echo(
+        "The '{}' raster dimension had been successfully created{}".format(
+            raster_name,
+            s2
+        )
+    )
+
+
 @click.command('create_taxon_dimension')
 @click.option(
     '--populate',
