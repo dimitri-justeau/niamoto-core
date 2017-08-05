@@ -26,6 +26,10 @@ class RasterDimension(BaseDimension):
             label_col=self.raster_name,
         )
 
+    @classmethod
+    def load(cls, dimension_name, label_col='label', properties={}):
+        return cls(dimension_name)
+
     def populate_from_publisher(self, *args, **kwargs):
         return super(RasterDimension, self).populate_from_publisher(
             self.raster_name,
