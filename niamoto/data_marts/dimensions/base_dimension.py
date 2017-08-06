@@ -53,7 +53,7 @@ class BaseDimension(metaclass=DimensionMeta):
     DEFAULT_NS_VALUE = pd.np.nan
 
     def __init__(self, name, columns, publisher=None, label_col='label',
-                 properties={}):
+                 properties={}, column_labels={}):
         """
         :param name: The name of the dimension. The dimension table will have
             this name.
@@ -63,6 +63,7 @@ class BaseDimension(metaclass=DimensionMeta):
             have to be in the column list.
         :param publisher: The publisher to use for populating the dimension.
         :param properties: A dict of arbitrary properties.
+            :param column_labels: The columns labels.
         """
         self.name = name
         self.columns = columns
@@ -71,6 +72,8 @@ class BaseDimension(metaclass=DimensionMeta):
         self._publisher = publisher
         self._exists = False
         self.properties = properties
+        self.column_labels = column_labels
+        self.properties['column_labels'] = column_labels
         dim_schema = settings.NIAMOTO_DIMENSIONS_SCHEMA
         if "{}.{}".format(dim_schema, name) in meta.metadata.tables:
             self._exists = True
@@ -104,7 +107,8 @@ class BaseDimension(metaclass=DimensionMeta):
         raise NotImplementedError()
 
     @classmethod
-    def load(cls, dimension_name, label_col='label', properties={}):
+    def load(cls, dimension_name, label_col='label', properties={},
+             column_labels={}):
         """
         Load a Dimension instance from its name. This method is used by the
         dimension manager to load Dimension instances from the information
@@ -112,12 +116,14 @@ class BaseDimension(metaclass=DimensionMeta):
         :param dimension_name: The name of the dimension.
         :param label_col: The label column name of the dimension.
         :param properties: A dict of arbitrary properties.
+        :param column_labels: The column labels.
         :return: The loaded dimension
         """
         return cls(
             name=dimension_name,
             label_col=label_col,
-            properties=properties
+            properties=properties,
+            column_labels=column_labels,
         )
 
     def get_cubes_attributes(self):
@@ -130,7 +136,12 @@ class BaseDimension(metaclass=DimensionMeta):
             exclude = c_cls in self.EXCLUDED_DIMENSION_ATTRIBUTE_TYPES
             if not exclude:
                 dim_attributes.append(c.name)
-        return dim_attributes
+        column_labels = self.get_column_labels()
+        dim_attr_return = [{
+            'name': d,
+            'label': column_labels.get(d, d),
+        } for d in dim_attributes]
+        return dim_attr_return
 
     def get_cubes_joins(self):
         """
@@ -304,6 +315,9 @@ class BaseDimension(metaclass=DimensionMeta):
 
     def get_labels(self):
         return self.get_values()[self.label_col]
+
+    def get_column_labels(self):
+        return self.column_labels
 
     def get_value(self, pk, attributes=None):
         attrs = "*"

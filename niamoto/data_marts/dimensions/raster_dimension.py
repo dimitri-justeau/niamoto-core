@@ -13,7 +13,7 @@ class RasterDimension(BaseDimension):
     values of a raster and their associated pixel count.
     """
 
-    def __init__(self, raster_name, cuts=None):
+    def __init__(self, raster_name, cuts=None, column_labels=None):
         """
         :param raster_name: The raster name.
         :param cuts: Cuts corresponding to categories: ([cuts], [labels]).
@@ -25,6 +25,7 @@ class RasterDimension(BaseDimension):
                 [20, 30[          => 'high'
                 [30, max_value[   => 'very high'
             ]
+        :param column_labels: The columns labels.
         """
         self.raster_name = raster_name
         self.cuts = cuts
@@ -44,15 +45,17 @@ class RasterDimension(BaseDimension):
             columns,
             publisher=RasterValueCountPublisher(),
             label_col=self.raster_name,
-            properties=properties
+            properties=properties,
+            column_labels=column_labels
         )
 
     @classmethod
-    def load(cls, dimension_name, label_col='label', properties={}):
+    def load(cls, dimension_name, label_col='label', properties={},
+             column_labels={}):
         cuts = None
         if 'cuts' in properties:
             cuts = properties['cuts']
-        return cls(dimension_name, cuts=cuts)
+        return cls(dimension_name, cuts=cuts, column_labels=column_labels)
 
     def populate_from_publisher(self, *args, **kwargs):
         return super(RasterDimension, self).populate_from_publisher(
@@ -74,13 +77,33 @@ class RasterDimension(BaseDimension):
     def get_cubes_levels(self):
         if self.cuts is None:
             return super(RasterDimension, self).get_cubes_levels()
-        return [
+        levels = [
             {
                 'name': 'category',
-                'attributes': ['category', ]
+                'attributes': [{
+                    'name': 'category',
+                    'label': self.get_column_labels().get(
+                        'category',
+                        'category'
+                    )
+                },
+                ]
             },
             {
                 'name': self.name,
-                'attributes': ['id', self.name],
+                'attributes': [
+                    {
+                        'name': 'id',
+                        'label': self.get_column_labels().get('id', 'id')
+                    },
+                    {
+                        'name': self.name,
+                        'label': self.get_column_labels().get(
+                            self.name,
+                            self.name
+                        )
+                    },
+                ],
             }
         ]
+        return levels

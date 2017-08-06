@@ -29,7 +29,8 @@ class TaxonDimension(BaseDimension):
         )
 
     @classmethod
-    def load(cls, dimension_name, label_col='label', properties={}):
+    def load(cls, dimension_name, label_col='label', properties={},
+             column_labels={}):
         return cls(name=dimension_name)
 
     def populate_from_publisher(self, *args, **kwargs):

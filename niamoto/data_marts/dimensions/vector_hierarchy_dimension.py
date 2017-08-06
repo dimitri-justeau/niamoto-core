@@ -57,7 +57,8 @@ class VectorHierarchyDimension(BaseDimension):
         return "Vector hierarchy dimension."
 
     @classmethod
-    def load(cls, dimension_name, label_col='label', properties={}):
+    def load(cls, dimension_name, label_col='label', properties={},
+             column_labels={}):
         if 'levels' not in properties:
             raise ValueError(
                 'The VectorHierarchyDimension needs a "levels" property to be'

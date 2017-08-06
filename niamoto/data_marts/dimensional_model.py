@@ -54,7 +54,7 @@ class DimensionalModel:
                 'dimensions': [dim.name for dim in v.dimensions],
                 'measures': [
                     {'name': m.name}
-                    for m in v.measurement_columns
+                    for m in v.columns
                 ],
                 'joins': [
                     {

@@ -34,7 +34,8 @@ class TestDimension(BaseDimension):
         )
 
     @classmethod
-    def load(cls, dimension_name, label_col=None, properties={}):
+    def load(cls, dimension_name, label_col=None, properties={},
+             column_labels={}):
         return cls(dimension_name)
 
     @classmethod

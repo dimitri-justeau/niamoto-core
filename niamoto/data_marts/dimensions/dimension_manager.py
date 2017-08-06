@@ -74,10 +74,14 @@ class DimensionManager:
             cls.assert_dimension_is_registered(dimension_name, connection)
             result = connection.execute(sel).fetchone()
             dim_type, label_column, properties = result
+            column_labels = {}
+            if 'column_labels' in properties:
+                column_labels = properties['column_labels']
         return DIMENSION_TYPE_REGISTRY[dim_type]['class'].load(
             dimension_name,
             label_col=label_column,
             properties=properties,
+            column_labels=column_labels,
         )
 
     @classmethod
