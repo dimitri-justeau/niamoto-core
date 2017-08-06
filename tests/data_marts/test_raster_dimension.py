@@ -70,6 +70,17 @@ class TestRasterDimension(BaseTestNiamotoSchemaCreated):
         dim.populate_from_publisher()
         dim.get_values()
 
+    def test_raster_dimension_with_cuts(self):
+        cuts = (
+            [1000, 3000],
+            ["Low rainfall", "Medium rainfall", "High rainfall"]
+        )
+        dim = RasterDimension('rainfall', cuts=cuts)
+        dim.create_dimension()
+        dim.populate_from_publisher()
+        df = dim.get_values()
+        self.assertIn('category', df.columns)
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()
