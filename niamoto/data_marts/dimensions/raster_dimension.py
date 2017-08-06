@@ -70,3 +70,17 @@ class RasterDimension(BaseDimension):
     @classmethod
     def get_key(cls):
         return "RASTER_DIMENSION"
+
+    def get_cubes_levels(self):
+        if self.cuts is None:
+            return super(RasterDimension, self).get_cubes_levels()
+        return [
+            {
+                'name': 'category',
+                'attributes': ['category', ]
+            },
+            {
+                'name': self.name,
+                'attributes': ['id', self.name],
+            }
+        ]

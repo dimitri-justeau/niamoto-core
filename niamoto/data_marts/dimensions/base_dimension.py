@@ -144,22 +144,27 @@ class BaseDimension(metaclass=DimensionMeta):
         """
         return []
 
+    def get_cubes_levels(self):
+        """
+        :return: The cubes levels.
+        """
+        return [
+            {
+                'name': self.name,
+                'attributes': self.get_cubes_attributes(),
+            }
+        ]
+
     def get_cubes_dict(self):
         """
         :return: A dict representation of the dimension, corresponding to the
             cubes format.
         """
-        dim_attributes = self.get_cubes_attributes()
         return {
             'name': self.name,
             'label': self.name,
             'description': self.get_description(),
-            'levels': [
-                {
-                    'name': self.name,
-                    'attributes': dim_attributes,
-                }
-            ]
+            'levels': self.get_cubes_levels(),
         }
 
     def is_created(self, connection=None):
