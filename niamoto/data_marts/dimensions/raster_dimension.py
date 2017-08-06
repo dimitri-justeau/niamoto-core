@@ -13,7 +13,8 @@ class RasterDimension(BaseDimension):
     values of a raster and their associated pixel count.
     """
 
-    def __init__(self, raster_name, cuts=None, column_labels=None):
+    def __init__(self, raster_name, cuts=None, value_column_label=None,
+                 category_column_label=None):
         """
         :param raster_name: The raster name.
         :param cuts: Cuts corresponding to categories: ([cuts], [labels]).
@@ -25,10 +26,16 @@ class RasterDimension(BaseDimension):
                 [20, 30[          => 'high'
                 [30, max_value[   => 'very high'
             ]
-        :param column_labels: The columns labels.
+        :param value_column_label: The value column label.
+        :param category_column_label: The category column label.
         """
         self.raster_name = raster_name
         self.cuts = cuts
+        column_labels = {}
+        if value_column_label is not None:
+            column_labels[self.raster_name] = value_column_label
+        if category_column_label is not None:
+            column_labels['category'] = category_column_label
         properties = {}
         columns = [
             sa.Column(self.raster_name, sa.Float),
@@ -55,7 +62,20 @@ class RasterDimension(BaseDimension):
         cuts = None
         if 'cuts' in properties:
             cuts = properties['cuts']
-        return cls(dimension_name, cuts=cuts, column_labels=column_labels)
+        val_col_label = None
+        cat_col_label = None
+        if 'column_labels' in properties:
+            val_col_label = properties['column_labels'].get(
+                dimension_name,
+                None
+            )
+            cat_col_label = properties['column_labels'].get('category', None)
+        return cls(
+            dimension_name,
+            cuts=cuts,
+            value_column_label=val_col_label,
+            category_column_label=cat_col_label,
+        )
 
     def populate_from_publisher(self, *args, **kwargs):
         return super(RasterDimension, self).populate_from_publisher(

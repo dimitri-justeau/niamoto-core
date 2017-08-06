@@ -49,20 +49,31 @@ def create_vector_dimension(vector_name, label_col='label', populate=True):
     return dim
 
 
-def create_raster_dimension(raster_name, cuts=None, populate=True):
+def create_raster_dimension(raster_name, cuts=None, value_column_label=None,
+                            category_column_label=None, populate=True):
     """
     Create a raster dimension.
     :param raster_name: The raster name.
-    :param cuts: Cuts corresponding to value categories: [(range, label)].
-        e.g: [
-            ((0, 10), 'low'),        => [0, 10[
-            ((10, 20), 'medium'),    => [10, 20[
-            ((20, 30), 'high')       => [20, 30[
+    :param cuts: Cuts corresponding to categories: ([cuts], [labels]).
+        len(labels) = len(cuts) + 1
+        e.g: ([10, 20, 30], ['low', 'medium', 'high', 'very high'])
+        corresponds to:
+            [min_value, 10[   => 'low'
+            [10, 20[          => 'medium'
+            [20, 30[          => 'high'
+            [30, max_value[   => 'very high'
         ]
     :param populate: If True, populate the dimension.
+    :param value_column_label: The value column label.
+    :param category_column_label: The category column label.
     :return: The created dimension
     """
-    dim = RasterDimension(raster_name, cuts=cuts)
+    dim = RasterDimension(
+        raster_name,
+        cuts=cuts,
+        value_column_label=value_column_label,
+        category_column_label=category_column_label,
+    )
     dim.create_dimension()
     if populate:
         dim.populate_from_publisher()
