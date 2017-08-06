@@ -147,9 +147,24 @@ def create_vector_hierarchy_dim_cli(name, vector_dimension, populate=True):
     help='Populate the dimension',
     is_flag=True,
 )
+@click.option(
+    '--cut_value',
+    '-cv',
+    help="The cut values",
+    type=float,
+    multiple=True,
+)
+@click.option(
+    '--cut_label',
+    '-cl',
+    help="The cut labels",
+    type=str,
+    multiple=True,
+)
 @click.argument('raster_name')
 @cli_catch_unknown_error
-def create_raster_dim_cli(raster_name, populate=True):
+def create_raster_dim_cli(raster_name, cut_value=None, cut_label=None,
+                          populate=True):
     """
     Create a raster dimension from a registered raster.
     """
@@ -161,8 +176,12 @@ def create_raster_dim_cli(raster_name, populate=True):
     click.echo(
         "Creating{} the '{}' raster dimension...".format(s1, raster_name)
     )
+    cuts = (cut_value, cut_label)
+    if len(cut_label) == 0:
+        cuts = None
     data_marts_api.create_raster_dimension(
         raster_name,
+        cuts=cuts,
         populate=populate
     )
     click.echo(

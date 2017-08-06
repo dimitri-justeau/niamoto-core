@@ -113,7 +113,7 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         runner = CliRunner()
         result = runner.invoke(
             data_marts.create_raster_dim_cli,
-            ['rainfall', '--populate']
+            ['rainfall', '--populate'],
         )
         self.assertEqual(result.exit_code, 0)
 
