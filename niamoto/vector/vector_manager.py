@@ -253,18 +253,59 @@ class VectorManager:
             return result.fetchall()
 
     @classmethod
-    def get_vector_geo_dataframe(cls, vector_name):
+    def get_vector_geo_dataframe(cls, vector_name, geojson_filter=None,
+                                 geojson_cut=False):
         """
         Return a registered vector as a GeoDataFrame.
         :param vector_name: The name of the vector.
+        :param geojson_filter: Optional: if specified (as str), will only
+            return the features intersecting with the geojson.
+        :param geojson_cut: If True, return the intersection with the geojson
+            filter (cut the intersecting features).
         :return: A GeoDataFrame corresponding to the vector.
         """
         geom_col = cls.get_geometry_column(vector_name)
         pk_cols = cls.get_vector_primary_key_columns(vector_name)
+        cols = cls.get_vector_sqlalchemy_table(vector_name).columns
+        cols_str = [c.name for c in cols]
+        where_statement = ''
+        if geojson_filter is not None:
+            geojson_postgis = \
+                """
+                    ST_Transform(
+                        ST_SetSRID(ST_GeomFromGeoJSON('{}'), 4326),
+                        {}
+                    )
+                """.format(geojson_filter, geom_col[2])
+            where_statement = \
+                """
+                    WHERE ST_Intersects(
+                        {},
+                        {}
+                    )
+                """.format(
+                    geom_col[0],
+                    geojson_postgis
+                )
+            if geojson_cut:
+                cols_str = []
+                for col in cols:
+                    if col.name == geom_col[0]:
+                        cols_str.append(
+                            "ST_Intersection({}, {}) AS {}".format(
+                                geom_col[0],
+                                geojson_postgis,
+                                col.name,
+                            )
+                        )
+                    else:
+                        cols_str.append(col.name)
         with Connector.get_connection() as connection:
-            sql = "SELECT * FROM {}.{};".format(
+            sql = "SELECT {} FROM {}.{} {};".format(
+                ','.join(cols_str),
                 settings.NIAMOTO_VECTOR_SCHEMA,
-                vector_name
+                vector_name,
+                where_statement,
             )
             return gpd.read_postgis(
                 sql,
