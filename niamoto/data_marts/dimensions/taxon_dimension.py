@@ -47,3 +47,64 @@ class TaxonDimension(BaseDimension):
     @classmethod
     def get_description(cls):
         return "Taxon dimension."
+
+    def get_cubes_levels(self):
+        levels = [
+            {
+                'name': 'regnum',
+                'attributes': [{
+                    'name': 'regnum',
+                    'label': 'Règne',
+                }]
+            },
+            {
+                'name': 'phylum',
+                'attributes': [{
+                    'name': 'phylum',
+                    'label': 'Embranchement',
+                }]
+            },
+            {
+                'name': 'classis',
+                'attributes': [{
+                    'name': 'classis',
+                    'label': 'Classe',
+                }]
+            },
+            {
+                'name': 'ordo',
+                'attributes': [{
+                    'name': 'ordo',
+                    'label': 'Ordre',
+                }]
+            },
+            {
+                'name': 'familia',
+                'attributes': [{
+                    'name': 'familia',
+                    'label': 'Famille',
+                }]
+            },
+            {
+                'name': 'genus',
+                'attributes': [{
+                    'name': 'genus',
+                    'label': 'Genre',
+                }]
+            },
+            {
+                'name': 'species',
+                'attributes': [{
+                    'name': 'species',
+                    'label': 'Espèce',
+                }]
+            },
+            {
+                'name': 'infraspecies',
+                'attributes': [{
+                    'name': 'infraspecies',
+                    'label': 'Sous-Espèce',
+                }]
+            },
+        ]
+        return levels
