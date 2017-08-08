@@ -274,7 +274,7 @@ class VectorManager:
                 """
                     ST_Transform(
                         ST_SetSRID(
-                            ST_Buffer(ST_GeomFromGeoJSON('{}'), 0),
+                            ST_MakeValid(ST_GeomFromGeoJSON('{}')),
                             4326
                         ),
                         {}
