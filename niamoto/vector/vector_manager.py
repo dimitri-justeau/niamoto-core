@@ -273,7 +273,10 @@ class VectorManager:
             geojson_postgis = \
                 """
                     ST_Transform(
-                        ST_SetSRID(ST_GeomFromGeoJSON('{}'), 4326),
+                        ST_SetSRID(
+                            ST_Buffer(ST_GeomFromGeoJSON('{}'), 0),
+                            4326
+                        ),
                         {}
                     )
                 """.format(geojson_filter, geom_col[2])
