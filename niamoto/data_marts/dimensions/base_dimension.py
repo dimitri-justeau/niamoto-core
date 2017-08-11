@@ -166,6 +166,17 @@ class BaseDimension(metaclass=DimensionMeta):
             }
         ]
 
+    def get_cubes_hierarchies(self):
+        """
+        :return: The cubes hierarchies.
+        """
+        return [
+            {
+                'name': 'default',
+                'levels': [i['name'] for i in self.get_cubes_levels()],
+            }
+        ]
+
     def get_cubes_dict(self):
         """
         :return: A dict representation of the dimension, corresponding to the
@@ -176,6 +187,7 @@ class BaseDimension(metaclass=DimensionMeta):
             'label': self.name,
             'description': self.get_description(),
             'levels': self.get_cubes_levels(),
+            'hierarchies': self.get_cubes_hierarchies(),
         }
 
     def is_created(self, connection=None):

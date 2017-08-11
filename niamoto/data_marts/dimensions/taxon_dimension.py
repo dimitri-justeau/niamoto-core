@@ -108,3 +108,16 @@ class TaxonDimension(BaseDimension):
             },
         ]
         return levels
+
+    def get_cubes_hierarchies(self):
+        hierarchies = [
+            {
+                'name': 'default',
+                'levels': [i['name'] for i in self.get_cubes_levels()],
+            },
+            {
+                'name': 'species',
+                'levels': ['species'],
+            }
+        ]
+        return hierarchies
