@@ -106,6 +106,13 @@ class TaxonDimension(BaseDimension):
                     'label': 'Sous-Espèce',
                 }]
             },
+            {
+                'name': 'full_name',
+                'attributes': [{
+                    'name': 'full_name',
+                    'label': 'Nom complet',
+                }]
+            },
         ]
         return levels
 
