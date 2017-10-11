@@ -319,10 +319,10 @@ class BasePlotOccurrenceProvider:
         provider (i.e. data which is in Niamoto, but not in the provider).
         """
         LOGGER.debug("Resolving plot-occurrence delete dataframe...")
+        df = niamoto_dataframe
+        df['plot_id'] = df.index.get_level_values('plot_id')
+        df['occurrence_id'] = df.index.get_level_values('occurrence_id')
         if len(provider_dataframe) == 0:
-            df = niamoto_dataframe
-            df['plot_id'] = df.index.get_level_values('plot_id')
-            df['occurrence_id'] = df.index.get_level_values('occurrence_id')
             return df
-        diff = niamoto_dataframe.index.difference(provider_dataframe.index)
-        return niamoto_dataframe.loc[diff]
+        diff = df.index.difference(provider_dataframe.index)
+        return df.loc[diff]
