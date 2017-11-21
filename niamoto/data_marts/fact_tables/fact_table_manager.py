@@ -90,3 +90,11 @@ class FactTableManager:
         :param fact_table_name: The name of the fact table to delete.
         """
         cls.get_fact_table(fact_table_name).drop_fact_table()
+
+    @classmethod
+    def truncate_fact_table(cls, fact_table_name):
+        """
+        Truncate a registered fact table.
+        :param fact_table_name: The fact table name.
+        """
+        cls.get_fact_table(fact_table_name).truncate()

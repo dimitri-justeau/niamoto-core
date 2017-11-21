@@ -152,6 +152,14 @@ def delete_dimension(dimension_name):
     return DimensionManager.delete_dimension(dimension_name)
 
 
+def truncate_dimension(dimension_name):
+    """
+    Truncate a registered dimension.
+    :param dimension_name: The name of the dimension to truncate.
+    """
+    return DimensionManager.truncate_dimension(dimension_name)
+
+
 def create_fact_table(name, dimension_names, measure_names,
                       publisher_cls=None):
     """
@@ -199,6 +207,14 @@ def delete_fact_table(fact_table_name):
     :param fact_table_name: The name of the fact table to delete.
     """
     return FactTableManager.delete_fact_table(fact_table_name)
+
+
+def truncate_fact_table(fact_table_name):
+    """
+    Truncate a registered fact table.
+    :param fact_table_name: The name of the fact table to truncate.
+    """
+    return FactTableManager.truncate_fact_table(fact_table_name)
 
 
 def populate_fact_table(fact_table_name, publisher_key, *args, **kwargs):

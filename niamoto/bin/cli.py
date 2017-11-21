@@ -29,7 +29,7 @@ from niamoto.bin.commands.data_marts import list_dimension_types_cli, \
     create_fact_table_cli, delete_dimension_cli, delete_fact_table_cli, \
     create_taxon_dim_cli, populate_fact_table_cli, \
     create_vector_hierarchy_dim_cli, create_occurrence_location_dim_cli, \
-    create_raster_dim_cli
+    create_raster_dim_cli, truncate_dimension_cli, truncate_fact_table_cli
 
 from niamoto import conf
 from niamoto.decorators import cli_catch_unknown_error
@@ -117,6 +117,8 @@ niamoto_cli.add_command(create_fact_table_cli)
 niamoto_cli.add_command(delete_dimension_cli)
 niamoto_cli.add_command(delete_fact_table_cli)
 niamoto_cli.add_command(populate_fact_table_cli)
+niamoto_cli.add_command(truncate_dimension_cli)
+niamoto_cli.add_command(truncate_fact_table_cli)
 
 
 display_dict = OrderedDict()
@@ -169,6 +171,8 @@ display_dict["Data marts commands"] = [
     create_vector_hierarchy_dim_cli,
     create_raster_dim_cli,
     create_fact_table_cli,
+    truncate_dimension_cli,
+    truncate_fact_table_cli,
     delete_dimension_cli,
     delete_fact_table_cli,
     populate_fact_table_cli,
@@ -179,3 +183,4 @@ niamoto_cli.commands_display_dict = display_dict
 
 if __name__ == '__main__':
     niamoto_cli(params={})
+

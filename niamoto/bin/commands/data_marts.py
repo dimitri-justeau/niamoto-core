@@ -59,6 +59,21 @@ def delete_dimension_cli(dimension_name):
         )
     )
 
+@click.command('truncate_dimension')
+@click.argument('dimension_name')
+@cli_catch_unknown_error
+def truncate_dimension_cli(dimension_name):
+    """
+    Truncate a registered dimension.
+    """
+    from niamoto.api import data_marts_api
+    click.secho("Truncating the '{}' dimension...".format(dimension_name))
+    data_marts_api.truncate_dimension(dimension_name)
+    click.secho(
+        "The '{}' dimension had been successfully truncated!".format(
+            dimension_name
+        )
+    )
 
 @click.command('create_vector_dimension')
 @click.option(
@@ -316,6 +331,23 @@ def delete_fact_table_cli(fact_table_name):
     data_marts_api.delete_fact_table(fact_table_name)
     click.secho(
         "The '{}' fact table had been successfully deleted!".format(
+            fact_table_name
+        )
+    )
+
+
+@click.command('truncate_fact_table')
+@click.argument('fact_table_name')
+@cli_catch_unknown_error
+def truncate_fact_table_cli(fact_table_name):
+    """
+    Truncate a registered fact table.
+    """
+    from niamoto.api import data_marts_api
+    click.secho("Truncating the '{}' fact table...".format(fact_table_name))
+    data_marts_api.truncate_fact_table(fact_table_name)
+    click.secho(
+        "The '{}' fact table had been successfully truncated!".format(
             fact_table_name
         )
     )

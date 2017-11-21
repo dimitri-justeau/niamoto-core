@@ -125,6 +125,18 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
 
+    def test_truncate_dimension_cli(self):
+        runner = CliRunner()
+        runner.invoke(
+            data_marts.create_taxon_dim_cli,
+            ['--populate']
+        )
+        result = runner.invoke(
+            data_marts.truncate_dimension_cli,
+            ['taxon_dimension']
+        )
+        self.assertEqual(result.exit_code, 0)
+
     def test_create_occurrence_location_dimension_cli(self):
         runner = CliRunner()
         result = runner.invoke(
@@ -192,6 +204,35 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         result = runner.invoke(
             data_marts.populate_fact_table_cli,
             ['fact_table', 'test_cli_fact_table_publisher']
+        )
+        self.assertEqual(result.exit_code, 0)
+
+
+    def test_truncate_fact_table_cli(self):
+        data_marts_api.create_taxon_dimension('taxon_dim')
+        data_marts_api.create_fact_table('fact_table', ['taxon_dim'], ['n'])
+
+        class TestCLIFactTablePublisher(BaseFactTablePublisher):
+            @classmethod
+            def get_key(cls):
+                return 'test_cli_fact_table_publisher'
+
+            def _process(self, *args, **kwargs):
+                dim = data_marts_api.get_dimension('taxon_dim')
+                df = dim.get_values()
+                df['n'] = df.index
+                df['taxon_dim_id'] = df.index
+                return df[['taxon_dim_id', 'n']]
+
+        data_marts_api.populate_fact_table(
+            'fact_table',
+            'test_cli_fact_table_publisher'
+        )
+
+        runner = CliRunner()
+        result = runner.invoke(
+            data_marts.truncate_fact_table_cli,
+            ["fact_table"],
         )
         self.assertEqual(result.exit_code, 0)
 

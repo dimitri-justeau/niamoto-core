@@ -160,6 +160,24 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
             TestFactTablePublisher.get_key()
         )
 
+    def test_truncate_fact_table(self):
+        dim_1 = TestDimension("dim_1")
+        dim_2 = TestDimension("dim_2")
+        dim_1.create_dimension()
+        dim_2.create_dimension()
+        dim_1.populate_from_publisher()
+        dim_2.populate_from_publisher()
+        data_marts_api.create_fact_table(
+            "test_fact",
+            dimension_names=['dim_1', 'dim_2'],
+            measure_names=['measure_1'],
+        )
+        data_marts_api.populate_fact_table(
+            'test_fact',
+            TestFactTablePublisher.get_key()
+        )
+        data_marts_api.truncate_fact_table('test_fact')
+
     def test_get_dimensional_model(self):
         dim_1 = TestDimension("dim_1")
         dim_2 = TestDimension("dim_2")
