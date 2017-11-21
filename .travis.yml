@@ -9,9 +9,9 @@ before_install:
   - gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
   - gpg -a --export E084DAB9 | sudo apt-key add -
 install:
+  - sudo apt-get install -y postgis
   - sudo apt-get -y update
   - sudo apt-get install -y libgdal-dev gdal-bin r-base
-  - sudo ln -s /usr/lib/postgresql/9.5/bin/raster2pgsql /usr/bin/raster2pgsql
   - pip install -r requirements.txt
   - pip install codecov
   - pip install coverage
