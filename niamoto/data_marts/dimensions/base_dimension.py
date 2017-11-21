@@ -312,6 +312,30 @@ class BaseDimension(metaclass=DimensionMeta):
         data = self.publisher.process(*args, **kwargs)[0]
         self.populate(data, append_ns_row=append_ns_row)
 
+    def truncate(self, connection=None):
+        """
+        Truncate an existing dimension (i.e. drop every row)
+        :param connection: If not None, use an existing connection.
+        """
+        LOGGER.debug("Start Truncate {}".format(self))
+        close_after = False
+        if connection is None:
+            connection = Connector.get_engine().connect()
+            close_after = True
+        if not self.is_created(connection):
+            m = "The dimension {} does not exists in database." \
+                " Truncate will be aborded"
+            LOGGER.warning(m.format(self.name))
+            return
+        with connection.begin():
+            connection.execute("TRUNCATE {}".format("{}.{}".format(
+                settings.NIAMOTO_DIMENSIONS_SCHEMA,
+                self.name
+            )))
+        if close_after:
+            connection.close()
+            LOGGER.debug("{} successfully truncated".format(self))
+
     def get_values(self):
         """
         :return: A dataframe containing the values stored in database for

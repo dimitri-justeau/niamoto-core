@@ -116,6 +116,22 @@ class TestBaseDimension(BaseTestNiamotoSchemaCreated):
             registered = connection.execute(sel).fetchall()
             self.assertEqual(len(registered), 0)
 
+    def test_truncate_dimension(self):
+        dim = TestDimension()
+        dim.create_dimension()
+        df = pd.DataFrame([
+            {'value': 1, 'category': 'cat1'},
+            {'value': 2, 'category': 'cat2'},
+            {'value': 3, 'category': 'cat2'},
+            {'value': 4, 'category': 'cat1'},
+            {'value': 5, 'category': 'NS'},
+        ])
+        df.index.names = [dim.PK_COLUMN_NAME]
+        dim.populate(df)
+        dim.truncate()
+        df2 = dim.get_values()
+        self.assertEqual(len(df2), 0)
+
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()

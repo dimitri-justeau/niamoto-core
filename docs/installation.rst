@@ -53,7 +53,7 @@ your system. The installation is straightforward:
 Git
 ---
 
-In order to clone the Niamoto repository, Git must be install in your system:
+In order to clone the Niamoto repository, Git must be installed in your system:
 
 .. code-block:: bash
 
@@ -81,7 +81,7 @@ Then, move into the project directory and install Niamoto using pip:
 Setting up the Niamoto environment
 ----------------------------------
 
-etting up the Niamoto database
+Setting up the Niamoto database
 -------------------------------
 
 .. note::
@@ -148,7 +148,7 @@ Log into PostgreSQL, with ``niamoto`` user and ``niamoto`` database:
 
     psql -U niamoto -d niamoto
 
-Create the ``niamoto``, ``niamoto_raster``, ``niamoto_vector`` schemas
+Create the ``niamoto``, ``niamoto_raster``, ``niamoto_vector``, ``niamoto_dimensions``, ``niamoto_fact_tables`` schemas
 (see :ref:`configuration` for more details
 and options):
 
@@ -181,9 +181,7 @@ be stored. Niamoto comes with a handy command for initializing it:
 Initializing the Niamoto database
 ---------------------------------
 
-Initializing the Niamoto database means creating the tables, indexes and
-constraints and registering the available data provider types.
-The procedure is straightforward:
+Initializing the Niamoto database means creating the tables, indexes, constraints and initializing basic data. The procedure is straightforward:
 
 .. code-block:: bash
 
