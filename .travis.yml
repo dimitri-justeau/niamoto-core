@@ -9,7 +9,7 @@ before_install:
   - gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
   - gpg -a --export E084DAB9 | sudo apt-key add -
 install:
-  - sudo apt-get install -y postgis
+  - sudo apt-get install -y postgresql-9.5-postgis-2.3
   - sudo apt-get -y update
   - sudo apt-get install -y libgdal-dev gdal-bin r-base
   - pip install -r requirements.txt
@@ -25,10 +25,10 @@ before_script:
   - mkdir /home/travis/niamoto
   - cp -r tests/test_data/test_niamoto_home/* /home/travis/niamoto
 
-addons:
-  postgresql: "9.5"
-  apt:
-    packages:
-      - postgresql-9.5-postgis-2.3
+#addons:
+#  postgresql: "9.5"
+#  apt:
+#    packages:
+#      - postgresql-9.5-postgis-2.3
 after_success:
   - codecov
