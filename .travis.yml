@@ -15,10 +15,10 @@ install:
   - pip install codecov
   - pip install coverage
 script: coverage run run_tests.py
-services:
-  -postgresql
-addons:
-  postgresql: "9.6"
+#services:
+#  -postgresql
+#addons:
+#  postgresql: "9.6"
 sudo: true
 before_script:
   - sudo apt-get install postgresql-9.6-postgis-2.3 postgis -y -q
