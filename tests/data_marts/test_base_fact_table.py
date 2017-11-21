@@ -76,6 +76,11 @@ class TestBaseFactTable(BaseTestNiamotoSchemaCreated):
             )
             self.assertIn("test_fact", tables)
         ft.populate_from_publisher()
+        vals = ft.get_values()
+        self.assertGreater(len(vals), 0)
+        ft.truncate()
+        vals_bis = ft.get_values()
+        self.assertEqual(len(vals_bis), 0)
 
     def test_load(self):
         dim_1 = TestDimension("dim_1")

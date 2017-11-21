@@ -5,6 +5,7 @@ from datetime import datetime
 
 from sqlalchemy.engine.reflection import Inspector
 import sqlalchemy as sa
+import pandas as pd
 
 from niamoto.data_marts.dimensions.dimension_manager import DimensionManager
 from niamoto.db import metadata as meta
@@ -193,6 +194,30 @@ class BaseFactTable:
             connection.close()
         LOGGER.debug("{} successfully dropped".format(self))
 
+    def truncate(self, connection=None):
+        """
+        Truncate an existing fact table (i.e. drop every row).
+        :param connection: If not None, use an existing connection.
+        """
+        LOGGER.debug("Start Truncate {}".format(self))
+        close_after = False
+        if connection is None:
+            connection = Connector.get_engine().connect()
+            close_after = True
+        if not self.is_created(connection):
+            m = "The fact table {} does not exists in database." \
+                " Truncate will be aborded"
+            LOGGER.warning(m.format(self.name))
+            return
+        with connection.begin():
+            connection.execute("TRUNCATE {}".format("{}.{}".format(
+                settings.NIAMOTO_FACT_TABLES_SCHEMA,
+                self.name
+            )))
+        if close_after:
+            connection.close()
+            LOGGER.debug("{} successfully truncated".format(self))
+
     def populate(self, dataframe):
         """
         Populates the fact table. Assume that the input dataframe had been
@@ -228,6 +253,19 @@ class BaseFactTable:
         LOGGER.debug("Start populating {} using publisher".format(self))
         data = self.publisher.process(*args, **kwargs)[0]
         self.populate(data)
+
+    def get_values(self):
+        """
+        :return: A dataframe containing the values stored in database for
+            the dimension.
+        """
+        sql = "SELECT * FROM {}.{};".format(
+            settings.NIAMOTO_FACT_TABLES_SCHEMA,
+            self.name
+        )
+        with Connector.get_connection() as connection:
+            df = pd.read_sql(sql, connection)
+        return df
 
     def __repr__(self):
         return "BaseFactTable('{}', {}, {})".format(
