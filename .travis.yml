@@ -10,7 +10,7 @@ before_install:
   - gpg -a --export E084DAB9 | sudo apt-key add -
 install:
   - sudo apt-get -y update
-  - sudo apt-get install -y libgdal-dev gdal-bin postgis r-base
+  - sudo apt-get install -y libgdal-dev gdal-bin r-base
   - pip install -r requirements.txt
   - pip install codecov
   - pip install coverage
