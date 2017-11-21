@@ -61,14 +61,19 @@ def delete_dimension_cli(dimension_name):
 
 @click.command('truncate_dimension')
 @click.argument('dimension_name')
+@click.option(
+    '--cascade',
+    help='Truncate cascade.',
+    is_flag=True,
+)
 @cli_catch_unknown_error
-def truncate_dimension_cli(dimension_name):
+def truncate_dimension_cli(dimension_name, cascade=False):
     """
     Truncate a registered dimension.
     """
     from niamoto.api import data_marts_api
     click.secho("Truncating the '{}' dimension...".format(dimension_name))
-    data_marts_api.truncate_dimension(dimension_name)
+    data_marts_api.truncate_dimension(dimension_name, cascade=cascade)
     click.secho(
         "The '{}' dimension had been successfully truncated!".format(
             dimension_name
@@ -258,6 +263,38 @@ def create_occurrence_location_dim_cli(populate=True):
     )
 
 
+@click.command('populate_dimension')
+@click.option(
+    '--truncate',
+    help='Truncate the dimension before populating',
+    is_flag=True,
+)
+@click.option(
+    '--cascade',
+    help='If truncate is True, truncate cascade',
+    is_flag=True,
+)
+@click.argument('dimension_name')
+@cli_catch_unknown_error
+def populate_dimension_cli(dimension_name, truncate=False, cascade=False):
+    """
+    Populate a registered dimension.
+    """
+    from niamoto.api import data_marts_api
+    click.secho("Populating the '{}' dimension...".format(dimension_name))
+    data_marts_api.populate_dimension(
+        dimension_name,
+        truncate=truncate,
+        cascade=cascade
+    )
+    click.secho(
+        "The '{}' dimension had been successfully populated!".format(
+            dimension_name
+        )
+    )
+
+
+
 @click.command('fact_tables')
 @cli_catch_unknown_error
 def list_fact_tables_cli():
@@ -356,8 +393,13 @@ def truncate_fact_table_cli(fact_table_name):
 @click.command('populate_fact_table')
 @click.argument('fact_table_name')
 @click.argument('publisher_key')
+@click.option(
+    '--truncate',
+    help='Truncate the fact table before populating',
+    is_flag=True,
+)
 @cli_catch_unknown_error
-def populate_fact_table_cli(fact_table_name, publisher_key):
+def populate_fact_table_cli(fact_table_name, publisher_key, truncate=False):
     """
     Populate a registered fact table using an available publisher.
     """
@@ -368,7 +410,11 @@ def populate_fact_table_cli(fact_table_name, publisher_key):
             publisher_key
         )
     )
-    data_marts_api.populate_fact_table(fact_table_name, publisher_key)
+    data_marts_api.populate_fact_table(
+        fact_table_name,
+        publisher_key,
+        truncate=truncate
+    )
     click.secho(
         "The '{}' fact table had been successfully populated!".format(
             fact_table_name

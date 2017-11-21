@@ -100,6 +100,11 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
     def test_create_taxon_dimension(self):
         data_marts_api.create_taxon_dimension()
 
+    def test_populate_dimension(self):
+        dim = data_marts_api.create_taxon_dimension(populate=False)
+        data_marts_api.populate_dimension(dim.name)
+        data_marts_api.populate_dimension(dim.name, truncate=True)
+
     def test_create_occurrence_location_dimension(self):
         data_marts_api.create_occurrence_location_dimension()
 
@@ -158,6 +163,11 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
         data_marts_api.populate_fact_table(
             'test_fact',
             TestFactTablePublisher.get_key()
+        )
+        data_marts_api.populate_fact_table(
+            'test_fact',
+            TestFactTablePublisher.get_key(),
+            truncate=True
         )
 
     def test_truncate_fact_table(self):

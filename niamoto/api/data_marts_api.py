@@ -130,6 +130,20 @@ def create_occurrence_location_dimension(
     return dim
 
 
+def populate_dimension(dimension_name, truncate=False, cascade=False):
+    """
+    Populate a registered dimension.
+    :param dimension_name: The dimension name.
+    :param truncate: If True, truncate the dimension before populating.
+    :param cascade: If True and truncate also, TRUNCATE CASCADE.
+    """
+    dim = get_dimension(dimension_name)
+    if truncate:
+        truncate_dimension(dimension_name, cascade=cascade)
+    dim.populate_from_publisher()
+    return dim
+
+
 def get_registered_dimensions():
     """
     :return: The registered dimensions.
@@ -152,12 +166,16 @@ def delete_dimension(dimension_name):
     return DimensionManager.delete_dimension(dimension_name)
 
 
-def truncate_dimension(dimension_name):
+def truncate_dimension(dimension_name, cascade=False):
     """
     Truncate a registered dimension.
     :param dimension_name: The name of the dimension to truncate.
+    :param cascade: If True, TRUNCATE CASCADE.
     """
-    return DimensionManager.truncate_dimension(dimension_name)
+    return DimensionManager.truncate_dimension(
+        dimension_name,
+        cascade=cascade
+    )
 
 
 def create_fact_table(name, dimension_names, measure_names,
@@ -217,17 +235,21 @@ def truncate_fact_table(fact_table_name):
     return FactTableManager.truncate_fact_table(fact_table_name)
 
 
-def populate_fact_table(fact_table_name, publisher_key, *args, **kwargs):
+def populate_fact_table(fact_table_name, publisher_key, *args,
+                        truncate=False, **kwargs):
     """
     Populate a registered fact table using an available publisher.
     :param fact_table_name: The name of the fact table to populate.
     :param publisher_key: The key of the publisher to use for populating the
         fact table.
+    :param truncate: If True, truncate the fact table before populating.
     """
     fact_table = get_fact_table(
         fact_table_name,
         publisher_cls=publish_api.get_publisher_class(publisher_key)
     )
+    if truncate:
+        truncate_fact_table(fact_table_name)
     fact_table.populate_from_publisher(*args, **kwargs)
 
 

@@ -93,9 +93,9 @@ class DimensionManager:
         cls.get_dimension(dimension_name).drop_dimension()
 
     @classmethod
-    def truncate_dimension(cls, dimension_name):
+    def truncate_dimension(cls, dimension_name, cascade=False):
         """
         Truncate a registered dimension.
         :param dimension_name: The dimension name.
         """
-        cls.get_dimension(dimension_name).truncate()
+        cls.get_dimension(dimension_name).truncate(cascade=cascade)

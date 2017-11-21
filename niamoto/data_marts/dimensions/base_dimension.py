@@ -312,10 +312,11 @@ class BaseDimension(metaclass=DimensionMeta):
         data = self.publisher.process(*args, **kwargs)[0]
         self.populate(data, append_ns_row=append_ns_row)
 
-    def truncate(self, connection=None):
+    def truncate(self, cascade=False, connection=None):
         """
         Truncate an existing dimension (i.e. drop every row)
         :param connection: If not None, use an existing connection.
+        :param cascade: If True, TRUNCATE CASCADE.
         """
         LOGGER.debug("Start Truncate {}".format(self))
         close_after = False
@@ -328,10 +329,13 @@ class BaseDimension(metaclass=DimensionMeta):
             LOGGER.warning(m.format(self.name))
             return
         with connection.begin():
-            connection.execute("TRUNCATE {}".format("{}.{}".format(
+            sql = "TRUNCATE {}".format("{}.{}".format(
                 settings.NIAMOTO_DIMENSIONS_SCHEMA,
                 self.name
-            )))
+            ))
+            if cascade:
+                sql += " CASCADE"
+            connection.execute(sql)
         if close_after:
             connection.close()
             LOGGER.debug("{} successfully truncated".format(self))

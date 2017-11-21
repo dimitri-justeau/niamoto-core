@@ -125,6 +125,20 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
         )
         self.assertEqual(result.exit_code, 0)
 
+    def test_populate_dimension_cli(self):
+        data_marts_api.create_taxon_dimension(populate=False)
+        runner = CliRunner()
+        result = runner.invoke(
+            data_marts.populate_dimension_cli,
+            ['taxon_dimension']
+        )
+        self.assertEqual(result.exit_code, 0)
+        result = runner.invoke(
+            data_marts.populate_dimension_cli,
+            ['taxon_dimension', '--truncate']
+        )
+        self.assertEqual(result.exit_code, 0)
+
     def test_truncate_dimension_cli(self):
         runner = CliRunner()
         runner.invoke(
