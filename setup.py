@@ -20,6 +20,7 @@ setup(
     entry_points={
         'console_scripts': [
             'niamoto=niamoto.bin.cli:niamoto_cli',
+            'init_niamoto_home=niamoto.bin.commands.init_niamoto_home'
         ],
     },
     install_requires=[

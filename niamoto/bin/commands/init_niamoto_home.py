@@ -24,3 +24,8 @@ def init_niamoto_home_cli(niamoto_home_path=None):
     click.echo("Initializing Niamoto home directory...")
     api_init_niamoto_home.init_niamoto_home(niamoto_home_path)
     click.echo("Niamoto home directory had been successfully initialized!")
+
+
+if __name__ == '__main__':
+    init_niamoto_home_cli(params={})
+
