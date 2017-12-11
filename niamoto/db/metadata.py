@@ -258,6 +258,33 @@ raster_registry = Table(
 )
 
 
+# ------------------- #
+#  SDM registry table #
+# ------------------- #
+
+sdm_registry = Table(
+    'sdm_registry',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('sdm_table_name', String(100), nullable=False),
+    Column(
+        'taxon_id',
+        ForeignKey(
+            '{}.taxon.id'.format(settings.NIAMOTO_SCHEMA),
+            ondelete='SET NULL',
+        ),
+        nullable=True,
+        index=True,
+    ),
+    Column('date_create', DateTime, nullable=False),
+    Column('date_update', DateTime, nullable=True),
+    Column('properties', JSONB, nullable=False),
+    UniqueConstraint('sdm_table_name', name='sdm_table_name'),
+    UniqueConstraint('taxon_id', name='taxon_id'),
+    schema=settings.NIAMOTO_SCHEMA,
+)
+
+
 # ---------------------- #
 #  Vector registry table #
 # ---------------------- #
