@@ -26,6 +26,7 @@ if __name__ == "__main__":
     TestDatabaseManager.create_schema(settings.NIAMOTO_VECTOR_SCHEMA)
     TestDatabaseManager.create_schema(settings.NIAMOTO_DIMENSIONS_SCHEMA)
     TestDatabaseManager.create_schema(settings.NIAMOTO_FACT_TABLES_SCHEMA)
+    TestDatabaseManager.create_schema(settings.NIAMOTO_SSDM_SCHEMA)
     test_suite = unittest.TestLoader().discover('tests')
     test_results = unittest.TextTestRunner(verbosity=1).run(test_suite)
     TestDatabaseManager.teardown_test_database()
