@@ -490,3 +490,23 @@ class TaxonomyManager:
             df.loc[i, 'mptt_right'] = right
             right += 1
         return right
+
+    @staticmethod
+    def assert_taxon_exists_in_database(taxon_id, connection=None):
+        """
+        Assert the existence of a taxon in database, from its id.
+        :param taxon_id: The id of the taxon to check.
+        :param connection: Use an existing connection if provided.
+        :return: True if the taxon exists in database.
+        """
+        sel = meta.taxon.select().where(
+            meta.taxon.c.id == taxon_id
+        )
+        if connection is not None:
+            r = connection.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                r = connection.execute(sel).rowcount
+        if r == 0:
+            m = "The taxon '{}' does not exist in database."
+            raise NoRecordFoundError(m.format(taxon_id))
