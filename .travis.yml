@@ -10,7 +10,7 @@ before_install:
 install:
   - sudo apt-get -y update
   - sudo apt-get install -y --no-install-recommends postgis
-  - sudo apt-get install -y libgdal-dev gdal-bin r-base
+  - sudo apt-get install -y --allow-unauthenticated libgdal-dev gdal-bin r-base
   - pip install -r requirements.txt
   - pip install codecov
   - pip install coverage
