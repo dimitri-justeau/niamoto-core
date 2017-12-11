@@ -20,7 +20,7 @@ depends_on = None
 def upgrade():
     op.create_table('sdm_registry',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('sdm_table_name', sa.String(length=100), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column(
             'taxon_id',
             sa.Integer(),
@@ -36,7 +36,7 @@ def upgrade():
             ondelete='SET NULL',
         ),
         sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('sdm_table_name', name=op.f('uq_sdm_registry_sdm_table_name')),
+        sa.UniqueConstraint('name', name=op.f('uq_sdm_registry_name')),
         sa.UniqueConstraint('taxon_id', name=op.f('uq_sdm_registry_taxon_id')),
         schema='niamoto'
     )

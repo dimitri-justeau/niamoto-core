@@ -32,6 +32,7 @@ class BaseTestNiamotoSchemaCreated(BaseTest):
             meta.vector_registry,
             meta.dimension_registry,
             meta.fact_table_registry,
+            meta.sdm_registry,
         ])
 
     @classmethod
@@ -71,5 +72,13 @@ class BaseTestNiamotoSchemaCreated(BaseTest):
             for tb in tables:
                 connection.execute("DROP TABLE IF EXISTS {} CASCADE;".format(
                     "{}.{}".format(settings.NIAMOTO_DIMENSIONS_SCHEMA, tb)
+                ))
+            # Drop SDMs
+            tables = inspector.get_table_names(
+                schema=settings.NIAMOTO_SSDM_SCHEMA
+            )
+            for tb in tables:
+                connection.execute("DROP TABLE IF EXISTS {} CASCADE;".format(
+                    "{}.{}".format(settings.NIAMOTO_SSDM_SCHEMA, tb)
                 ))
         super(BaseTestNiamotoSchemaCreated, cls).tearDownClass()

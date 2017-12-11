@@ -23,6 +23,8 @@ class RasterManager:
     Class managing the raster registry (list, add, update, delete).
     """
 
+    registry_table_meta = niamoto_db_meta.raster_registry
+
     @classmethod
     def get_raster_list(cls):
         """
@@ -30,16 +32,16 @@ class RasterManager:
         available within the given database.
         """
         with Connector.get_connection() as connection:
-            sel = select([niamoto_db_meta.raster_registry])
+            sel = select([cls.registry_table_meta])
             return pd.read_sql(
                 sel,
                 connection,
-                index_col=niamoto_db_meta.raster_registry.c.id.name
+                index_col=cls.registry_table_meta.c.id.name
             )
 
     @classmethod
     def add_raster(cls, raster_file_path, name, tile_dimension=None,
-                   register=False, properties={}):
+                   register=False, properties={}, **kwargs):
         """
         Add a raster in database and register it the Niamoto raster registry.
         Uses raster2pgsql command. The raster is cut in tiles, using the
@@ -97,11 +99,13 @@ class RasterManager:
             raise RuntimeError(
                 "raster import failed, check the logs for more details."
             )
-        ins = niamoto_db_meta.raster_registry.insert().values({
+        values = {
             'name': name,
             'date_create': datetime.now(),
             'properties': properties,
-        })
+        }
+        values.update(kwargs)
+        ins = cls.registry_table_meta.insert().values(values)
         with Connector.get_connection() as connection:
             connection.execute(ins)
 
@@ -168,11 +172,11 @@ class RasterManager:
         os.environ["PGPASSWORD"] = ""
         if p2 != 0 or p1.returncode != 0:
             raise RuntimeError("raster import failed.")
-        upd = niamoto_db_meta.raster_registry.update().values({
+        upd = cls.registry_table_meta.update().values({
             'name': new_name,
             'date_update': datetime.now(),
             'properties': properties,
-        }).where(niamoto_db_meta.raster_registry.c.name == name)
+        }).where(cls.registry_table_meta.c.name == name)
         with Connector.get_connection() as connection:
             connection.execute(upd)
             if new_name != name:
@@ -196,8 +200,8 @@ class RasterManager:
             connection.execute("DROP TABLE IF EXISTS {};".format(
                 "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
             ))
-            del_stmt = niamoto_db_meta.raster_registry.delete().where(
-                niamoto_db_meta.raster_registry.c.name == name
+            del_stmt = cls.registry_table_meta.delete().where(
+                cls.registry_table_meta.c.name == name
             )
             connection.execute(del_stmt)
         if close_after:
@@ -214,10 +218,10 @@ class RasterManager:
         raster.close()
         return srid
 
-    @staticmethod
-    def assert_raster_does_not_exist(name):
-        sel = niamoto_db_meta.raster_registry.select().where(
-            niamoto_db_meta.raster_registry.c.name == name
+    @classmethod
+    def assert_raster_does_not_exist(cls, name):
+        sel = cls.registry_table_meta.select().where(
+            cls.registry_table_meta.c.name == name
         )
         with Connector.get_connection() as connection:
             r = connection.execute(sel).rowcount
@@ -225,10 +229,10 @@ class RasterManager:
                 m = "The raster '{}' already exists in database."
                 raise RecordAlreadyExistsError(m.format(name))
 
-    @staticmethod
-    def assert_raster_exists(name, connection=None):
-        sel = niamoto_db_meta.raster_registry.select().where(
-            niamoto_db_meta.raster_registry.c.name == name
+    @classmethod
+    def assert_raster_exists(cls, name, connection=None):
+        sel = cls.registry_table_meta.select().where(
+            cls.registry_table_meta.c.name == name
         )
         if connection is not None:
             r = connection.execute(sel).rowcount

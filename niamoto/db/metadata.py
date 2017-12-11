@@ -266,7 +266,7 @@ sdm_registry = Table(
     'sdm_registry',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('sdm_table_name', String(100), nullable=False),
+    Column('name', String(100), nullable=False),
     Column(
         'taxon_id',
         ForeignKey(
@@ -279,7 +279,7 @@ sdm_registry = Table(
     Column('date_create', DateTime, nullable=False),
     Column('date_update', DateTime, nullable=True),
     Column('properties', JSONB, nullable=False),
-    UniqueConstraint('sdm_table_name', name='sdm_table_name'),
+    UniqueConstraint('name', name='name'),
     UniqueConstraint('taxon_id', name='taxon_id'),
     schema=settings.NIAMOTO_SCHEMA,
 )
