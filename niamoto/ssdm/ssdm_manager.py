@@ -25,7 +25,9 @@ class SSDMManager(RasterManager):
         """
         :return: A pandas Dataframe containing all the stored SDMs.
         """
-        return super(SSDMManager, cls).get_raster_list()
+        return super(SSDMManager, cls).get_raster_list(
+            alt_index=cls.REGISTRY_TABLE.c.taxon_id.name
+        )
 
     @classmethod
     def add_sdm(cls, taxon_id, raster_file_path, tile_dimension=None,

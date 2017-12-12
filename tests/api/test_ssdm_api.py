@@ -46,6 +46,14 @@ class TestSSDMApi(BaseTestNiamotoSchemaCreated):
         "Rasters",
         "Probability.tif"
     )
+    TEST_CSV_PROPERTIES = os.path.join(
+        NIAMOTO_HOME,
+        "data",
+        "sdm",
+        "1180",
+        "Tables",
+        "ENMeval.csv"
+    )
 
     @classmethod
     def setUpClass(cls):
@@ -102,6 +110,23 @@ class TestSSDMApi(BaseTestNiamotoSchemaCreated):
             ssdm_api.delete_sdm,
             1180,
         )
+
+    def test_update_sdm_properties_from_csv(self):
+        ssdm_api.add_sdm(
+            1180,
+            self.TEST_SDM_1180,
+        )
+        cols = ["threshold", "AUC", "omission.rate", "sensitivity",
+                "specificity", "prop.correct", "Kappa"]
+        ssdm_api.update_sdm_properties_from_csv(
+            1180,
+            self.TEST_CSV_PROPERTIES,
+            cols,
+        )
+        record = ssdm_api.get_sdm_list().loc[1180]
+        props = record.properties
+        for c in cols:
+            self.assertIn(c, props)
 
 if __name__ == '__main__':
     TestDatabaseManager.setup_test_database()

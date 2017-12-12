@@ -4,6 +4,8 @@
 SSDM API module.
 """
 
+import pandas as pd
+
 from niamoto.ssdm.ssdm_manager import SSDMManager
 from niamoto.db.utils import fix_db_sequences
 from niamoto.log import get_logger
@@ -77,4 +79,8 @@ def update_sdm_properties_from_csv(taxon_id, csv_file_path, columns=None):
     :param columns: The columns of the csv to use. If None, all the columns
         will be used.
     """
-    pass
+    df = pd.read_csv(csv_file_path)
+    if columns is not None:
+        df = df[columns]
+    props = df.to_dict(orient='record')[0]
+    update_sdm(taxon_id, properties=props)

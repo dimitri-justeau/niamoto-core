@@ -27,17 +27,22 @@ class RasterManager:
     DB_SCHEMA = settings.NIAMOTO_RASTER_SCHEMA
 
     @classmethod
-    def get_raster_list(cls):
+    def get_raster_list(cls, alt_index=None):
         """
+        :param alt_index: Specify an alternative index.
         :return: A pandas DataFrame containing all the raster entries
         available within the given database.
         """
+        if alt_index is not None:
+            index = alt_index
+        else:
+            index = cls.REGISTRY_TABLE.c.id.name
         with Connector.get_connection() as connection:
             sel = select([cls.REGISTRY_TABLE])
             return pd.read_sql(
                 sel,
                 connection,
-                index_col=cls.REGISTRY_TABLE.c.id.name
+                index_col=index
             )
 
     @classmethod
