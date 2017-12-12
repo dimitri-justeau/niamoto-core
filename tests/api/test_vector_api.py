@@ -57,25 +57,25 @@ class TestVectorApi(BaseTestNiamotoSchemaCreated):
 
     def test_add_vector(self):
         vector_api.add_vector(
-            SHP_TEST,
             'test_vector',
+            SHP_TEST,
         )
 
     def test_update_vector(self):
         vector_api.add_vector(
-            SHP_TEST,
             'test_vector',
+            SHP_TEST,
         )
         vector_api.update_vector(
-            SHP_TEST,
             'test_vector',
+            SHP_TEST,
             new_name="new_test_vector"
         )
 
     def test_delete_raster(self):
         vector_api.add_vector(
-            SHP_TEST,
             'test_vector',
+            SHP_TEST,
         )
         vector_api.delete_vector('test_vector')
         self.assertRaises(

@@ -57,8 +57,8 @@ class TestRasterValueExtractor(BaseTestNiamotoSchemaCreated):
             "rainfall_wgs84.tif"
         )
         RasterManager.add_raster(
-            test_raster,
             "rainfall",
+            test_raster,
         )
         csv_provider.sync()
 

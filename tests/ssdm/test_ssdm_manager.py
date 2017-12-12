@@ -52,7 +52,7 @@ class TestSSDMManager(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestSSDMManager, cls).setUpClass()
-        # Populate taxon
+        # Populate taxon database
         populate.populate_ncpippn_taxon_database(
             populate.load_ncpippn_taxon_dataframe_from_json(),
         )
@@ -109,20 +109,20 @@ class TestSSDMManager(BaseTestNiamotoSchemaCreated):
         self.assertRaises(
             FileNotFoundError,
             SSDMManager.add_sdm,
-            null_path, 1038,
+            1038, null_path,
             tile_dimension=(200, 200)
         )
         # Test wrong taxon id
         self.assertRaises(
             NoRecordFoundError,
             SSDMManager.add_sdm,
-            TEST_SDM_1038,
             -1,
+            TEST_SDM_1038,
         )
         # Test existing raster
         SSDMManager.add_sdm(
-            TEST_SDM_1038,
             1038,
+            TEST_SDM_1038,
         )
         df = SSDMManager.get_raster_list()
         self.assertEqual(len(df), 1)
@@ -131,24 +131,24 @@ class TestSSDMManager(BaseTestNiamotoSchemaCreated):
         inspector = Inspector.from_engine(engine)
         self.assertIn(
             'species_{}'.format(1038),
-            inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
+            inspector.get_table_names(schema=settings.NIAMOTO_SSDM_SCHEMA),
         )
 
     def test_update_sdm(self):
         SSDMManager.add_sdm(
-            TEST_SDM_1038,
             1038,
+            TEST_SDM_1038,
         )
         # Update raster
         SSDMManager.update_sdm(
-            TEST_SDM_1180,
             1038,
+            TEST_SDM_1180,
         )
 
     def test_delete_raster(self):
         SSDMManager.add_sdm(
-            TEST_SDM_1038,
             1038,
+            TEST_SDM_1038,
         )
         self.assertEqual(len(SSDMManager.get_sdm_list()), 1)
         SSDMManager.delete_sdm(1038)
@@ -157,7 +157,7 @@ class TestSSDMManager(BaseTestNiamotoSchemaCreated):
         inspector = Inspector.from_engine(engine)
         self.assertNotIn(
             'species_{}'.format(1038),
-            inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
+            inspector.get_table_names(schema=settings.NIAMOTO_SSDM_SCHEMA),
         )
 
 

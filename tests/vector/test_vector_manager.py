@@ -59,13 +59,15 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
         self.assertRaises(
             FileNotFoundError,
             VectorManager.add_vector,
-            null_path, "null_vector",
+            "null_vector",
+            null_path,
         )
-        VectorManager.add_vector(SHP_TEST, "ncl_adm1")
+        VectorManager.add_vector("ncl_adm1", SHP_TEST)
         self.assertRaises(
             RecordAlreadyExistsError,
             VectorManager.add_vector,
-            SHP_TEST, "ncl_adm1",
+            "ncl_adm1",
+            SHP_TEST,
         )
         df = VectorManager.get_vector_list()
         self.assertEqual(len(df), 1)
@@ -79,28 +81,29 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
 
     def test_update_vector(self):
         # Add raster
-        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        VectorManager.add_vector('ncl_adm1', SHP_TEST)
         # Update raster
-        VectorManager.update_vector(SHP_TEST, 'ncl_adm1', new_name='ncl')
-        VectorManager.update_vector(SHP_TEST, 'ncl')
+        VectorManager.update_vector('ncl_adm1', SHP_TEST, new_name='ncl')
+        VectorManager.update_vector('ncl', SHP_TEST)
         self.assertRaises(
             NoRecordFoundError,
             VectorManager.update_vector,
+            'ncl_adm1',
             SHP_TEST,
-            'ncl_adm1'
         )
         null_path = os.path.join(NIAMOTO_HOME, "NULL.shp")
         self.assertRaises(
             FileNotFoundError,
             VectorManager.add_vector,
-            null_path, "ncl_bis",
+            "ncl_bis",
+            null_path,
         )
-        VectorManager.add_vector(SHP_TEST, 'ncl_adm')
+        VectorManager.add_vector('ncl_adm', SHP_TEST)
         self.assertRaises(
             RecordAlreadyExistsError,
             VectorManager.update_vector,
-            SHP_TEST,
             'ncl',
+            SHP_TEST,
             new_name='ncl_adm'
         )
         df = VectorManager.get_vector_list()
@@ -115,9 +118,13 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
             'ncl_adm1',
             inspector.get_table_names(schema=settings.NIAMOTO_VECTOR_SCHEMA),
         )
+        VectorManager.update_vector(
+            'ncl',
+
+        )
 
     def test_delete_vector(self):
-        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        VectorManager.add_vector('ncl_adm1', SHP_TEST)
         VectorManager.delete_vector('ncl_adm1')
         df = VectorManager.get_vector_list()
         self.assertNotIn('ncl_adm1', list(df['name']))
@@ -134,22 +141,22 @@ class TestVectorManager(BaseTestNiamotoSchemaCreated):
         )
 
     def test_get_geometry_column(self):
-        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        VectorManager.add_vector('ncl_adm1', SHP_TEST)
         geom_col = VectorManager.get_geometry_column('ncl_adm1')
         self.assertEqual(geom_col, ('wkb_geometry', 'MULTIPOLYGON', 4326))
 
     def test_get_vector_primary_key_columns(self):
-        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        VectorManager.add_vector('ncl_adm1', SHP_TEST)
         pk_cols = VectorManager.get_vector_primary_key_columns('ncl_adm1')
         self.assertEqual(pk_cols, [('ogc_fid', 'integer')])
 
     def test_get_vector_geo_dataframe(self):
-        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        VectorManager.add_vector('ncl_adm1', SHP_TEST)
         df = VectorManager.get_vector_geo_dataframe('ncl_adm1')
         self.assertIsInstance(df, gpd.GeoDataFrame)
 
     def test_get_vector_sqlalchemy_table(self):
-        VectorManager.add_vector(SHP_TEST, 'ncl_adm1')
+        VectorManager.add_vector('ncl_adm1', SHP_TEST)
         table = VectorManager.get_vector_sqlalchemy_table('ncl_adm1')
         self.assertIsInstance(table, Table)
         self.assertEqual(table.name, 'ncl_adm1')

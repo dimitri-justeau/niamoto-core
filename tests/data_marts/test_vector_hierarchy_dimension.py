@@ -38,9 +38,9 @@ class TestVectorHierarchyDimension(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestVectorHierarchyDimension, cls).setUpClass()
-        vector_api.add_vector(SHP_TEST_0, 'ncl_adm0')
-        vector_api.add_vector(SHP_TEST_1, 'ncl_adm1')
-        vector_api.add_vector(SHP_TEST_2, 'ncl_adm2')
+        vector_api.add_vector('ncl_adm0', SHP_TEST_0)
+        vector_api.add_vector('ncl_adm1',SHP_TEST_1)
+        vector_api.add_vector('ncl_adm2', SHP_TEST_2)
 
     def tearDown(self):
         super(TestVectorHierarchyDimension, self).tearDownClass()

@@ -23,7 +23,8 @@ class RasterManager:
     Class managing the raster registry (list, add, update, delete).
     """
 
-    registry_table_meta = niamoto_db_meta.raster_registry
+    REGISTRY_TABLE = niamoto_db_meta.raster_registry
+    DB_SCHEMA = settings.NIAMOTO_RASTER_SCHEMA
 
     @classmethod
     def get_raster_list(cls):
@@ -32,15 +33,15 @@ class RasterManager:
         available within the given database.
         """
         with Connector.get_connection() as connection:
-            sel = select([cls.registry_table_meta])
+            sel = select([cls.REGISTRY_TABLE])
             return pd.read_sql(
                 sel,
                 connection,
-                index_col=cls.registry_table_meta.c.id.name
+                index_col=cls.REGISTRY_TABLE.c.id.name
             )
 
     @classmethod
-    def add_raster(cls, raster_file_path, name, tile_dimension=None,
+    def add_raster(cls, name, raster_file_path, tile_dimension=None,
                    register=False, properties={}, **kwargs):
         """
         Add a raster in database and register it the Niamoto raster registry.
@@ -49,8 +50,8 @@ class RasterManager:
         are stored in the settings.NIAMOTO_RASTER_SCHEMA schema. c.f.
         https://postgis.net/docs/using_raster_dataman.html#RT_Raster_Loader
         for more details on raster2pgsql.
-        :param raster_file_path: The path to the raster file.
         :param name: The name of the raster.
+        :param raster_file_path: The path to the raster file.
         :param tile_dimension: The tile dimension (width, height), if None,
             tile dimension will be chosen automatically by PostGIS.
         :param register: Register the raster as a filesystem (out-db) raster.
@@ -66,7 +67,7 @@ class RasterManager:
             dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
         else:
             dim = 'auto'
-        tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
+        tb = "{}.{}".format(cls.DB_SCHEMA, name)
         os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
         raster2pgsql_args = [
             "raster2pgsql", "-c", "-Y", '-C', '-t', dim,
@@ -105,13 +106,13 @@ class RasterManager:
             'properties': properties,
         }
         values.update(kwargs)
-        ins = cls.registry_table_meta.insert().values(values)
+        ins = cls.REGISTRY_TABLE.insert().values(values)
         with Connector.get_connection() as connection:
             connection.execute(ins)
 
     @classmethod
-    def update_raster(cls, raster_file_path, name, new_name=None,
-                      tile_dimension=None, register=False, properties={}):
+    def update_raster(cls, name, raster_file_path=None, new_name=None,
+                      tile_dimension=None, register=False, properties=None):
         """
         Update an existing raster in database and update it the Niamoto
         raster registry. Uses raster2pgsql command. The raster is cut in
@@ -119,8 +120,9 @@ class RasterManager:
         are stored in the settings.NIAMOTO_RASTER_SCHEMA schema. c.f.
         https://postgis.net/docs/using_raster_dataman.html#RT_Raster_Loader
         for more details on raster2pgsql.
+        :param name: The name of the raster. If None, the raster data won't
+            be updated.
         :param raster_file_path: The path to the raster file.
-        :param name: The name of the raster.
         :param new_name: The new name of the raster (not changed if None).
         :param tile_dimension: The tile dimension (width, height), if None,
             tile dimension will be chosen automatically by PostGIS.
@@ -128,61 +130,86 @@ class RasterManager:
             (-R option of raster2pgsql).
         :param properties: A dict of arbitrary properties.
         """
-        if not os.path.exists(raster_file_path):
-            raise FileNotFoundError(
-                "The raster {} does not exist".format(raster_file_path)
-            )
         cls.assert_raster_exists(name)
-        if tile_dimension is not None:
-            dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
-        else:
-            dim = 'auto'
-        os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
-        d = "-d"
         if new_name is None:
             new_name = name
         else:
             cls.assert_raster_does_not_exist(new_name)
-            d = "-c"
-        tb = "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, new_name)
-        raster2pgsql_args = [
-            "raster2pgsql", d, "-C", "-Y", '-t', dim,
-            '-I', '-M', raster_file_path, tb,
-        ]
-        if register:
-            raster2pgsql_args.append('-R')
-        p1 = subprocess.Popen(
-            raster2pgsql_args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        with open(LOG_FILE, mode='a') as log_file:
-            p2 = subprocess.call([
-                "psql",
-                "-q",
-                "-U", settings.NIAMOTO_DATABASE["USER"],
-                "-h", settings.NIAMOTO_DATABASE["HOST"],
-                "-p", settings.NIAMOTO_DATABASE["PORT"],
-                "-d", settings.NIAMOTO_DATABASE["NAME"],
-                "-w",
-            ], stdin=p1.stdout, stdout=log_file, stderr=log_file)
-            stdout, stderr = p1.communicate()
-        if stderr:
-            LOGGER.debug(stderr)
-        os.environ["PGPASSWORD"] = ""
-        if p2 != 0 or p1.returncode != 0:
-            raise RuntimeError("raster import failed.")
-        upd = cls.registry_table_meta.update().values({
+        if raster_file_path is not None:
+            if not os.path.exists(raster_file_path):
+                raise FileNotFoundError(
+                    "The raster {} does not exist".format(raster_file_path)
+                )
+            if tile_dimension is not None:
+                dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
+            else:
+                dim = 'auto'
+            os.environ["PGPASSWORD"] = settings.NIAMOTO_DATABASE["PASSWORD"]
+            d = "-d"
+            if new_name != name:
+                d = "-c"
+            tb = "{}.{}".format(cls.DB_SCHEMA, new_name)
+            raster2pgsql_args = [
+                "raster2pgsql", d, "-C", "-Y", '-t', dim,
+                '-I', '-M', raster_file_path, tb,
+            ]
+            if register:
+                raster2pgsql_args.append('-R')
+            p1 = subprocess.Popen(
+                raster2pgsql_args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            with open(LOG_FILE, mode='a') as log_file:
+                p2 = subprocess.call([
+                    "psql",
+                    "-q",
+                    "-U", settings.NIAMOTO_DATABASE["USER"],
+                    "-h", settings.NIAMOTO_DATABASE["HOST"],
+                    "-p", settings.NIAMOTO_DATABASE["PORT"],
+                    "-d", settings.NIAMOTO_DATABASE["NAME"],
+                    "-w",
+                ], stdin=p1.stdout, stdout=log_file, stderr=log_file)
+                stdout, stderr = p1.communicate()
+            if stderr:
+                LOGGER.debug(stderr)
+            os.environ["PGPASSWORD"] = ""
+            if p2 != 0 or p1.returncode != 0:
+                raise RuntimeError("raster import failed.")
+        upd_values = {
             'name': new_name,
-            'date_update': datetime.now(),
-            'properties': properties,
-        }).where(cls.registry_table_meta.c.name == name)
+            'date_update': datetime.now()
+        }
+        if properties is not None:
+            upd_values['properties'] = properties
+        upd = cls.REGISTRY_TABLE.update() \
+            .values(upd_values)\
+            .where(cls.REGISTRY_TABLE.c.name == name)
         with Connector.get_connection() as connection:
             connection.execute(upd)
             if new_name != name:
-                connection.execute("DROP TABLE IF EXISTS {};".format(
-                    "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
-                ))
+                if raster_file_path is not None:
+                    connection.execute(
+                        "DROP TABLE IF EXISTS {};".format(
+                            "{}.{}".format(
+                                cls.DB_SCHEMA,
+                                name
+                            )
+                        )
+                    )
+                else:
+                    connection.execute(
+                        "ALTER TABLE {} RENAME TO {};".format(
+                            '{}.{}'.format(
+                                cls.DB_SCHEMA,
+                                name
+                            ),
+                            '{}.{}'.format(
+                                cls.DB_SCHEMA,
+                                new_name
+                            )
+                        )
+                    )
 
     @classmethod
     def delete_raster(cls, name, connection=None):
@@ -198,10 +225,10 @@ class RasterManager:
             connection = Connector.get_engine().connect()
         with connection.begin():
             connection.execute("DROP TABLE IF EXISTS {};".format(
-                "{}.{}".format(settings.NIAMOTO_RASTER_SCHEMA, name)
+                "{}.{}".format(cls.DB_SCHEMA, name)
             ))
-            del_stmt = cls.registry_table_meta.delete().where(
-                cls.registry_table_meta.c.name == name
+            del_stmt = cls.REGISTRY_TABLE.delete().where(
+                cls.REGISTRY_TABLE.c.name == name
             )
             connection.execute(del_stmt)
         if close_after:
@@ -220,8 +247,8 @@ class RasterManager:
 
     @classmethod
     def assert_raster_does_not_exist(cls, name):
-        sel = cls.registry_table_meta.select().where(
-            cls.registry_table_meta.c.name == name
+        sel = cls.REGISTRY_TABLE.select().where(
+            cls.REGISTRY_TABLE.c.name == name
         )
         with Connector.get_connection() as connection:
             r = connection.execute(sel).rowcount
@@ -231,8 +258,8 @@ class RasterManager:
 
     @classmethod
     def assert_raster_exists(cls, name, connection=None):
-        sel = cls.registry_table_meta.select().where(
-            cls.registry_table_meta.c.name == name
+        sel = cls.REGISTRY_TABLE.select().where(
+            cls.REGISTRY_TABLE.c.name == name
         )
         if connection is not None:
             r = connection.execute(sel).rowcount

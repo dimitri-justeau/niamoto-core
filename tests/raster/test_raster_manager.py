@@ -78,7 +78,8 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
         self.assertRaises(
             FileNotFoundError,
             RasterManager.add_raster,
-            null_path, "null_raster",
+            "null_raster",
+            null_path,
             tile_dimension=(200, 200)
         )
         # Test existing raster
@@ -89,8 +90,8 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             "rainfall_wgs84.tif"
         )
         RasterManager.add_raster(
-            test_raster,
             "rainfall",
+            test_raster,
         )
         df = RasterManager.get_raster_list()
         self.assertEqual(len(df), 1)
@@ -111,14 +112,14 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             "rainfall_wgs84.tif"
         )
         RasterManager.add_raster(
-            test_raster,
             "rainfall",
+            test_raster,
             tile_dimension=(200, 200),
         )
         # Update raster
         RasterManager.update_raster(
-            test_raster,
             "rainfall",
+            test_raster,
             new_name="rainfall_new",
             tile_dimension=(100, 100),
         )
@@ -133,6 +134,11 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             'rainfall',
             inspector.get_table_names(schema=settings.NIAMOTO_RASTER_SCHEMA),
         )
+        # Update raster, only properties
+        RasterManager.update_raster(
+            "rainfall_new",
+            properties={'test': 10}
+        )
 
     def test_delete_raster(self):
         test_raster = os.path.join(
@@ -142,8 +148,8 @@ class TestRasterManager(BaseTestNiamotoSchemaCreated):
             "rainfall_wgs84.tif"
         )
         RasterManager.add_raster(
-            test_raster,
             "rainfall",
+            test_raster,
             tile_dimension=(200, 200),
         )
         RasterManager.delete_raster("rainfall")

@@ -36,8 +36,8 @@ def add_vector_cli(name, vector_file_path):
     from niamoto.api import vector_api
     click.echo("Registering the vector in database...")
     vector_api.add_vector(
-        vector_file_path,
         name,
+        vector_file_path,
     )
     click.echo("The vector had been successfully registered to the "
                "Niamoto vector database!")
@@ -59,8 +59,8 @@ def update_vector_cli(name, vector_file_path, new_name=None):
     from niamoto.api import vector_api
     click.echo("Updating {} vector...".format(name))
     vector_api.update_vector(
-        vector_file_path,
         name,
+        vector_file_path,
         new_name=new_name,
     )
     click.echo("The vector had been successfully updated!")

@@ -53,8 +53,8 @@ class TestCLIVector(BaseTestNiamotoSchemaCreated):
         result = runner.invoke(vector.list_vectors_cli)
         self.assertEqual(result.exit_code, 0)
         vector_api.add_vector(
-            TEST_VECTOR,
             'test_vector',
+            TEST_VECTOR,
         )
         result = runner.invoke(vector.list_vectors_cli)
         self.assertEqual(result.exit_code, 0)

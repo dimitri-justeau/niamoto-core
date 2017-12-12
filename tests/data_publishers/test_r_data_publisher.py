@@ -65,7 +65,7 @@ class TestRDataPublisher(BaseTestNiamotoSchemaCreated):
             plot_occurrence_csv_path=TEST_PLOTS_OCCURRENCES_CSV
         )
         csv_provider.sync()
-        RasterManager.add_raster(TEST_RASTER, 'test_raster')
+        RasterManager.add_raster('test_raster', TEST_RASTER)
         result = r_data_publisher._process()[0]
         self.assertIsInstance(result, pd.DataFrame)
 

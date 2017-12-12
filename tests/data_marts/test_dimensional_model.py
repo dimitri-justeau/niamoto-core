@@ -140,7 +140,7 @@ class TestDimensionalModel(BaseTestNiamotoSchemaCreated):
         browser.aggregate(drilldown=['dim_1'])
 
     def test_occurrence_observed_model(self):
-        add_vector(SHP_TEST, 'ncl_adm1')
+        add_vector('ncl_adm1', SHP_TEST)
         model_dict = {
             'dimensions': [
                 {

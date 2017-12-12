@@ -38,14 +38,14 @@ class VectorManager:
             )
 
     @classmethod
-    def add_vector(cls, vector_file_path, name, properties={}):
+    def add_vector(cls, name, vector_file_path, properties={}):
         """
         Add a vector in database and register it the Niamoto vector registry.
         Uses ogr2ogr. All vectors are stored in the
         settings.NIAMOTO_RASTER_SCHEMA schema.
-        :param vector_file_path: The path to the vector file.
         :param name: The name of the vector. The created table will have this
         name.
+        :param vector_file_path: The path to the vector file.
         :param properties: A dict of arbitrary properties.
         """
         LOGGER.debug("VectorManager.add_vector({}, {})".format(
@@ -89,68 +89,74 @@ class VectorManager:
             connection.execute(ins)
 
     @classmethod
-    def update_vector(cls, vector_file_path, name, new_name=None,
-                      properties={}):
+    def update_vector(cls, name, vector_file_path=None, new_name=None,
+                      properties=None):
         """
         Update an existing vector in database and update it the Niamoto
         vector registry. Uses ogr2ogr. All vectors are stored in the
         settings.NIAMOTO_RASTER_SCHEMA schema.
-        :param vector_file_path: The path to the vector file.
         :param name: The name of the vector.
+        :param vector_file_path: The path to the vector file. If None, the
+            vector data won't be updated.
         :param new_name: The new name of the vector (not changed if None).
         :param properties: A dict of arbitrary properties.
         """
         LOGGER.debug(
             "VectorManager.update_vector({}, {}, new_name={})".format(
-                vector_file_path,
                 name,
+                vector_file_path,
                 new_name
             )
         )
-        if not os.path.exists(vector_file_path):
-            raise FileNotFoundError(
-                "The vector {} does not exist".format(vector_file_path)
-            )
         cls.assert_vector_exists(name)
         if new_name is None:
             new_name = name
         else:
             cls.assert_vector_does_not_exist(new_name)
-        with Connector.get_connection() as connection:
-            connection.execute("DROP TABLE IF EXISTS {};".format(
-                "{}.{}".format(settings.NIAMOTO_VECTOR_SCHEMA, name)
-            ))
-        tb = "{}.{}".format(settings.NIAMOTO_VECTOR_SCHEMA, new_name)
-        pg_str = "dbname='{}' host='{}' port='{}' user='{}' password='{}'"
-        pg_str = pg_str.format(
-            settings.NIAMOTO_DATABASE["NAME"],
-            settings.NIAMOTO_DATABASE["HOST"],
-            settings.NIAMOTO_DATABASE["PORT"],
-            settings.NIAMOTO_DATABASE["USER"],
-            settings.NIAMOTO_DATABASE["PASSWORD"],
-        )
-        p = subprocess.Popen([
-            "ogr2ogr",
-            "-overwrite",
-            "-lco", "SCHEMA={}".format(settings.NIAMOTO_VECTOR_SCHEMA),
-            "-lco", "OVERWRITE=YES",
-            '-f', 'PostgreSQL', 'PG:{}'.format(pg_str),
-            '-nln', tb,
-            '-nlt', 'PROMOTE_TO_MULTI',
-            vector_file_path,
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        if stdout:
-            LOGGER.debug(str(stdout))
-        if stderr:
-            LOGGER.debug(str(stderr))
-        if p.returncode != 0:
-            raise RuntimeError("vector import failed.")
-        upd = meta.vector_registry.update().values({
+        if vector_file_path is not None:
+            if not os.path.exists(vector_file_path):
+                raise FileNotFoundError(
+                    "The vector {} does not exist".format(vector_file_path)
+                )
+            with Connector.get_connection() as connection:
+                connection.execute("DROP TABLE IF EXISTS {};".format(
+                    "{}.{}".format(settings.NIAMOTO_VECTOR_SCHEMA, name)
+                ))
+            tb = "{}.{}".format(settings.NIAMOTO_VECTOR_SCHEMA, new_name)
+            pg_str = "dbname='{}' host='{}' port='{}' user='{}' password='{}'"
+            pg_str = pg_str.format(
+                settings.NIAMOTO_DATABASE["NAME"],
+                settings.NIAMOTO_DATABASE["HOST"],
+                settings.NIAMOTO_DATABASE["PORT"],
+                settings.NIAMOTO_DATABASE["USER"],
+                settings.NIAMOTO_DATABASE["PASSWORD"],
+            )
+            p = subprocess.Popen([
+                "ogr2ogr",
+                "-overwrite",
+                "-lco", "SCHEMA={}".format(settings.NIAMOTO_VECTOR_SCHEMA),
+                "-lco", "OVERWRITE=YES",
+                '-f', 'PostgreSQL', 'PG:{}'.format(pg_str),
+                '-nln', tb,
+                '-nlt', 'PROMOTE_TO_MULTI',
+                vector_file_path,
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = p.communicate()
+            if stdout:
+                LOGGER.debug(str(stdout))
+            if stderr:
+                LOGGER.debug(str(stderr))
+            if p.returncode != 0:
+                raise RuntimeError("vector import failed.")
+        upd_values = {
             'name': new_name,
-            'date_update': datetime.now(),
-            'properties': properties,
-        }).where(meta.vector_registry.c.name == name)
+            'date_update': datetime.now()
+        }
+        if properties is not None:
+            upd_values['properties'] = properties
+        upd = meta.vector_registry.update() \
+            .values(upd_values)\
+            .where(meta.vector_registry.c.name == name)
         with Connector.get_connection() as connection:
             if new_name != name:
                 connection.execute(upd)

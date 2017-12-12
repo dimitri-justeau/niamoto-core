@@ -31,7 +31,7 @@ class TestVectorDimension(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestVectorDimension, cls).setUpClass()
-        add_vector(SHP_TEST, 'ncl_adm1')
+        add_vector('ncl_adm1', SHP_TEST)
 
     def setUp(self):
         super(TestVectorDimension, self).setUp()

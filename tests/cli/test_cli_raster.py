@@ -57,8 +57,8 @@ class TestCLIRaster(BaseTestNiamotoSchemaCreated):
         result = runner.invoke(raster.list_rasters_cli)
         self.assertEqual(result.exit_code, 0)
         raster_api.add_raster(
-            TEST_RASTER,
             'test_raster',
+            TEST_RASTER,
         )
         result = runner.invoke(raster.list_rasters_cli)
         self.assertEqual(result.exit_code, 0)

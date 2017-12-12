@@ -60,27 +60,27 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
 
     def test_add_raster(self):
         raster_api.add_raster(
-            self.TEST_RASTER_PATH,
             'test_raster',
+            self.TEST_RASTER_PATH,
             tile_dimension=(200, 200),
         )
 
     def test_update_raster(self):
         raster_api.add_raster(
-            self.TEST_RASTER_PATH,
             'test_raster',
+            self.TEST_RASTER_PATH,
             tile_dimension=(200, 200),
         )
         raster_api.update_raster(
-            self.TEST_RASTER_PATH,
             'test_raster',
+            self.TEST_RASTER_PATH,
             tile_dimension=(150, 150),
         )
 
     def test_delete_raster(self):
         raster_api.add_raster(
-            self.TEST_RASTER_PATH,
             'test_raster',
+            self.TEST_RASTER_PATH,
         )
         raster_api.delete_raster('test_raster')
         self.assertRaises(
@@ -91,20 +91,20 @@ class TestRasterApi(BaseTestNiamotoSchemaCreated):
 
     def test_extract_raster_values(self):
         raster_api.add_raster(
-            self.TEST_RASTER_PATH,
             'test_raster',
+            self.TEST_RASTER_PATH,
         )
         raster_api.extract_raster_values_to_occurrences('test_raster')
         raster_api.extract_raster_values_to_plots('test_raster')
 
     def test_extract_all_rasters_values(self):
         raster_api.add_raster(
-            self.TEST_RASTER_PATH,
             'test_raster',
+            self.TEST_RASTER_PATH,
         )
         raster_api.add_raster(
-            self.TEST_RASTER_PATH,
             'test_raster_2',
+            self.TEST_RASTER_PATH,
         )
         raster_api.extract_all_rasters_values_to_occurrences()
         raster_api.extract_all_rasters_values_to_plots()

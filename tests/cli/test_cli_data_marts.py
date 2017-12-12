@@ -43,8 +43,8 @@ class TestCLIDataMarts(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestCLIDataMarts, cls).setUpClass()
-        vector_api.add_vector(SHP_TEST, 'ncl_adm')
-        raster_api.add_raster(TEST_RASTER, 'rainfall')
+        vector_api.add_vector('ncl_adm', SHP_TEST)
+        raster_api.add_raster('rainfall', TEST_RASTER)
 
     def tearDown(self):
         super(TestCLIDataMarts, self).tearDown()

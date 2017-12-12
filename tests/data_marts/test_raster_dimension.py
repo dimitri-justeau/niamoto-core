@@ -34,7 +34,7 @@ class TestRasterDimension(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestRasterDimension, cls).setUpClass()
-        raster_api.add_raster(TEST_RASTER, 'rainfall')
+        raster_api.add_raster('rainfall', TEST_RASTER)
 
     def setUp(self):
         super(TestRasterDimension, self).setUp()

@@ -53,9 +53,9 @@ class TestDataMartsApi(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestDataMartsApi, cls).setUpClass()
-        add_vector(SHP_TEST, 'ncl_adm1')
-        add_vector(SHP_TEST_0, 'ncl_adm0')
-        add_raster(TEST_RASTER, 'rainfall')
+        add_vector('ncl_adm1', SHP_TEST)
+        add_vector('ncl_adm0', SHP_TEST_0)
+        add_raster('rainfall', TEST_RASTER)
 
     def tearDown(self):
         super(TestDataMartsApi, self).tearDown()

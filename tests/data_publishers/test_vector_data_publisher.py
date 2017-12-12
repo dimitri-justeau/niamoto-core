@@ -34,7 +34,7 @@ class TestVectorDataPublisher(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestVectorDataPublisher, cls).setUpClass()
-        add_vector(SHP_TEST, 'test_vector')
+        add_vector('test_vector', SHP_TEST)
 
     def test_vector_publisher(self):
         publisher = VectorDataPublisher()

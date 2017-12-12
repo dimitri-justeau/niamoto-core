@@ -37,7 +37,7 @@ class TestRasterDataPublisher(BaseTestNiamotoSchemaCreated):
     @classmethod
     def setUpClass(cls):
         super(TestRasterDataPublisher, cls).setUpClass()
-        add_raster(TEST_RASTER, 'test_raster')
+        add_raster('test_raster', TEST_RASTER)
 
     def test_raster_publisher(self):
         publisher = RasterDataPublisher()

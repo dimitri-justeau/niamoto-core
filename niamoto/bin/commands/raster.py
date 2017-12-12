@@ -53,8 +53,8 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None,
     if tile_dimension is not None:
         tile_dimension = [int(i) for i in tile_dimension.split('x')]
     raster_api.add_raster(
-        raster_file_path,
         name,
+        raster_file_path,
         tile_dimension=tile_dimension,
         register=register
     )
@@ -82,10 +82,17 @@ def add_raster_cli(name, raster_file_path, tile_dimension=None,
     is_flag=True,
     default=False
 )
+@click.option(
+    '--raster_file_path',
+    '-f',
+    help='Update the raster data from a file',
+    default=None,
+    required=False
+)
 @click.argument('name')
 @click.argument('raster_file_path')
 @cli_catch_unknown_error
-def update_raster_cli(name, raster_file_path, new_name=None,
+def update_raster_cli(name, raster_file_path=None, new_name=None,
                       tile_dimension=None, register=False):
     """
     Update an existing raster in Niamoto's raster database.
@@ -95,8 +102,8 @@ def update_raster_cli(name, raster_file_path, new_name=None,
     if tile_dimension is not None:
         tile_dimension = [int(i) for i in tile_dimension.split('x')]
     raster_api.update_raster(
-        raster_file_path,
         name,
+        raster_file_path=raster_file_path,
         new_name=new_name,
         tile_dimension=tile_dimension,
         register=register,

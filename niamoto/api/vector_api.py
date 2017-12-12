@@ -20,34 +20,38 @@ def get_vector_list():
     return VectorManager.get_vector_list()
 
 
-def add_vector(vector_file_path, name):
+def add_vector(name, vector_file_path):
     """
     Add a vector in database and register it the Niamoto vector registry.
     Uses ogr2ogr. All vectors are stored in the
     settings.NIAMOTO_RASTER_SCHEMA schema.
-    :param vector_file_path: The path to the vector file.
     :param name: The name of the vector. The created table will have this
     name.
+    :param vector_file_path: The path to the vector file.
     """
     return VectorManager.add_vector(
+        name,
         vector_file_path,
-        name
     )
 
 
-def update_vector(vector_file_path, name, new_name=None):
+def update_vector(name, vector_file_path=None, new_name=None,
+                  properties=None):
     """
     Update an existing vector in database and update it the Niamoto
     vector registry. Uses ogr2ogr. All vectors are stored in the
     settings.NIAMOTO_RASTER_SCHEMA schema.
-    :param vector_file_path: The path to the vector file.
     :param name: The name of the vector.
+    :param vector_file_path: The path to the vector file. If None, the vector
+        data won't be updated.
     :param new_name: The new name of the vector (not changed if None).
+    :param properties: A dict of arbitrary properties.
     """
     return VectorManager.update_vector(
-        vector_file_path,
         name,
-        new_name=new_name
+        vector_file_path,
+        new_name=new_name,
+        properties=properties
     )
 
 

@@ -21,35 +21,36 @@ def get_raster_list():
     return RasterManager.get_raster_list()
 
 
-def add_raster(raster_file_path, name, tile_dimension=None, register=False):
+def add_raster(name, raster_file_path, tile_dimension=None, register=False):
     """
     Add a raster in database and register it the Niamoto raster registry.
     Uses raster2pgsql command. The raster is cut in tiles, using the
     dimension tile_width x tile_width. All rasters
     are stored in the settings.NIAMOTO_RASTER_SCHEMA schema.
-    :param raster_file_path: The path to the raster file.
     :param name: The name of the raster.
+    :param raster_file_path: The path to the raster file.
     :param tile_dimension: The tile dimension (width, height), if None,
         tile dimension will be chosen automatically by PostGIS.
     :param register: Register the raster as a filesystem (out-db) raster.
         (-R option of raster2pgsql).
     """
     return RasterManager.add_raster(
-        raster_file_path,
         name,
+        raster_file_path,
         tile_dimension=tile_dimension,
         register=register
     )
 
 
-def update_raster(raster_file_path, name, new_name=None, tile_dimension=None,
-                  register=False):
+def update_raster(name, raster_file_path=None, new_name=None,
+                  tile_dimension=None, register=False):
     """
     Update an existing raster in database and register it the Niamoto
     raster registry. Uses raster2pgsql command. The raster is cut in
     tiles, using the dimension tile_width x tile_width. All rasters
     are stored
-    :param raster_file_path: The path to the raster file.
+    :param raster_file_path: The path to the raster file. If None, the raster
+        data won't be updated.
     :param name: The name of the raster.
     :param new_name: The new name of the raster (not changed if None).
     :param tile_dimension: The tile dimension (width, height), if None,
@@ -58,8 +59,8 @@ def update_raster(raster_file_path, name, new_name=None, tile_dimension=None,
         (-R option of raster2pgsql).
     """
     return RasterManager.update_raster(
-        raster_file_path,
         name,
+        raster_file_path=raster_file_path,
         new_name=new_name,
         tile_dimension=tile_dimension,
         register=register
