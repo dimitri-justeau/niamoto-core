@@ -5,6 +5,7 @@ psycopg2
 GeoAlchemy2
 
 # Data manipulation / analysis libraries
+numpy
 pandas
 cubes
 

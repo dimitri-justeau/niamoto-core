@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import os
+import shutil
 import platform
 
 from niamoto.data_providers.base_data_provider import BaseDataProvider
@@ -18,7 +19,7 @@ from niamoto.conf import NIAMOTO_HOME
 PYTHON_PROVIDERS_HOME = os.path.join(NIAMOTO_HOME, 'python', 'providers')
 
 if not os.path.exists(PYTHON_PROVIDERS_HOME):
-    os.mkdir(PYTHON_PROVIDERS_HOME)
+    os.mkdirs(PYTHON_PROVIDERS_HOME)
 
 # Load Python data providers
 py_version = platform.python_version_tuple()
