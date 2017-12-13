@@ -19,7 +19,7 @@ from niamoto.conf import NIAMOTO_HOME
 PYTHON_PROVIDERS_HOME = os.path.join(NIAMOTO_HOME, 'python', 'providers')
 
 if not os.path.exists(PYTHON_PROVIDERS_HOME):
-    os.mkdirs(PYTHON_PROVIDERS_HOME)
+    os.makedirs(PYTHON_PROVIDERS_HOME)
 
 # Load Python data providers
 py_version = platform.python_version_tuple()
