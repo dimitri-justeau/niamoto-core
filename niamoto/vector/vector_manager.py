@@ -12,7 +12,8 @@ from niamoto.db.connector import Connector
 from niamoto.conf import settings
 from niamoto.db import metadata as meta
 from niamoto.log import get_logger
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
+    IncoherentDatabaseStateError
 
 
 LOGGER = get_logger(__name__)
@@ -53,6 +54,7 @@ class VectorManager:
             name
         ))
         cls.assert_vector_does_not_exist(name)
+        cls.assert_vector_schema_exists()
         if not os.path.exists(vector_file_path):
             raise FileNotFoundError(
                 "The file {} does not exist.".format(vector_file_path)
@@ -211,6 +213,25 @@ class VectorManager:
         if r == 0:
             m = "The vector '{}' does not exist in database."
             raise NoRecordFoundError(m.format(name))
+
+    @classmethod
+    def assert_vector_schema_exists(cls, connection=None):
+        sel = \
+            """
+            SELECT schema_name
+            FROM information_schema.schemata
+            WHERE schema_name= '{}'
+            """.format(settings.NIAMOTO_VECTOR_SCHEMA)
+        if connection is not None:
+            r = connection.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                r = connection.execute(sel).rowcount
+        if r == 0:
+            m = "The schema '{}' does not exists in database.".format(
+                settings.NIAMOTO_VECTOR_SCHEMA
+            )
+            raise IncoherentDatabaseStateError(m)
 
     @classmethod
     def get_geometry_column(cls, vector_name):
