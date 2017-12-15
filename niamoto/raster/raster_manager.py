@@ -11,7 +11,8 @@ import rasterio
 from niamoto.db import metadata as niamoto_db_meta
 from niamoto.db.connector import Connector
 from niamoto.conf import settings
-from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError
+from niamoto.exceptions import NoRecordFoundError, RecordAlreadyExistsError, \
+    IncoherentDatabaseStateError
 from niamoto.log import get_logger, LOG_FILE
 
 
@@ -68,6 +69,7 @@ class RasterManager:
                 "The raster {} does not exist".format(raster_file_path)
             )
         cls.assert_raster_does_not_exist(name)
+        cls.assert_raster_schema_exists()
         if tile_dimension is not None:
             dim = "{}x{}".format(tile_dimension[0], tile_dimension[1])
         else:
@@ -274,3 +276,20 @@ class RasterManager:
         if r == 0:
             m = "The raster '{}' does not exist in database."
             raise NoRecordFoundError(m.format(name))
+
+    @classmethod
+    def assert_raster_schema_exists(cls, connection=None):
+        sel = \
+            """
+            SELECT schema_name
+            FROM information_schema.schemata
+            WHERE schema_name= '{}'
+            """.format(cls.DB_SCHEMA)
+        if connection is not None:
+            r = connection.execute(sel).rowcount
+        else:
+            with Connector.get_connection() as connection:
+                r = connection.execute(sel).rowcount
+        if r == 0:
+            m = "The schema '{}' does not exists in database."
+            raise IncoherentDatabaseStateError(m.format(cls.DB_SCHEMA))
