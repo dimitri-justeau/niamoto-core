@@ -115,7 +115,8 @@ class BaseDataPublisher(metaclass=PublisherMeta):
 
     @staticmethod
     def _publish_sql(data, destination, *args, db_url=None, schema='public',
-                     if_exists='fail', truncate_cascade=False, **kwargs):
+                     if_exists='fail', truncate_cascade=False,
+                     set_pk=None, **kwargs):
         """
         Publish a DataFrame as a table to a SQL database.
         Rely on pandas 'to_sql' method. c.f. :
@@ -151,12 +152,24 @@ class BaseDataPublisher(metaclass=PublisherMeta):
                     schema=schema,
                     if_exists=if_exists
                 )
-            return data.to_sql(
+            data.to_sql(
                 destination,
                 con=connection,
                 schema=schema,
                 if_exists=if_exists
             )
+            if set_pk is not None:
+                if isinstance(set_pk, (list, tuple)):
+                    set_pk = ",".join(set_pk)
+                connection.execute(
+                    """
+                    ALTER TABLE {}.{} ADD PRIMARY KEY ({});
+                    """.format(
+                        schema,
+                        destination,
+                        set_pk,
+                    )
+                )
 
     FORMAT_TO_METHOD = {
         CSV: _publish_csv.__func__,
