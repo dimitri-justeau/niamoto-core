@@ -137,12 +137,21 @@ class BaseDataPublisher(metaclass=PublisherMeta):
             connection = create_engine(db_url).connect()
         with connection.begin():
             if if_exists == 'truncate':
-                sql = "TRUNCATE {}".format(
-                    "{}.{}".format(schema, destination)
-                )
-                if truncate_cascade:
-                    sql += " CASCADE"
-                connection.execute(sql)
+                test = \
+                    """
+                    SELECT table_name
+                    FROM information_schema.tables
+                    WHERE table_schema = '{}'
+                    AND table_name = '{}'
+                    """.format(schema, destination)
+                r = connection.execute(test).rowcount
+                if r != 0:
+                    sql = "TRUNCATE {}".format(
+                        "{}.{}".format(schema, destination)
+                    )
+                    if truncate_cascade:
+                        sql += " CASCADE"
+                    connection.execute(sql)
                 if_exists = 'append'
             if isinstance(data, (GeoDataFrame, GeoSeries)):
                 return to_postgis(
