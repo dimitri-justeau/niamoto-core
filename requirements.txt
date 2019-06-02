@@ -1,5 +1,5 @@
 # Database libraries
-sqlalchemy==1.1.11
+sqlalchemy
 alembic
 psycopg2
 GeoAlchemy2
