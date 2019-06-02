@@ -21,7 +21,7 @@ click
 colorlog
 
 # Interaction with R
-rpy2
+rpy2rpy2==2.8.6
 tzlocal
 
 # Doc
