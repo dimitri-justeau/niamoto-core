@@ -1,5 +1,5 @@
 # Database libraries
-sqlalchemy
+sqlalchemy==1.1.11
 alembic
 psycopg2
 GeoAlchemy2
@@ -21,7 +21,7 @@ click
 colorlog
 
 # Interaction with R
-rpy2rpy2==2.8.6
+rpy2==2.8.6
 tzlocal
 
 # Doc
