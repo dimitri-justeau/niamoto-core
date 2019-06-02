@@ -210,7 +210,9 @@ class TestBasePlotOccurrenceProvider(BaseTestNiamotoSchemaCreated):
         reindexed_data_3 = prov1.get_reindexed_provider_dataframe(data_3)
         upd = prov1.get_update_dataframe(df1, reindexed_data_3)
         self.assertEqual(len(upd), 2)
-        self.assertEqual(list(upd['occurrence_id']), [0, 2])
+        l = list(upd['occurrence_id'])
+        l.sort()
+        self.assertEqual(l, [0, 2])
 
     def test_get_delete_dataframe(self):
         data_provider_1 = TestDataProvider('test_data_provider_1')
