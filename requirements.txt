@@ -22,6 +22,7 @@ colorlog
 
 # Interaction with R
 rpy2
+tzlocal
 
 # Doc
 sphinx
